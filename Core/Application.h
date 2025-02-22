@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DirectXApplication.h"
+#include "DX12SwapChain.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -21,9 +22,8 @@ namespace Core
     static const uint32_t FrameCount = 2;
 
     // Pipeline objects
-    ComPtr<ID3D12Device> m_device;
+    std::unique_ptr<DX12SwapChain> m_swapChain;
     ComPtr<ID3D12CommandQueue> m_commandQueue;
-    ComPtr<IDXGISwapChain3> m_swapChain;
     // render target heap
     ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
     unsigned int m_rtvDescriptorSize;
