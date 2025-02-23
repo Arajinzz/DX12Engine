@@ -9,7 +9,7 @@ namespace Core
   {
 
   public:
-    DX12SwapChain(unsigned int frameCount, unsigned int width, unsigned int height, ID3D12CommandQueue* cmdQueue);
+    DX12SwapChain(unsigned int frameCount, unsigned int width, unsigned int height);
     ~DX12SwapChain();
 
     unsigned int GetCurrentBackBufferIndex();

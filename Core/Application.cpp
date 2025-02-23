@@ -2,12 +2,12 @@
 #include "Application.h"
 
 #include "Core/DX12Device.h"
+#include "Core/DX12CommandQueue.h"
 
 namespace Core
 {
   Application::Application(UINT width, UINT height, std::wstring name)
     : DirectXApplication(width, height, name)
-    , m_rtvDescriptorSize(0)
     , m_frameIndex(0)
     , m_swapChain(nullptr)
   {
@@ -20,54 +20,33 @@ namespace Core
     // Create Device
     CreateDevice(); // Singleton
 
-    // Describe and create the command queue.
-    {
-      D3D12_COMMAND_QUEUE_DESC queueDesc = {};
-      queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-      queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-      ThrowIfFailed(Device()->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_commandQueue)));
-    }
+    // Create Command Queue
+    CreateCmdQueue(); // Singleton
 
     // Create SwapChain
-    m_swapChain = std::make_unique<DX12SwapChain>(FrameCount, m_width, m_height, m_commandQueue.Get());
+    m_swapChain = std::make_unique<DX12SwapChain>(FrameCount, m_width, m_height);
     m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
     // full screen transitions not supported.
     ThrowIfFailed(Factory()->MakeWindowAssociation(WindowsApplication::GetHwnd(), DXGI_MWA_NO_ALT_ENTER));
 
-    // Create descriptor heaps.
-    {
-      // Describe and create a render target view (RTV) descriptor heap.
-      D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-      rtvHeapDesc.NumDescriptors = FrameCount;
-      rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-      rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-      ThrowIfFailed(Device()->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
-      m_rtvDescriptorSize = Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-    }
+    // Create RTV heap
+    m_rtvHeap = std::make_unique<DX12Heap>(FrameCount, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, m_swapChain.get());
 
     // Create frame resources.
-    {
-      CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
-
-      // Create a RTV for each frame.
-      for (UINT n = 0; n < FrameCount; n++)
-      {
-        m_swapChain->GetBuffer(n, &m_renderTargets[n]);
-        Device()->CreateRenderTargetView(m_renderTargets[n].Get(), nullptr, rtvHandle);
-        rtvHandle.Offset(1, m_rtvDescriptorSize);
-        ThrowIfFailed(Device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocators[n])));
-      }
-    }
+    m_rtvHeap->CreateResources();
 
     // Create the command list.
     for (unsigned n = 0; n < FrameCount; ++n)
+    {
+      ThrowIfFailed(Device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocators[n])));
       ThrowIfFailed(Device()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[n].Get(), nullptr, IID_PPV_ARGS(&m_commandList)));
+    }
 
     // Close the command list and execute it to begin the initial GPU setup.
     ThrowIfFailed(m_commandList->Close());
     ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
-    m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+    CommandQueue()->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
     // Create synchronization objects.
     {
@@ -85,7 +64,7 @@ namespace Core
       // list in our main loop but for now, we just want to wait for setup to 
       // complete before continuing.
       // Schedule a Signal command in the queue.
-      ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), m_fenceValues[m_frameIndex]));
+      ThrowIfFailed(CommandQueue()->Signal(m_fence.Get(), m_fenceValues[m_frameIndex]));
 
       // Wait until the fence has been processed.
       ThrowIfFailed(m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent));
@@ -113,18 +92,15 @@ namespace Core
     // re-recording.
     ThrowIfFailed(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr));
 
-    auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+    auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(m_rtvHeap->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
     // Indicate that the back buffer will be used as a render target.
     m_commandList->ResourceBarrier(1, &barrier1);
 
-    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
-    //m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
-
     // Record commands.
     const float clearColor[] = { 0.25f, 0.25f, 0.45f, 1.0f };
-    m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+    m_commandList->ClearRenderTargetView(m_rtvHeap->GetOffsetHandle(m_frameIndex), clearColor, 0, nullptr);
 
-    auto barrier2 = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+    auto barrier2 = CD3DX12_RESOURCE_BARRIER::Transition(m_rtvHeap->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
     // Indicate that the back buffer will now be used to present.
     m_commandList->ResourceBarrier(1, &barrier2);
 
@@ -132,7 +108,7 @@ namespace Core
 
 
     ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
-    m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+    CommandQueue()->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
     // Present the frame.
     m_swapChain->Present();
@@ -140,7 +116,7 @@ namespace Core
     // MOVE TO NEXT FRAME
     // Signal and increment the fence value.
     const UINT64 currentFenceValue = m_fenceValues[m_frameIndex];
-    ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), currentFenceValue));
+    ThrowIfFailed(CommandQueue()->Signal(m_fence.Get(), currentFenceValue));
 
     m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
@@ -163,7 +139,7 @@ namespace Core
     // list in our main loop but for now, we just want to wait for setup to 
     // complete before continuing.
     // Schedule a Signal command in the queue.
-    ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), m_fenceValues[m_frameIndex]));
+    ThrowIfFailed(CommandQueue()->Signal(m_fence.Get(), m_fenceValues[m_frameIndex]));
 
     // Wait until the fence has been processed.
     ThrowIfFailed(m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent));

@@ -1,13 +1,14 @@
 #include "stdafx.h"
 #include "DX12SwapChain.h"
 
-#include "WindowsApplication.h"
-#include "DXApplicationHelper.h"
-#include "DX12Device.h"
+#include "Core/WindowsApplication.h"
+#include "Core/DXApplicationHelper.h"
+#include "Core/DX12Device.h"
+#include "Core/DX12CommandQueue.h"
 
 namespace Core
 {
-  DX12SwapChain::DX12SwapChain(unsigned int frameCount, unsigned int width, unsigned int height, ID3D12CommandQueue* cmdQueue)
+  DX12SwapChain::DX12SwapChain(unsigned int frameCount, unsigned int width, unsigned int height)
   {
     // Describe and create the swap chain.
     {
@@ -22,7 +23,7 @@ namespace Core
 
       ComPtr<IDXGISwapChain1> swapChain;
       ThrowIfFailed(Factory()->CreateSwapChainForHwnd(
-        cmdQueue, // Swap chain needs the queue so that it can force a flush on it.
+        CommandQueue(), // Swap chain needs the queue so that it can force a flush on it.
         WindowsApplication::GetHwnd(),
         &swapChainDesc,
         nullptr,
