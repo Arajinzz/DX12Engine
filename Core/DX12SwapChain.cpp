@@ -23,7 +23,7 @@ namespace Core
 
       ComPtr<IDXGISwapChain1> swapChain;
       ThrowIfFailed(Factory()->CreateSwapChainForHwnd(
-        CommandQueue(), // Swap chain needs the queue so that it can force a flush on it.
+        CommandQueue().GetCommandQueuePointer(), // Swap chain needs the queue so that it can force a flush on it.
         WindowsApplication::GetHwnd(),
         &swapChainDesc,
         nullptr,

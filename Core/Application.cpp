@@ -37,42 +37,19 @@ namespace Core
     m_rtvHeap->CreateResources();
 
     // Create the command list.
-    for (unsigned n = 0; n < FrameCount; ++n)
-    {
-      ThrowIfFailed(Device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocators[n])));
-      ThrowIfFailed(Device()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[n].Get(), nullptr, IID_PPV_ARGS(&m_commandList)));
-    }
+    m_commandList = std::make_unique<DX12CommandList>(FrameCount);
 
     // Close the command list and execute it to begin the initial GPU setup.
-    ThrowIfFailed(m_commandList->Close());
-    ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
-    CommandQueue()->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
-
+    m_commandList->Close();
+    
     // Create synchronization objects.
-    {
-      ThrowIfFailed(Device()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
-      m_fenceValues[m_frameIndex]++;
+    CommandQueue().InitFence(FrameCount);
 
-      // Create an event handle to use for frame synchronization.
-      m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-      if (m_fenceEvent == nullptr)
-      {
-        ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
-      }
+    // execute commands to finish setup
+    CommandQueue().ExecuteCommandLists();
 
-      // Wait for the command list to execute; we are reusing the same command 
-      // list in our main loop but for now, we just want to wait for setup to 
-      // complete before continuing.
-      // Schedule a Signal command in the queue.
-      ThrowIfFailed(CommandQueue()->Signal(m_fence.Get(), m_fenceValues[m_frameIndex]));
-
-      // Wait until the fence has been processed.
-      ThrowIfFailed(m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent));
-      WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
-
-      // Increment the fence value for the current frame.
-      m_fenceValues[m_frameIndex]++;
-    }
+    // Wait for GPU to finish Execution
+    CommandQueue().WaitForGpu(m_frameIndex);
   }
 
   void Application::OnUpdate()
@@ -85,69 +62,66 @@ namespace Core
     // Command list allocators can only be reset when the associated 
     // command lists have finished execution on the GPU; apps should use 
     // fences to determine GPU execution progress.
-    ThrowIfFailed(m_commandAllocators[m_frameIndex]->Reset());
-
     // However, when ExecuteCommandList() is called on a particular command 
     // list, that command list can then be reset at any time and must be before 
     // re-recording.
-    ThrowIfFailed(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr));
+    m_commandList->Reset(m_frameIndex);
 
-    auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(m_rtvHeap->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
     // Indicate that the back buffer will be used as a render target.
-    m_commandList->ResourceBarrier(1, &barrier1);
+    m_commandList->Transition(m_rtvHeap->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
     // Record commands.
     const float clearColor[] = { 0.25f, 0.25f, 0.45f, 1.0f };
-    m_commandList->ClearRenderTargetView(m_rtvHeap->GetOffsetHandle(m_frameIndex), clearColor, 0, nullptr);
+    m_commandList->ClearRenderTargetView(m_rtvHeap->GetOffsetHandle(m_frameIndex), clearColor);
 
-    auto barrier2 = CD3DX12_RESOURCE_BARRIER::Transition(m_rtvHeap->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
     // Indicate that the back buffer will now be used to present.
-    m_commandList->ResourceBarrier(1, &barrier2);
+    m_commandList->Transition(m_rtvHeap->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
-    ThrowIfFailed(m_commandList->Close());
+    m_commandList->Close();
 
-
-    ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
-    CommandQueue()->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+    CommandQueue().ExecuteCommandLists();
 
     // Present the frame.
     m_swapChain->Present();
 
-    // MOVE TO NEXT FRAME
-    // Signal and increment the fence value.
-    const UINT64 currentFenceValue = m_fenceValues[m_frameIndex];
-    ThrowIfFailed(CommandQueue()->Signal(m_fence.Get(), currentFenceValue));
-
-    m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
-
-    // If the next frame is not ready to be rendered yet, wait until
-    if (m_fence->GetCompletedValue() < m_fenceValues[m_frameIndex])
-    {
-      ThrowIfFailed(m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent));
-      WaitForSingleObjectEx(m_fenceEvent, INFINITE, false);
-    }
-
-    m_fenceValues[m_frameIndex] = currentFenceValue + 1;
+    MoveToNextFrame(); // try to render next frame
   }
 
   void Application::OnDestroy()
   {
     // Ensure that the GPU is no longer referencing resources that are about to be
     // cleaned up by the destructor.
-
     // Wait for the command list to execute; we are reusing the same command 
     // list in our main loop but for now, we just want to wait for setup to 
     // complete before continuing.
     // Schedule a Signal command in the queue.
-    ThrowIfFailed(CommandQueue()->Signal(m_fence.Get(), m_fenceValues[m_frameIndex]));
+    CommandQueue().WaitForGpu(m_frameIndex);
+  }
 
-    // Wait until the fence has been processed.
-    ThrowIfFailed(m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent));
-    WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
+  void Application::MoveToNextFrame()
+  {
+    // Signal and increment the fence value.
+    CommandQueue().SignalFence(m_frameIndex);
 
-    // Increment the fence value for the current frame.
-    m_fenceValues[m_frameIndex]++;
+    // current frame Fence
+    const UINT64 currentFenceValue = CommandQueue().GetFenceValue(m_frameIndex);
 
-    CloseHandle(m_fenceEvent);
+    // next frame
+    m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+
+    // If the next frame is not ready to be rendered yet, wait until
+    CommandQueue().WaitFence(m_frameIndex);
+
+    // How I understand it is, the current frame will always a fenceValue bigger than next frame
+    // Why is that? because we begin with fence values 0 for both frames, but the current frame
+    // will be increment to one.
+    // so we will have an initial state of
+    // currentFrame fenceValue = 1
+    // nextFrame fenceValue = 0
+    // so if nextFrame if available it recieves current frame fence value
+    // which will be
+    // currentFrame fenceValue = 1
+    // nextFrame fenceValue = 2
+    CommandQueue().SetFenceValue(m_frameIndex, currentFenceValue + 1);
   }
 }
