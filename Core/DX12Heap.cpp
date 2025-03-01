@@ -18,6 +18,8 @@ namespace Core
       heapDesc.NumDescriptors = numDescriptors;
       heapDesc.Type = type;
       heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+      if (type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)
+        heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
       ThrowIfFailed(Device()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&m_heap)));
       m_descriptorSize = Device()->GetDescriptorHandleIncrementSize(type);
     }
@@ -32,6 +34,7 @@ namespace Core
     m_heap.Reset();
   }
 
+  // TO REFACTOR
   void DX12Heap::CreateResources()
   {
     // other types not supported for now
@@ -41,6 +44,28 @@ namespace Core
       {
         m_swapChain->GetBuffer(n, &m_resources[n]);
         Device()->CreateRenderTargetView(m_resources[n].Get(), nullptr, m_handle);
+        Offset(1);
+      }
+    } else if (m_type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)
+    {
+      for (unsigned n = 0; n < m_descriptorCount; ++n)
+      {
+        auto heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+        auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(256);
+        ThrowIfFailed(Device()->CreateCommittedResource(
+          &heapProp,
+          D3D12_HEAP_FLAG_NONE,
+          &resDesc,
+          D3D12_RESOURCE_STATE_GENERIC_READ,
+          nullptr,
+          IID_PPV_ARGS(&m_resources[n])));
+
+        // Describe and create a constant buffer view.
+        D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
+        cbvDesc.BufferLocation = m_resources[n]->GetGPUVirtualAddress();
+        cbvDesc.SizeInBytes = 256;
+        auto handle = m_heap->GetCPUDescriptorHandleForHeapStart();
+        Device()->CreateConstantBufferView(&cbvDesc, handle);
         Offset(1);
       }
     }

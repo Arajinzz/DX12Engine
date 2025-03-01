@@ -34,10 +34,10 @@ namespace Core
     ThrowIfFailed(m_commandList->Close());
   }
 
-  void DX12CommandList::Reset(unsigned index)
+  void DX12CommandList::Reset(unsigned index, ID3D12PipelineState* pso)
   {
     ThrowIfFailed(m_commandAllocators[index]->Reset());
-    ThrowIfFailed(m_commandList->Reset(m_commandAllocators[index].Get(), nullptr));
+    ThrowIfFailed(m_commandList->Reset(m_commandAllocators[index].Get(), pso));
   }
   void DX12CommandList::Transition(ID3D12Resource* res, D3D12_RESOURCE_STATES from, D3D12_RESOURCE_STATES to)
   {
@@ -48,5 +48,17 @@ namespace Core
   void DX12CommandList::ClearRenderTargetView(CD3DX12_CPU_DESCRIPTOR_HANDLE handle, const float* clearColor)
   {
     m_commandList->ClearRenderTargetView(handle, clearColor, 0, nullptr);
+  }
+
+  void DX12CommandList::SetRootSignature(ID3D12RootSignature* sig)
+  {
+    m_commandList->SetGraphicsRootSignature(sig);
+  }
+
+  void DX12CommandList::SetDescriptorHeap(DX12Heap* heap)
+  {
+
+    ID3D12DescriptorHeap* ppHeaps[] = { heap->Get() };
+    m_commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
   }
 }

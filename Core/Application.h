@@ -21,15 +21,42 @@ namespace Core
     virtual void OnDestroy() override;
 
   private:
+    void LoadPipeline();
     void MoveToNextFrame();
 
   private:
+    struct Vertex
+    {
+      XMFLOAT3 position;
+    };
+
+    struct SceneConstantBuffer
+    {
+      float color[4];
+      float padding[60]; // Padding so the constant buffer is 256-byte aligned.
+    };
+
     static const uint32_t FrameCount = 2;
 
     // Pipeline objects (commandQueue and Device are singletons)
     std::unique_ptr<DX12SwapChain> m_swapChain;
     // render target heap
     std::unique_ptr<DX12Heap> m_rtvHeap;
+    // cbv heap
+    std::unique_ptr<DX12Heap> m_cbvHeap;
+    
+    CD3DX12_VIEWPORT m_viewport;
+    CD3DX12_RECT m_scissorRect;
+    // root signature and pso
+    ComPtr<ID3D12RootSignature> m_rootSignature;
+    ComPtr<ID3D12PipelineState> m_pipelineState;
+    ComPtr<ID3D12Resource> m_vertexBuffer;
+    D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+    ComPtr<ID3D12Resource> m_indexBuffer;
+    D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
+    SceneConstantBuffer m_constantBufferData;
+    UINT8* m_pCbvDataBegin;
+
     // command List unique_ptr???
     std::unique_ptr<DX12CommandList> m_commandList;
 
