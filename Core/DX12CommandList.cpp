@@ -13,6 +13,7 @@ namespace Core
     for (int n = 0; n < allocators; ++n)
     {
       ThrowIfFailed(Device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocators[n])));
+      // maybe bind this to the pso!!!!!!!!!!!
       ThrowIfFailed(Device()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[n].Get(), nullptr, IID_PPV_ARGS(&m_commandList)));
     }
     DX12CommandQueue::Instance().AddCommandList(m_commandList.Get());

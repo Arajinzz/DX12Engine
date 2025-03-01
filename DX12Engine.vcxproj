@@ -161,6 +161,7 @@
   <ItemGroup>
     <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Core\DirectXApplication.cpp" />
+    <ClCompile Include="Core\Cube.cpp" />
     <ClCompile Include="dep\imgui\backends\imgui_impl_dx11.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -239,6 +240,7 @@
     <ClInclude Include="Core\Application.h" />
     <ClInclude Include="Core\DirectXApplication.h" />
     <ClInclude Include="Core\DXApplicationHelper.h" />
+    <ClInclude Include="Core\Cube.h" />
     <ClInclude Include="dep\imgui\backends\imgui_impl_dx11.h" />
     <ClInclude Include="dep\imgui\backends\imgui_impl_dx12.h" />
     <ClInclude Include="dep\imgui\backends\imgui_impl_win32.h" />

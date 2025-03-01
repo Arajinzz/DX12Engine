@@ -4,6 +4,7 @@
 #include "Core/DX12SwapChain.h"
 #include "Core/DX12Heap.h"
 #include "Core/DX12CommandList.h"
+#include "Core/Cube.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -25,11 +26,6 @@ namespace Core
     void MoveToNextFrame();
 
   private:
-    struct Vertex
-    {
-      XMFLOAT3 position;
-    };
-
     struct SceneConstantBuffer
     {
       float color[4];
@@ -44,16 +40,15 @@ namespace Core
     std::unique_ptr<DX12Heap> m_rtvHeap;
     // cbv heap
     std::unique_ptr<DX12Heap> m_cbvHeap;
+    // cube
+    std::vector<Cube*> cubes;
+
     
     CD3DX12_VIEWPORT m_viewport;
     CD3DX12_RECT m_scissorRect;
     // root signature and pso
     ComPtr<ID3D12RootSignature> m_rootSignature;
     ComPtr<ID3D12PipelineState> m_pipelineState;
-    ComPtr<ID3D12Resource> m_vertexBuffer;
-    D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
-    ComPtr<ID3D12Resource> m_indexBuffer;
-    D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
     SceneConstantBuffer m_constantBufferData;
     UINT8* m_pCbvDataBegin;
 
