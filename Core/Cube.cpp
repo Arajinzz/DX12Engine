@@ -149,6 +149,10 @@ namespace Core
     m_commandList->Reset(0, m_pipelineState.Get());
     // Set necessary state.
     m_commandList->SetRootSignature(m_rootSignature.Get());
+
+    // these must be done in the same commandlist as drawing
+    // because they set a state for rendering
+    // and states they reset between command lists
     m_commandList->Get()->RSSetViewports(1, &m_viewport);
     m_commandList->Get()->RSSetScissorRects(1, &m_scissorRect);
     m_commandList->Get()->OMSetRenderTargets(1, &renderTargetHandle, FALSE, nullptr);
