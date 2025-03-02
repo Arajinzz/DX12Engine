@@ -1,9 +1,3 @@
-cbuffer SceneConstantBuffer : register(b0)
-{
-    float4 color;
-    float4 padding[15];
-};
-
 struct PSInput
 {
     float4 position : SV_POSITION;

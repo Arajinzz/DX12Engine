@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Core/DX12CommandList.h"
+#include "Core/DX12Heap.h"
+
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
@@ -8,10 +11,10 @@ namespace Core
   class Cube
   {
   public:
-    Cube(ID3D12GraphicsCommandList* cmdList);
+    Cube();
     ~Cube();
 
-    void Draw();
+    void Draw(CD3DX12_CPU_DESCRIPTOR_HANDLE renderTargetHandle);
 
   private:
     struct Vertex
@@ -20,7 +23,12 @@ namespace Core
       XMFLOAT4 color;
     };
 
-    ID3D12GraphicsCommandList* m_commandList;
+    std::unique_ptr<DX12CommandList> m_commandList;
+
+    // root signature and pso
+    ComPtr<ID3D12RootSignature> m_rootSignature;
+    ComPtr<ID3D12PipelineState> m_pipelineState;
+
     ComPtr<ID3D12Resource> m_vertexBuffer;
     D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
     ComPtr<ID3D12Resource> m_indexBuffer;

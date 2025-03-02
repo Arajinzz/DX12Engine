@@ -26,31 +26,17 @@ namespace Core
     void MoveToNextFrame();
 
   private:
-    struct SceneConstantBuffer
-    {
-      float color[4];
-      float padding[60]; // Padding so the constant buffer is 256-byte aligned.
-    };
-
     static const uint32_t FrameCount = 2;
 
     // Pipeline objects (commandQueue and Device are singletons)
     std::unique_ptr<DX12SwapChain> m_swapChain;
     // render target heap
     std::unique_ptr<DX12Heap> m_rtvHeap;
-    // cbv heap
-    std::unique_ptr<DX12Heap> m_cbvHeap;
     // cube
     std::vector<Cube*> cubes;
 
-    
     CD3DX12_VIEWPORT m_viewport;
     CD3DX12_RECT m_scissorRect;
-    // root signature and pso
-    ComPtr<ID3D12RootSignature> m_rootSignature;
-    ComPtr<ID3D12PipelineState> m_pipelineState;
-    SceneConstantBuffer m_constantBufferData;
-    UINT8* m_pCbvDataBegin;
 
     // command List unique_ptr???
     std::unique_ptr<DX12CommandList> m_commandList;
