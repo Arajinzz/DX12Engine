@@ -11,7 +11,7 @@ namespace Core
   class Cube
   {
   public:
-    Cube();
+    Cube(unsigned viewportWidth, unsigned viewportHeight);
     ~Cube();
 
     void Draw(CD3DX12_CPU_DESCRIPTOR_HANDLE renderTargetHandle, ID3D12Resource* renderTarget, DX12CommandList* cmd);
@@ -34,6 +34,9 @@ namespace Core
     D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
     ComPtr<ID3D12Resource> m_indexBuffer;
     D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
+
+    CD3DX12_VIEWPORT m_viewport;
+    CD3DX12_RECT m_scissorRect;
 
   private:
     Cube(const Cube&) = delete;

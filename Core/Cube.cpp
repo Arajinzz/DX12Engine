@@ -6,8 +6,10 @@
 
 namespace Core
 {
-  Cube::Cube()
+  Cube::Cube(unsigned viewportWidth, unsigned viewportHeight)
     : m_commandList(nullptr)
+    , m_viewport(0.0f, 0.0f, static_cast<float>(viewportWidth), static_cast<float>(viewportHeight))
+    , m_scissorRect(0, 0, static_cast<LONG>(viewportWidth), static_cast<LONG>(viewportHeight))
   {
     // Create the command list.
     // the class should add command list automatically to CommandQueue
@@ -144,19 +146,22 @@ namespace Core
   void Cube::Draw(CD3DX12_CPU_DESCRIPTOR_HANDLE renderTargetHandle, ID3D12Resource* renderTarget, DX12CommandList* cmd)
   {
     // 1 allocator
-    //cmd->Reset(0, m_pipelineState.Get());
+    m_commandList->Reset(0, m_pipelineState.Get());
     // Set necessary state.
-    cmd->SetRootSignature(m_rootSignature.Get());
+    m_commandList->SetRootSignature(m_rootSignature.Get());
+    m_commandList->Get()->RSSetViewports(1, &m_viewport);
+    m_commandList->Get()->RSSetScissorRects(1, &m_scissorRect);
+    m_commandList->Get()->OMSetRenderTargets(1, &renderTargetHandle, FALSE, nullptr);
 
     /*m_commandList->SetDescriptorHeap(m_cbvHeap.get());
     auto handle = m_cbvHeap->Get()->GetGPUDescriptorHandleForHeapStart();
     m_commandList->Get()->SetGraphicsRootDescriptorTable(0, handle);*/
-    cmd->Get()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    cmd->Get()->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-    cmd->Get()->IASetIndexBuffer(&m_indexBufferView);
-    cmd->Get()->DrawIndexedInstanced(3, UINT(3 / 3), 0, 0, 0);
+    m_commandList->Get()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    m_commandList->Get()->IASetVertexBuffers(0, 1, &m_vertexBufferView);
+    m_commandList->Get()->IASetIndexBuffer(&m_indexBufferView);
+    m_commandList->Get()->DrawIndexedInstanced(3, UINT(3 / 3), 0, 0, 0);
     // Indicate that the back buffer will now be used to present.
-    cmd->Transition(renderTarget, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-    //cmd->Close();
+    m_commandList->Transition(renderTarget, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+    m_commandList->Close();
   }
 }

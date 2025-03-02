@@ -10,8 +10,6 @@ namespace Core
     : DirectXApplication(width, height, name)
     , m_frameIndex(0)
     , m_swapChain(nullptr)
-    , m_viewport(0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height))
-    , m_scissorRect(0, 0, static_cast<LONG>(width), static_cast<LONG>(height))
   {
   }
 
@@ -25,7 +23,7 @@ namespace Core
     CommandQueue().InitFence(FrameCount);
 
     // Create Cube, will also create pso and root signature and constant buffer for transformation
-    cubes.push_back(new Cube());
+    cubes.push_back(new Cube(GetWidth(), GetHeight()));
 
     // Close the command list and execute it to begin the initial GPU setup.
     m_commandList->Close();
@@ -48,19 +46,14 @@ namespace Core
     // However, when ExecuteCommandList() is called on a particular command 
     // list, that command list can then be reset at any time and must be before 
     // re-recording.
-    m_commandList->Reset(m_frameIndex, cubes[0]->GetPSO());
-    /*m_commandList->Get()->RSSetViewports(1, &m_viewport);
-    m_commandList->Get()->RSSetScissorRects(1, &m_scissorRect);*/
+    m_commandList->Reset(m_frameIndex, nullptr);
 
     // Indicate that the back buffer will be used as a render target.
     m_commandList->Transition(m_rtvHeap->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-    auto rtvHandle = m_rtvHeap->GetOffsetHandle(m_frameIndex);
-    m_commandList->Get()->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
     // Record commands.
     const float clearColor[] = { 0.25f, 0.55f, 0.45f, 1.0f };
     m_commandList->ClearRenderTargetView(m_rtvHeap->GetOffsetHandle(m_frameIndex), clearColor);
-    
 
     // draw cube
     cubes[0]->Draw(m_rtvHeap->GetOffsetHandle(m_frameIndex), m_rtvHeap->GetResource(m_frameIndex), m_commandList.get());

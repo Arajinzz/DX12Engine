@@ -35,9 +35,6 @@ namespace Core
     // cube
     std::vector<Cube*> cubes;
 
-    CD3DX12_VIEWPORT m_viewport;
-    CD3DX12_RECT m_scissorRect;
-
     // command List unique_ptr???
     std::unique_ptr<DX12CommandList> m_commandList;
 
