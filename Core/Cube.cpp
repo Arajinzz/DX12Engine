@@ -141,20 +141,22 @@ namespace Core
   }
 
   // just a triangle for now
-  void Cube::Draw(CD3DX12_CPU_DESCRIPTOR_HANDLE renderTargetHandle)
+  void Cube::Draw(CD3DX12_CPU_DESCRIPTOR_HANDLE renderTargetHandle, ID3D12Resource* renderTarget, DX12CommandList* cmd)
   {
     // 1 allocator
-    m_commandList->Reset(0, m_pipelineState.Get());
+    //cmd->Reset(0, m_pipelineState.Get());
     // Set necessary state.
-    m_commandList->SetRootSignature(m_rootSignature.Get());
-    m_commandList->Get()->OMSetRenderTargets(1, &renderTargetHandle, FALSE, nullptr);
+    cmd->SetRootSignature(m_rootSignature.Get());
+
     /*m_commandList->SetDescriptorHeap(m_cbvHeap.get());
     auto handle = m_cbvHeap->Get()->GetGPUDescriptorHandleForHeapStart();
     m_commandList->Get()->SetGraphicsRootDescriptorTable(0, handle);*/
-    m_commandList->Get()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    m_commandList->Get()->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-    m_commandList->Get()->IASetIndexBuffer(&m_indexBufferView);
-    m_commandList->Get()->DrawIndexedInstanced(3, UINT(3 / 3), 0, 0, 0);
-    m_commandList->Close();
+    cmd->Get()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    cmd->Get()->IASetVertexBuffers(0, 1, &m_vertexBufferView);
+    cmd->Get()->IASetIndexBuffer(&m_indexBufferView);
+    cmd->Get()->DrawIndexedInstanced(3, UINT(3 / 3), 0, 0, 0);
+    // Indicate that the back buffer will now be used to present.
+    cmd->Transition(renderTarget, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+    //cmd->Close();
   }
 }

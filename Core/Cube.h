@@ -14,7 +14,8 @@ namespace Core
     Cube();
     ~Cube();
 
-    void Draw(CD3DX12_CPU_DESCRIPTOR_HANDLE renderTargetHandle);
+    void Draw(CD3DX12_CPU_DESCRIPTOR_HANDLE renderTargetHandle, ID3D12Resource* renderTarget, DX12CommandList* cmd);
+    ID3D12PipelineState* GetPSO() { return m_pipelineState.Get(); }
 
   private:
     struct Vertex
