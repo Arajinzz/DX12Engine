@@ -49,8 +49,8 @@ namespace Core
     // list, that command list can then be reset at any time and must be before 
     // re-recording.
     m_commandList->Reset(m_frameIndex, cubes[0]->GetPSO());
-    m_commandList->Get()->RSSetViewports(1, &m_viewport);
-    m_commandList->Get()->RSSetScissorRects(1, &m_scissorRect);
+    /*m_commandList->Get()->RSSetViewports(1, &m_viewport);
+    m_commandList->Get()->RSSetScissorRects(1, &m_scissorRect);*/
 
     // Indicate that the back buffer will be used as a render target.
     m_commandList->Transition(m_rtvHeap->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
