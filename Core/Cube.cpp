@@ -3,6 +3,8 @@
 
 #include "Core/DX12Device.h"
 #include "Core/DXApplicationHelper.h"
+#include "Core/Application.h"
+
 
 namespace Core
 {
@@ -69,14 +71,24 @@ namespace Core
     ThrowIfFailed(Device()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
 
     {
-      Vertex triangleVertices[] =
+      // Hack
+      float aspectRatio = (1280.0 / 720.0);
+      float vertexPositionX = 0.25 / aspectRatio;
+      float vertexPosition = 0.25;
+      Vertex cubeVertices[] =
       {
-        { { -0.5f + padding, -0.5f, 0.0f }, {1.0, 0.0, 0.0, 1.0} },
-        { { 0.5f + padding, -0.5f, 0.0f }, {0.0, 1.0, 0.0, 1.0} },
-        { { 0.0f + padding, 0.5f, 0.0f }, {0.0, 0.0, 1.0, 1.0} }
+          { { -vertexPositionX, -vertexPosition ,  vertexPosition }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+          { {  vertexPositionX, -vertexPosition,  vertexPosition }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+          { {  vertexPositionX,  vertexPosition,  vertexPosition }, { 0.0f, 1.0f, 0.0f, 1.0f } },
+          { { -vertexPositionX,  vertexPosition,  vertexPosition }, { 0.0f, 1.0f, 0.0f, 1.0f } },
+
+          { { -vertexPositionX, -vertexPosition, -vertexPosition }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+          { {  vertexPositionX, -vertexPosition, -vertexPosition }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+          { {  vertexPositionX,  vertexPosition, -vertexPosition }, { 0.0f, 1.0f, 0.0f, 1.0f } },
+          { { -vertexPositionX,  vertexPosition, -vertexPosition }, { 0.0f, 1.0f, 0.0f, 1.0f } },
       };
       // since array is on the stack it can deduce the size
-      const unsigned vertexBufferSize = sizeof(triangleVertices);
+      const unsigned vertexBufferSize = sizeof(cubeVertices);
 
       // Note: using upload heaps to transfer static data like vert buffers is not 
       // recommended. Every time the GPU needs it, the upload heap will be marshalled 
@@ -96,7 +108,7 @@ namespace Core
       UINT8* pVertexDataBegin;
       CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
       ThrowIfFailed(m_vertexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pVertexDataBegin)));
-      memcpy(pVertexDataBegin, triangleVertices, vertexBufferSize);
+      memcpy(pVertexDataBegin, cubeVertices, vertexBufferSize);
       m_vertexBuffer->Unmap(0, nullptr);
 
       // Initialize the vertex buffer view.
@@ -107,7 +119,29 @@ namespace Core
 
     {
       uint16_t indicies[] = {
-        2, 1, 0
+        // front face
+        0, 3, 2,
+        0, 2, 1,
+
+        // back face
+        4, 5, 6,
+        4, 6, 7,
+
+        // left face
+        0, 1, 5,
+        0, 5, 4,
+
+        // right face
+        3, 7, 6,
+        3, 6, 2,
+
+        // top face
+        1, 2, 6,
+        1, 6, 5,
+
+        // bottom face
+        0, 4, 7,
+        0, 7, 3
       };
 
       const unsigned indexBufferSize = sizeof(indicies);
@@ -166,7 +200,7 @@ namespace Core
     m_commandList->Get()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     m_commandList->Get()->IASetVertexBuffers(0, 1, &m_vertexBufferView);
     m_commandList->Get()->IASetIndexBuffer(&m_indexBufferView);
-    m_commandList->Get()->DrawIndexedInstanced(3, UINT(3 / 3), 0, 0, 0);
+    m_commandList->Get()->DrawIndexedInstanced(36, UINT(36 / 3), 0, 0, 0);
     
     m_commandList->Close();
   }
