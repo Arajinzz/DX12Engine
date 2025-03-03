@@ -13,7 +13,7 @@ namespace Core
   {
     // Create the command list.
     // the class should add command list automatically to CommandQueue
-    m_commandList = std::make_unique<DX12CommandList>(1);
+    m_commandList = std::make_unique<DX12CommandList>();
 
     // Create an empty root signature.
     {
@@ -143,19 +143,22 @@ namespace Core
   }
 
   // just a triangle for now
-  void Cube::Draw(CD3DX12_CPU_DESCRIPTOR_HANDLE renderTargetHandle, ID3D12Resource* renderTarget, DX12CommandList* cmd)
+  void Cube::Draw(DX12Heap* rtvHeap, unsigned frameIndex)
   {
     // 1 allocator
-    m_commandList->Reset(0, m_pipelineState.Get());
+    m_commandList->Reset(frameIndex, m_pipelineState.Get());
     // Set necessary state.
     m_commandList->SetRootSignature(m_rootSignature.Get());
+
+
 
     // these must be done in the same commandlist as drawing
     // because they set a state for rendering
     // and states they reset between command lists
     m_commandList->Get()->RSSetViewports(1, &m_viewport);
     m_commandList->Get()->RSSetScissorRects(1, &m_scissorRect);
-    m_commandList->Get()->OMSetRenderTargets(1, &renderTargetHandle, FALSE, nullptr);
+    auto handle = rtvHeap->GetOffsetHandle(frameIndex);
+    m_commandList->Get()->OMSetRenderTargets(1, &handle, FALSE, nullptr);
 
     /*m_commandList->SetDescriptorHeap(m_cbvHeap.get());
     auto handle = m_cbvHeap->Get()->GetGPUDescriptorHandleForHeapStart();
@@ -164,8 +167,7 @@ namespace Core
     m_commandList->Get()->IASetVertexBuffers(0, 1, &m_vertexBufferView);
     m_commandList->Get()->IASetIndexBuffer(&m_indexBufferView);
     m_commandList->Get()->DrawIndexedInstanced(3, UINT(3 / 3), 0, 0, 0);
-    // Indicate that the back buffer will now be used to present.
-    m_commandList->Transition(renderTarget, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+    
     m_commandList->Close();
   }
 }

@@ -12,7 +12,7 @@ namespace Core
   class DX12CommandList
   {
   public:
-    DX12CommandList(unsigned int allocators);
+    DX12CommandList();
     ~DX12CommandList();
 
     ID3D12GraphicsCommandList* Get() { return m_commandList.Get(); }

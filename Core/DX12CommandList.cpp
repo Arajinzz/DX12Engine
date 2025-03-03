@@ -4,13 +4,14 @@
 #include "Core/DXApplicationHelper.h"
 #include "Core/DX12Device.h"
 #include "Core/DX12CommandQueue.h"
+#include "Core/Application.h"
 
 namespace Core
 {
-  DX12CommandList::DX12CommandList(unsigned int allocators)
-    : m_commandAllocators(allocators)
+  DX12CommandList::DX12CommandList()
+    : m_commandAllocators(Application::FrameCount)
   {
-    for (int n = 0; n < allocators; ++n)
+    for (int n = 0; n < Application::FrameCount; ++n)
     {
       ThrowIfFailed(Device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocators[n])));
       // maybe bind this to the pso!!!!!!!!!!!

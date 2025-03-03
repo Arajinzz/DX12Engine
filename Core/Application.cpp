@@ -10,6 +10,8 @@ namespace Core
     : DirectXApplication(width, height, name)
     , m_frameIndex(0)
     , m_swapChain(nullptr)
+    , m_beginCommandList(nullptr)
+    , m_endCommandList(nullptr)
   {
   }
 
@@ -17,16 +19,22 @@ namespace Core
   {
     LoadPipeline();
 
-    // Create the command list.
-    m_commandList = std::make_unique<DX12CommandList>(FrameCount);
+    // Create the first command list
+    m_beginCommandList = std::make_unique<DX12CommandList>();
+    
     // Create synchronization objects.
     CommandQueue().InitFence(FrameCount);
 
     // Create Cube, will also create pso and root signature and constant buffer for transformation
     cubes.push_back(new Cube(GetWidth(), GetHeight()));
 
-    // Close the command list and execute it to begin the initial GPU setup.
-    m_commandList->Close();
+    // this order is necessary to insert this command list in the end of the queue
+    m_endCommandList = std::make_unique<DX12CommandList>();
+
+    // close all commandlists
+    m_beginCommandList->Close();
+    m_endCommandList->Close();
+
     // execute commands to finish setup
     CommandQueue().ExecuteCommandLists();
     // Wait for GPU to finish Execution
@@ -46,32 +54,33 @@ namespace Core
     // However, when ExecuteCommandList() is called on a particular command 
     // list, that command list can then be reset at any time and must be before 
     // re-recording.
-    m_commandList->Reset(m_frameIndex, nullptr);
+    m_beginCommandList->Reset(m_frameIndex, nullptr);
+    m_endCommandList->Reset(m_frameIndex, nullptr);
 
     // Indicate that the back buffer will be used as a render target.
-    m_commandList->Transition(m_rtvHeap->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+    m_beginCommandList->Transition(m_rtvHeap->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
     // Record commands.
     const float clearColor[] = { 0.25f, 0.55f, 0.45f, 1.0f };
-    m_commandList->ClearRenderTargetView(m_rtvHeap->GetOffsetHandle(m_frameIndex), clearColor);
+    m_beginCommandList->ClearRenderTargetView(m_rtvHeap->GetOffsetHandle(m_frameIndex), clearColor);
+    
+    m_beginCommandList->Close();
 
     // draw cube
-    cubes[0]->Draw(m_rtvHeap->GetOffsetHandle(m_frameIndex), m_rtvHeap->GetResource(m_frameIndex), m_commandList.get());
-    m_commandList->Close();
+    for (auto cube : cubes)
+      cube->Draw(m_rtvHeap.get(), m_frameIndex);
+
+    // Indicate that the back buffer will now be used to present.
+    m_endCommandList->Transition(m_rtvHeap->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+
+    m_endCommandList->Close();
 
     CommandQueue().ExecuteCommandLists();
 
     // Present the frame.
     m_swapChain->Present();
 
-    CommandQueue().WaitForGpu(m_frameIndex);
-    auto fenceVal = CommandQueue().GetFenceValue(m_frameIndex);
-    // next frame
-    m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
-    CommandQueue().SetFenceValue(m_frameIndex, fenceVal);
-
-    // not doing it for next frame because I would need a seperate Queue to draw models
-    //MoveToNextFrame(); // try to render next frame
+    MoveToNextFrame(); // try to render next frame
   }
 
   void Application::OnDestroy()

@@ -14,7 +14,7 @@ namespace Core
     Cube(unsigned viewportWidth, unsigned viewportHeight);
     ~Cube();
 
-    void Draw(CD3DX12_CPU_DESCRIPTOR_HANDLE renderTargetHandle, ID3D12Resource* renderTarget, DX12CommandList* cmd);
+    void Draw(DX12Heap* rtvHeap, unsigned frameIndex);
     ID3D12PipelineState* GetPSO() { return m_pipelineState.Get(); }
 
   private:

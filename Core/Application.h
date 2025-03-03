@@ -20,13 +20,14 @@ namespace Core
     virtual void OnUpdate() override;
     virtual void OnRender() override;
     virtual void OnDestroy() override;
+    
+    static const uint32_t FrameCount = 2;
 
   private:
     void LoadPipeline();
     void MoveToNextFrame();
 
   private:
-    static const uint32_t FrameCount = 2;
 
     // Pipeline objects (commandQueue and Device are singletons)
     std::unique_ptr<DX12SwapChain> m_swapChain;
@@ -35,8 +36,8 @@ namespace Core
     // cube
     std::vector<Cube*> cubes;
 
-    // command List unique_ptr???
-    std::unique_ptr<DX12CommandList> m_commandList;
+    std::unique_ptr<DX12CommandList> m_beginCommandList;
+    std::unique_ptr<DX12CommandList> m_endCommandList;
 
     // Synchronization objects.
     uint32_t m_frameIndex;
