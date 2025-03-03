@@ -52,6 +52,17 @@ namespace Core
     m_commandList->ClearRenderTargetView(handle, clearColor, 0, nullptr);
   }
 
+  void DX12CommandList::ClearDepthStencilView(CD3DX12_CPU_DESCRIPTOR_HANDLE handle)
+  {
+    m_commandList->ClearDepthStencilView(
+      handle,
+      D3D12_CLEAR_FLAG_DEPTH,
+      1.0f,    // Clear depth to maximum (far plane)
+      0,       // Clear stencil to 0
+      0, nullptr
+    );
+  }
+
   void DX12CommandList::SetRootSignature(ID3D12RootSignature* sig)
   {
     m_commandList->SetGraphicsRootSignature(sig);

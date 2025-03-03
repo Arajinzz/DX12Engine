@@ -64,13 +64,14 @@ namespace Core
 
     // Record commands.
     const float clearColor[] = { 0.25f, 0.55f, 0.45f, 1.0f };
+    m_beginCommandList->ClearDepthStencilView(m_dsvHeap->GetOffsetHandle(0));
     m_beginCommandList->ClearRenderTargetView(m_rtvHeap->GetOffsetHandle(m_frameIndex), clearColor);
     
     m_beginCommandList->Close();
 
     // draw cube
     for (auto cube : cubes)
-      cube->Draw(m_rtvHeap.get(), m_frameIndex);
+      cube->Draw(m_rtvHeap.get(), m_dsvHeap.get(), m_frameIndex);
 
     // Indicate that the back buffer will now be used to present.
     m_endCommandList->Transition(m_rtvHeap->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
@@ -115,6 +116,11 @@ namespace Core
     m_rtvHeap = std::make_unique<DX12Heap>(FrameCount, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, m_swapChain.get());
     // Create frame resources.
     m_rtvHeap->CreateResources();
+
+    // Create DSV heap
+    m_dsvHeap = std::make_unique<DX12Heap>(1, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, m_swapChain.get());
+    // create resource
+    m_dsvHeap->CreateResources();
   }
 
   void Application::MoveToNextFrame()

@@ -33,6 +33,8 @@ namespace Core
     std::unique_ptr<DX12SwapChain> m_swapChain;
     // render target heap
     std::unique_ptr<DX12Heap> m_rtvHeap;
+    // depth heap
+    std::unique_ptr<DX12Heap> m_dsvHeap;
     // cube
     std::vector<Cube*> cubes;
 

@@ -54,16 +54,17 @@ namespace Core
     psoDesc.VS = CD3DX12_SHADER_BYTECODE(vertexShader.Get());
     psoDesc.PS = CD3DX12_SHADER_BYTECODE(pixelShader.Get());
     psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-    psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+    psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
     psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-    psoDesc.DepthStencilState.DepthEnable = FALSE;
-    psoDesc.DepthStencilState.StencilEnable = FALSE;
+    psoDesc.DepthStencilState.DepthEnable = TRUE;
     psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
     psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+    psoDesc.DepthStencilState.StencilEnable = FALSE;
     psoDesc.SampleMask = UINT_MAX;
     psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     psoDesc.NumRenderTargets = 1;
     psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+    psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
     psoDesc.SampleDesc.Count = 1;
     ThrowIfFailed(Device()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
 
@@ -143,22 +144,21 @@ namespace Core
   }
 
   // just a triangle for now
-  void Cube::Draw(DX12Heap* rtvHeap, unsigned frameIndex)
+  void Cube::Draw(DX12Heap* rtvHeap, DX12Heap* dsvHeap, unsigned frameIndex)
   {
     // 1 allocator
     m_commandList->Reset(frameIndex, m_pipelineState.Get());
     // Set necessary state.
     m_commandList->SetRootSignature(m_rootSignature.Get());
 
-
-
     // these must be done in the same commandlist as drawing
     // because they set a state for rendering
     // and states they reset between command lists
     m_commandList->Get()->RSSetViewports(1, &m_viewport);
     m_commandList->Get()->RSSetScissorRects(1, &m_scissorRect);
-    auto handle = rtvHeap->GetOffsetHandle(frameIndex);
-    m_commandList->Get()->OMSetRenderTargets(1, &handle, FALSE, nullptr);
+    auto rtvHandle = rtvHeap->GetOffsetHandle(frameIndex);
+    auto dsvHandle = dsvHeap->GetOffsetHandle(0);
+    m_commandList->Get()->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 
     /*m_commandList->SetDescriptorHeap(m_cbvHeap.get());
     auto handle = m_cbvHeap->Get()->GetGPUDescriptorHandleForHeapStart();

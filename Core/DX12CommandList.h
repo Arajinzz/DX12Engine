@@ -21,6 +21,7 @@ namespace Core
     void Reset(unsigned index, ID3D12PipelineState* pso);
     void Transition(ID3D12Resource* res, D3D12_RESOURCE_STATES from, D3D12_RESOURCE_STATES to);
     void ClearRenderTargetView(CD3DX12_CPU_DESCRIPTOR_HANDLE handle, const float* clearColor);
+    void ClearDepthStencilView(CD3DX12_CPU_DESCRIPTOR_HANDLE handle);
     void SetRootSignature(ID3D12RootSignature* sig);
     void SetDescriptorHeap(DX12Heap* heap);
 
