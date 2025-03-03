@@ -77,15 +77,15 @@ namespace Core
       float vertexPosition = 0.25;
       Vertex cubeVertices[] =
       {
-          { { -vertexPositionX, -vertexPosition ,  vertexPosition }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-          { {  vertexPositionX, -vertexPosition,  vertexPosition }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-          { {  vertexPositionX,  vertexPosition,  vertexPosition }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-          { { -vertexPositionX,  vertexPosition,  vertexPosition }, { 0.0f, 1.0f, 0.0f, 1.0f } },
+          { { -vertexPositionX + padding, -vertexPosition ,  vertexPosition }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+          { {  vertexPositionX + padding, -vertexPosition,  vertexPosition }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+          { {  vertexPositionX + padding,  vertexPosition,  vertexPosition }, { 0.0f, 1.0f, 0.0f, 1.0f } },
+          { { -vertexPositionX + padding,  vertexPosition,  vertexPosition }, { 0.0f, 1.0f, 0.0f, 1.0f } },
 
-          { { -vertexPositionX, -vertexPosition, -vertexPosition }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-          { {  vertexPositionX, -vertexPosition, -vertexPosition }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-          { {  vertexPositionX,  vertexPosition, -vertexPosition }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-          { { -vertexPositionX,  vertexPosition, -vertexPosition }, { 0.0f, 1.0f, 0.0f, 1.0f } },
+          { { -vertexPositionX + padding, -vertexPosition, -vertexPosition }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+          { {  vertexPositionX + padding, -vertexPosition, -vertexPosition }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+          { {  vertexPositionX + padding,  vertexPosition, -vertexPosition }, { 0.0f, 1.0f, 0.0f, 1.0f } },
+          { { -vertexPositionX + padding,  vertexPosition, -vertexPosition }, { 0.0f, 1.0f, 0.0f, 1.0f } },
       };
       // since array is on the stack it can deduce the size
       const unsigned vertexBufferSize = sizeof(cubeVertices);
