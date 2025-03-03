@@ -11,7 +11,7 @@ namespace Core
   class Cube
   {
   public:
-    Cube(unsigned viewportWidth, unsigned viewportHeight);
+    Cube(unsigned viewportWidth, unsigned viewportHeight, float padding = 0.0);
     ~Cube();
 
     void Draw(DX12Heap* rtvHeap, unsigned frameIndex);

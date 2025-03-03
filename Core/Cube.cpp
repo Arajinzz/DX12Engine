@@ -6,7 +6,7 @@
 
 namespace Core
 {
-  Cube::Cube(unsigned viewportWidth, unsigned viewportHeight)
+  Cube::Cube(unsigned viewportWidth, unsigned viewportHeight, float padding)
     : m_commandList(nullptr)
     , m_viewport(0.0f, 0.0f, static_cast<float>(viewportWidth), static_cast<float>(viewportHeight))
     , m_scissorRect(0, 0, static_cast<LONG>(viewportWidth), static_cast<LONG>(viewportHeight))
@@ -70,9 +70,9 @@ namespace Core
     {
       Vertex triangleVertices[] =
       {
-        { { -0.5f, -0.5f, 0.0f }, {1.0, 0.0, 0.0, 1.0} },
-        { { 0.5f, -0.5f, 0.0f }, {0.0, 1.0, 0.0, 1.0} },
-        { { 0.0f, 0.5f, 0.0f }, {0.0, 0.0, 1.0, 1.0} }
+        { { -0.5f + padding, -0.5f, 0.0f }, {1.0, 0.0, 0.0, 1.0} },
+        { { 0.5f + padding, -0.5f, 0.0f }, {0.0, 1.0, 0.0, 1.0} },
+        { { 0.0f + padding, 0.5f, 0.0f }, {0.0, 0.0, 1.0, 1.0} }
       };
       // since array is on the stack it can deduce the size
       const unsigned vertexBufferSize = sizeof(triangleVertices);

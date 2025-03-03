@@ -26,7 +26,9 @@ namespace Core
     CommandQueue().InitFence(FrameCount);
 
     // Create Cube, will also create pso and root signature and constant buffer for transformation
-    cubes.push_back(new Cube(GetWidth(), GetHeight()));
+    cubes.push_back(new Cube(GetWidth(), GetHeight(), 0.0));
+    cubes.push_back(new Cube(GetWidth(), GetHeight(), 1.0));
+    cubes.push_back(new Cube(GetWidth(), GetHeight(), -1.0));
 
     // this order is necessary to insert this command list in the end of the queue
     m_endCommandList = std::make_unique<DX12CommandList>();
