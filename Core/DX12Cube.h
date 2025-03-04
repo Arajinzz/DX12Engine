@@ -8,11 +8,11 @@ using Microsoft::WRL::ComPtr;
 
 namespace Core
 {
-  class Cube
+  class DX12Cube
   {
   public:
-    Cube(unsigned viewportWidth, unsigned viewportHeight, float padding = 0.0);
-    ~Cube();
+    DX12Cube(unsigned viewportWidth, unsigned viewportHeight, float padding = 0.0);
+    ~DX12Cube();
 
     void Draw(DX12Heap* rtvHeap, DX12Heap* dsvHeap, unsigned frameIndex);
     ID3D12PipelineState* GetPSO() { return m_pipelineState.Get(); }
@@ -39,8 +39,8 @@ namespace Core
     CD3DX12_RECT m_scissorRect;
 
   private:
-    Cube(const Cube&) = delete;
-    Cube& operator=(const Cube&) = delete;
+    DX12Cube(const DX12Cube&) = delete;
+    DX12Cube& operator=(const DX12Cube&) = delete;
 
   };
 }

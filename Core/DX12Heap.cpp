@@ -6,10 +6,9 @@
 
 namespace Core
 {
-  DX12Heap::DX12Heap(unsigned int numDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE type, DX12SwapChain* swapChain)
+  DX12Heap::DX12Heap(unsigned int numDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE type)
     : m_descriptorCount(numDescriptors)
     , m_resources(numDescriptors)
-    , m_swapChain(swapChain)
     , m_type(type)
   {
     {
@@ -42,7 +41,7 @@ namespace Core
     {
       for (unsigned n = 0; n < m_descriptorCount; ++n)
       {
-        m_swapChain->GetBuffer(n, &m_resources[n]);
+        SwapChain().GetBuffer(n, &m_resources[n]);
         Device()->CreateRenderTargetView(m_resources[n].Get(), nullptr, m_handle);
         Offset(1);
       }

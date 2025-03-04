@@ -5,17 +5,18 @@
 #include "Core/DXApplicationHelper.h"
 #include "Core/DX12Device.h"
 #include "Core/DX12CommandQueue.h"
+#include "Core/Application.h"
 
 namespace Core
 {
-  DX12SwapChain::DX12SwapChain(unsigned int frameCount, unsigned int width, unsigned int height)
+  DX12SwapChain::DX12SwapChain()
   {
     // Describe and create the swap chain.
     {
       DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-      swapChainDesc.BufferCount = frameCount;
-      swapChainDesc.Width = width;
-      swapChainDesc.Height = height;
+      swapChainDesc.BufferCount = Application::FrameCount;
+      swapChainDesc.Width = 1280;
+      swapChainDesc.Height = 720;
       swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
       swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
       swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;

@@ -10,7 +10,7 @@ namespace Core
   class DX12Heap
   {
   public:
-    DX12Heap(unsigned int numDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE type, DX12SwapChain* swapChain);
+    DX12Heap(unsigned int numDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE type);
     ~DX12Heap();
 
     void CreateResources();
@@ -26,7 +26,6 @@ namespace Core
   private:
     ComPtr<ID3D12DescriptorHeap> m_heap;
     std::vector<ComPtr<ID3D12Resource>> m_resources;
-    DX12SwapChain* m_swapChain;
     unsigned int m_descriptorSize;
     unsigned int m_descriptorCount;
     D3D12_DESCRIPTOR_HEAP_TYPE m_type;

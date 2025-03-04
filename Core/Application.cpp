@@ -9,7 +9,6 @@ namespace Core
   Application::Application(UINT width, UINT height, std::wstring name)
     : DirectXApplication(width, height, name)
     , m_frameIndex(0)
-    , m_swapChain(nullptr)
     , m_beginCommandList(nullptr)
     , m_endCommandList(nullptr)
   {
@@ -26,9 +25,9 @@ namespace Core
     CommandQueue().InitFence(FrameCount);
 
     // Create Cube, will also create pso and root signature and constant buffer for transformation
-    cubes.push_back(new Cube(GetWidth(), GetHeight(), 0.0));
-    cubes.push_back(new Cube(GetWidth(), GetHeight(), 0.5));
-    cubes.push_back(new Cube(GetWidth(), GetHeight(), -0.5));
+    cubes.push_back(new DX12Cube(GetWidth(), GetHeight(), 0.0));
+    cubes.push_back(new DX12Cube(GetWidth(), GetHeight(), 0.5));
+    cubes.push_back(new DX12Cube(GetWidth(), GetHeight(), -0.5));
 
     // this order is necessary to insert this command list in the end of the queue
     m_endCommandList = std::make_unique<DX12CommandList>();
@@ -81,7 +80,7 @@ namespace Core
     CommandQueue().ExecuteCommandLists();
 
     // Present the frame.
-    m_swapChain->Present();
+    SwapChain().Present();
 
     MoveToNextFrame(); // try to render next frame
   }
@@ -106,19 +105,19 @@ namespace Core
     CreateCmdQueue(); // Singleton
 
     // Create SwapChain
-    m_swapChain = std::make_unique<DX12SwapChain>(FrameCount, m_width, m_height);
-    m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+    CreateSwapChain();
+    m_frameIndex = SwapChain().GetCurrentBackBufferIndex();
 
     // full screen transitions not supported.
     ThrowIfFailed(Factory()->MakeWindowAssociation(WindowsApplication::GetHwnd(), DXGI_MWA_NO_ALT_ENTER));
 
     // Create RTV heap
-    m_rtvHeap = std::make_unique<DX12Heap>(FrameCount, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, m_swapChain.get());
+    m_rtvHeap = std::make_unique<DX12Heap>(FrameCount, D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     // Create frame resources.
     m_rtvHeap->CreateResources();
 
     // Create DSV heap
-    m_dsvHeap = std::make_unique<DX12Heap>(1, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, m_swapChain.get());
+    m_dsvHeap = std::make_unique<DX12Heap>(1, D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
     // create resource
     m_dsvHeap->CreateResources();
   }
@@ -132,7 +131,7 @@ namespace Core
     const UINT64 currentFenceValue = CommandQueue().GetFenceValue(m_frameIndex);
 
     // next frame
-    m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+    m_frameIndex = SwapChain().GetCurrentBackBufferIndex();
 
     // If the next frame is not ready to be rendered yet, wait until
     CommandQueue().WaitFence(m_frameIndex);

@@ -4,7 +4,7 @@
 #include "Core/DX12SwapChain.h"
 #include "Core/DX12Heap.h"
 #include "Core/DX12CommandList.h"
-#include "Core/Cube.h"
+#include "Core/DX12Cube.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -28,15 +28,12 @@ namespace Core
     void MoveToNextFrame();
 
   private:
-
-    // Pipeline objects (commandQueue and Device are singletons)
-    std::unique_ptr<DX12SwapChain> m_swapChain;
     // render target heap
     std::unique_ptr<DX12Heap> m_rtvHeap;
     // depth heap
     std::unique_ptr<DX12Heap> m_dsvHeap;
     // cube
-    std::vector<Cube*> cubes;
+    std::vector<DX12Cube*> cubes;
 
     std::unique_ptr<DX12CommandList> m_beginCommandList;
     std::unique_ptr<DX12CommandList> m_endCommandList;

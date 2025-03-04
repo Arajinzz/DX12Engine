@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "Cube.h"
+#include "DX12Cube.h"
 
 #include "Core/DX12Device.h"
 #include "Core/DXApplicationHelper.h"
@@ -8,7 +8,7 @@
 
 namespace Core
 {
-  Cube::Cube(unsigned viewportWidth, unsigned viewportHeight, float padding)
+  DX12Cube::DX12Cube(unsigned viewportWidth, unsigned viewportHeight, float padding)
     : m_commandList(nullptr)
     , m_viewport(0.0f, 0.0f, static_cast<float>(viewportWidth), static_cast<float>(viewportHeight))
     , m_scissorRect(0, 0, static_cast<LONG>(viewportWidth), static_cast<LONG>(viewportHeight))
@@ -173,12 +173,12 @@ namespace Core
     m_commandList->Close();
   }
 
-  Cube::~Cube()
+  DX12Cube::~DX12Cube()
   {
   }
 
   // just a triangle for now
-  void Cube::Draw(DX12Heap* rtvHeap, DX12Heap* dsvHeap, unsigned frameIndex)
+  void DX12Cube::Draw(DX12Heap* rtvHeap, DX12Heap* dsvHeap, unsigned frameIndex)
   {
     // 1 allocator
     m_commandList->Reset(frameIndex, m_pipelineState.Get());

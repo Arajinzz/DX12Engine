@@ -75,7 +75,7 @@
     <ClCompile Include="Core\DX12CommandList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Cube.cpp">
+    <ClCompile Include="Core\DX12Cube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -146,7 +146,7 @@
     <ClInclude Include="Core\DX12CommandList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Cube.h">
+    <ClInclude Include="Core\DX12Cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
