@@ -122,33 +122,33 @@ namespace Core
     }
 
     {
-      uint16_t indicies[] = {
+      uint16_t indices[] = {
         // front face
-        0, 3, 2,
-        0, 2, 1,
+        0, 1, 2,
+        0, 2, 3,
 
         // back face
-        4, 5, 6,
-        4, 6, 7,
+        4, 7, 6,
+        4, 6, 5,
 
         // left face
-        0, 1, 5,
-        0, 5, 4,
+        0, 4, 5,
+        0, 5, 1,
 
         // right face
-        3, 7, 6,
-        3, 6, 2,
+        3, 2, 6,
+        3, 6, 7,
 
         // top face
-        1, 2, 6,
-        1, 6, 5,
+        1, 5, 6,
+        1, 6, 2,
 
         // bottom face
-        0, 4, 7,
-        0, 7, 3
+        0, 3, 7,
+        0, 7, 4
       };
 
-      const unsigned indexBufferSize = sizeof(indicies);
+      const unsigned indexBufferSize = sizeof(indices);
 
       auto heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
       auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize);
@@ -164,7 +164,7 @@ namespace Core
       UINT8* pIndexDataBegin;
       CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
       ThrowIfFailed(m_indexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pIndexDataBegin)));
-      memcpy(pIndexDataBegin, indicies, indexBufferSize);
+      memcpy(pIndexDataBegin, indices, indexBufferSize);
       m_indexBuffer->Unmap(0, nullptr);
 
       // Initialize the index buffer view.
@@ -229,7 +229,7 @@ namespace Core
       XMMatrixIdentity() * XMMatrixRotationZ(angle) * XMMatrixRotationY(angle * 2) * XMMatrixRotationX(angle) * XMMatrixTranslation(sin(angle), 0.0, 0.0)
     );
     m_constantBufferData.view = XMMatrixTranspose(XMMatrixLookAtLH(
-      XMVectorSet(0.0, 0.0, -2.0, 0.0), // camera position
+      XMVectorSet(0.0, 0.0, -3.0, 0.0), // camera position
       XMVectorSet(0.0, 0.0, 0.0, 0.0), // lookat position
       XMVectorSet(0.0, 1.0, 0.0, 0.0) // up vector
     ));
