@@ -12,6 +12,9 @@ namespace Core
     : m_commandList(nullptr)
     , m_viewport(0.0f, 0.0f, static_cast<float>(viewportWidth), static_cast<float>(viewportHeight))
     , m_scissorRect(0, 0, static_cast<LONG>(viewportWidth), static_cast<LONG>(viewportHeight))
+    , m_constantBufferData()
+    , m_pCbvDataBegin(nullptr)
+    , m_constantBuffer(nullptr)
   {
     // Create the command list.
     // the class should add command list automatically to CommandQueue
@@ -19,12 +22,17 @@ namespace Core
 
     // Create an empty root signature.
     {
-      CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
-      rootSignatureDesc.Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+      CD3DX12_DESCRIPTOR_RANGE1 ranges[1];
+      ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+      CD3DX12_ROOT_PARAMETER1 rootParameters[1];
+      rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_VERTEX);
+
+      CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
+      rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
       ComPtr<ID3DBlob> signature;
       ComPtr<ID3DBlob> error;
-      ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
+      ThrowIfFailed(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &signature, &error));
       ThrowIfFailed(Device()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature)));
     }
 
@@ -71,21 +79,17 @@ namespace Core
     ThrowIfFailed(Device()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
 
     {
-      // Hack
-      float aspectRatio = (1280.0 / 720.0);
-      float vertexPositionX = 0.25 / aspectRatio;
       float vertexPosition = 0.25;
       Vertex cubeVertices[] =
       {
-          { { -vertexPositionX + padding, -vertexPosition ,  vertexPosition }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-          { {  vertexPositionX + padding, -vertexPosition,  vertexPosition }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-          { {  vertexPositionX + padding,  vertexPosition,  vertexPosition }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-          { { -vertexPositionX + padding,  vertexPosition,  vertexPosition }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-
-          { { -vertexPositionX + padding, -vertexPosition, -vertexPosition }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-          { {  vertexPositionX + padding, -vertexPosition, -vertexPosition }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-          { {  vertexPositionX + padding,  vertexPosition, -vertexPosition }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-          { { -vertexPositionX + padding,  vertexPosition, -vertexPosition }, { 0.0f, 1.0f, 0.0f, 1.0f } },
+          { { -vertexPosition + padding, -vertexPosition , vertexPosition + padding }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+          { {  vertexPosition + padding, -vertexPosition,  vertexPosition + padding }, { 0.0f, 1.0f, 0.0f, 1.0f } },
+          { {  vertexPosition + padding,  vertexPosition,  vertexPosition + padding }, { 0.0f, 0.0f, 1.0f, 1.0f } },
+          { { -vertexPosition + padding,  vertexPosition,  vertexPosition + padding }, { 0.0f, 1.0f, 0.0f, 1.0f } },
+          { { -vertexPosition + padding, -vertexPosition, -vertexPosition + padding }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+          { {  vertexPosition + padding, -vertexPosition, -vertexPosition + padding }, { 0.0f, 1.0f, 0.0f, 1.0f } },
+          { {  vertexPosition + padding,  vertexPosition, -vertexPosition + padding }, { 0.0f, 0.0f, 1.0f, 1.0f } },
+          { { -vertexPosition + padding,  vertexPosition, -vertexPosition + padding }, { 0.0f, 1.0f, 0.0f, 1.0f } },
       };
       // since array is on the stack it can deduce the size
       const unsigned vertexBufferSize = sizeof(cubeVertices);
@@ -169,6 +173,15 @@ namespace Core
       m_indexBufferView.Format = DXGI_FORMAT_R16_UINT;
     }
 
+    // create constant buffer
+    m_constantBuffer = std::make_unique<DX12Heap>(1, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    m_constantBuffer->CreateResources();
+    // Map and initialize the constant buffer. We don't unmap this until the
+    // app closes. Keeping things mapped for the lifetime of the resource is okay.
+    CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
+    ThrowIfFailed(m_constantBuffer->GetResource(0)->Map(0, &readRange, reinterpret_cast<void**>(&m_pCbvDataBegin)));
+    memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
+
     // not good
     m_commandList->Close();
   }
@@ -194,14 +207,34 @@ namespace Core
     auto dsvHandle = dsvHeap->GetOffsetHandle(0);
     m_commandList->Get()->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 
-    /*m_commandList->SetDescriptorHeap(m_cbvHeap.get());
-    auto handle = m_cbvHeap->Get()->GetGPUDescriptorHandleForHeapStart();
-    m_commandList->Get()->SetGraphicsRootDescriptorTable(0, handle);*/
+    m_commandList->SetDescriptorHeap(m_constantBuffer.get());
+    auto handle = m_constantBuffer->Get()->GetGPUDescriptorHandleForHeapStart();
+    m_commandList->Get()->SetGraphicsRootDescriptorTable(0, handle);
     m_commandList->Get()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     m_commandList->Get()->IASetVertexBuffers(0, 1, &m_vertexBufferView);
     m_commandList->Get()->IASetIndexBuffer(&m_indexBufferView);
     m_commandList->Get()->DrawIndexedInstanced(36, UINT(36 / 3), 0, 0, 0);
     
     m_commandList->Close();
+  }
+
+  void DX12Cube::Update()
+  {
+    auto static angle = 0.0;
+    angle += 0.002;
+    if (angle > 360.0)
+      angle = 0.0;
+
+    m_constantBufferData.model = XMMatrixTranspose(
+      XMMatrixIdentity() * XMMatrixRotationZ(angle) * XMMatrixRotationY(angle * 2) * XMMatrixRotationX(angle) * XMMatrixTranslation(sin(angle), 0.0, 0.0)
+    );
+    m_constantBufferData.view = XMMatrixTranspose(XMMatrixLookAtLH(
+      XMVectorSet(0.0, 0.0, -2.0, 0.0), // camera position
+      XMVectorSet(0.0, 0.0, 0.0, 0.0), // lookat position
+      XMVectorSet(0.0, 1.0, 0.0, 0.0) // up vector
+    ));
+    auto aspectRatio = 1280.0 / 720.0;
+    m_constantBufferData.projection = XMMatrixTranspose(XMMatrixPerspectiveFovLH(45.0, aspectRatio, 1.0, 100.0));
+    memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
   }
 }

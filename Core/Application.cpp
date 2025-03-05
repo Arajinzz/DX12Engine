@@ -44,6 +44,8 @@ namespace Core
 
   void Application::OnUpdate()
   {
+    for (auto cube : cubes)
+      cube->Update();
   }
 
   void Application::OnRender()

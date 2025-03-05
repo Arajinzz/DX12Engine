@@ -52,7 +52,7 @@ namespace Core
 
   void DX12SwapChain::Present()
   {
-    // no vsync
-    ThrowIfFailed(m_swapChain->Present(0, 0));
+    // yes vsync
+    ThrowIfFailed(m_swapChain->Present(1, 0));
   }
 }
