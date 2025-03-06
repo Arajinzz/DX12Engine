@@ -21,8 +21,20 @@ namespace Core
     ~DX12FrameResource();
 
   private:
+    struct SceneConstantBuffer
+    {
+      XMMATRIX model;
+      XMMATRIX view;
+      XMMATRIX projection;
+      float padding[16]; // Padding so the constant buffer is 256-byte aligned.
+    };
+
     std::unique_ptr<DX12CommandList> m_commandList;
     std::unique_ptr<DX12Heap> m_CbvSrvHeap;
+    
+    // data
+    SceneConstantBuffer m_constantBufferData;
+    UINT8* m_pCbvDataBegin;
 
   private:
     DX12FrameResource();

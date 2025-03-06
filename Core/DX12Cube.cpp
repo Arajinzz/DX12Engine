@@ -11,9 +11,6 @@ namespace Core
     : m_commandList(nullptr)
     , m_viewport(0.0f, 0.0f, static_cast<float>(viewportWidth), static_cast<float>(viewportHeight))
     , m_scissorRect(0, 0, static_cast<LONG>(viewportWidth), static_cast<LONG>(viewportHeight))
-    , m_constantBufferData()
-    , m_pCbvDataBegin(nullptr)
-    , m_constantBuffer(nullptr)
   {
     // Create the command list.
     // the class should add command list automatically to CommandQueue

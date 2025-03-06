@@ -39,17 +39,6 @@ namespace Core
     CD3DX12_VIEWPORT m_viewport;
     CD3DX12_RECT m_scissorRect;
 
-    struct SceneConstantBuffer
-    {
-      XMMATRIX model;
-      XMMATRIX view;
-      XMMATRIX projection;
-      float padding[16]; // Padding so the constant buffer is 256-byte aligned.
-    };
-    std::unique_ptr<DX12Heap> m_constantBuffer;
-    SceneConstantBuffer m_constantBufferData;
-    UINT8* m_pCbvDataBegin;
-
   private:
     DX12Cube(const DX12Cube&) = delete;
     DX12Cube& operator=(const DX12Cube&) = delete;
