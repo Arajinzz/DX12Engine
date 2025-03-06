@@ -23,6 +23,7 @@ namespace Core
     {
       XMFLOAT3 position;
       XMFLOAT4 color;
+      XMFLOAT2 uv;
     };
 
     std::unique_ptr<DX12CommandList> m_commandList;

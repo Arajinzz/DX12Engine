@@ -4,6 +4,7 @@
 #include "Core/DX12Device.h"
 #include "Core/DXApplicationHelper.h"
 #include "Core/Application.h"
+#include "Core/DX12FrameResource.h"
 
 namespace Core
 {
@@ -68,6 +69,7 @@ namespace Core
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
         { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 28, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
     };
 
     // Describe and create the graphics pipeline state object (PSO).
@@ -95,14 +97,14 @@ namespace Core
       float vertexPosition = 0.25;
       Vertex cubeVertices[] =
       {
-          { { -vertexPosition + padding, -vertexPosition , vertexPosition + padding }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-          { {  vertexPosition + padding, -vertexPosition,  vertexPosition + padding }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-          { {  vertexPosition + padding,  vertexPosition,  vertexPosition + padding }, { 0.0f, 0.0f, 1.0f, 1.0f } },
-          { { -vertexPosition + padding,  vertexPosition,  vertexPosition + padding }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-          { { -vertexPosition + padding, -vertexPosition, -vertexPosition + padding }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-          { {  vertexPosition + padding, -vertexPosition, -vertexPosition + padding }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-          { {  vertexPosition + padding,  vertexPosition, -vertexPosition + padding }, { 0.0f, 0.0f, 1.0f, 1.0f } },
-          { { -vertexPosition + padding,  vertexPosition, -vertexPosition + padding }, { 0.0f, 1.0f, 0.0f, 1.0f } },
+          { { -vertexPosition + padding, -vertexPosition , vertexPosition + padding }, { 1.0f, 0.0f, 0.0f, 1.0f }, {1.0, 0.0} },
+          { {  vertexPosition + padding, -vertexPosition,  vertexPosition + padding }, { 0.0f, 1.0f, 0.0f, 1.0f }, {0.0, 0.0} },
+          { {  vertexPosition + padding,  vertexPosition,  vertexPosition + padding }, { 0.0f, 0.0f, 1.0f, 1.0f }, {0.0, 1.0} },
+          { { -vertexPosition + padding,  vertexPosition,  vertexPosition + padding }, { 0.0f, 1.0f, 0.0f, 1.0f }, {0.0, 0.0} },
+          { { -vertexPosition + padding, -vertexPosition, -vertexPosition + padding }, { 1.0f, 0.0f, 0.0f, 1.0f }, {1.0, 0.0} },
+          { {  vertexPosition + padding, -vertexPosition, -vertexPosition + padding }, { 0.0f, 1.0f, 0.0f, 1.0f }, {0.0, 0.0} },
+          { {  vertexPosition + padding,  vertexPosition, -vertexPosition + padding }, { 0.0f, 0.0f, 1.0f, 1.0f }, {0.0, 1.0} },
+          { { -vertexPosition + padding,  vertexPosition, -vertexPosition + padding }, { 0.0f, 1.0f, 0.0f, 1.0f }, {1.0, 0.0} },
       };
       // since array is on the stack it can deduce the size
       const unsigned vertexBufferSize = sizeof(cubeVertices);
@@ -186,17 +188,6 @@ namespace Core
       m_indexBufferView.Format = DXGI_FORMAT_R16_UINT;
     }
 
-    // create constant buffer
-    m_constantBuffer = std::make_unique<DX12Heap>(2, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    m_constantBuffer->CreateResources(256 * 256); // not good
-
-    // Map and initialize the constant buffer. We don't unmap this until the
-    // app closes. Keeping things mapped for the lifetime of the resource is okay.
-    CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
-    ThrowIfFailed(m_constantBuffer->GetResource(0)->Map(0, &readRange, reinterpret_cast<void**>(&m_pCbvDataBegin)));
-    memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
-
-    // not good
     m_commandList->Close();
   }
 
@@ -221,8 +212,8 @@ namespace Core
     auto dsvHandle = dsvHeap->GetOffsetHandle(0);
     m_commandList->Get()->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 
-    m_commandList->SetDescriptorHeap(m_constantBuffer.get());
-    auto handle = m_constantBuffer->Get()->GetGPUDescriptorHandleForHeapStart();
+    m_commandList->SetDescriptorHeap(FrameResource().GetHeap());
+    auto handle = FrameResource().GetHeap()->Get()->GetGPUDescriptorHandleForHeapStart();
     m_commandList->Get()->SetGraphicsRootDescriptorTable(0, handle);
     handle.ptr += Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     m_commandList->Get()->SetGraphicsRootDescriptorTable(1, handle);
@@ -236,21 +227,5 @@ namespace Core
 
   void DX12Cube::Update()
   {
-    auto static angle = 0.0;
-    angle += 0.002;
-    if (angle > 360.0)
-      angle = 0.0;
-
-    m_constantBufferData.model = XMMatrixTranspose(
-      XMMatrixIdentity() * XMMatrixRotationZ(angle) * XMMatrixRotationY(angle * 2) * XMMatrixRotationX(angle) * XMMatrixTranslation(sin(angle), 0.0, 0.0)
-    );
-    m_constantBufferData.view = XMMatrixTranspose(XMMatrixLookAtLH(
-      XMVectorSet(0.0, 0.0, -3.0, 0.0), // camera position
-      XMVectorSet(0.0, 0.0, 0.0, 0.0), // lookat position
-      XMVectorSet(0.0, 1.0, 0.0, 0.0) // up vector
-    ));
-    auto aspectRatio = 1280.0 / 720.0;
-    m_constantBufferData.projection = XMMatrixTranspose(XMMatrixPerspectiveFovLH(45.0, aspectRatio, 1.0, 100.0));
-    memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
   }
 }

@@ -9,7 +9,9 @@ namespace Core
   DX12Heap::DX12Heap(unsigned int numDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE type)
     : m_descriptorCount(numDescriptors)
     , m_resources(numDescriptors)
+    , m_resourceTypes(numDescriptors)
     , m_type(type)
+    , m_counter(0)
   {
     {
       // Describe and create a render target view (RTV) descriptor heap.
@@ -33,8 +35,15 @@ namespace Core
     m_heap.Reset();
   }
 
+  void DX12Heap::AddResource(ComPtr<ID3D12Resource> resource, ResourceType type)
+  {
+    m_resources[m_counter] = resource;
+    m_resourceTypes[m_counter] = type;
+    m_counter++;
+  }
+
   // TO REFACTOR
-  void DX12Heap::CreateResources(unsigned size)
+  void DX12Heap::CreateResources()
   {
     // other types not supported for now
     if (m_type == D3D12_DESCRIPTOR_HEAP_TYPE_RTV)
@@ -49,21 +58,22 @@ namespace Core
     {
       for (unsigned n = 0; n < m_descriptorCount; ++n)
       {
-        auto heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-        auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(size);
-        ThrowIfFailed(Device()->CreateCommittedResource(
-          &heapProp,
-          D3D12_HEAP_FLAG_NONE,
-          &resDesc,
-          D3D12_RESOURCE_STATE_GENERIC_READ,
-          nullptr,
-          IID_PPV_ARGS(&m_resources[n])));
-
-        // Describe and create a constant buffer view.
-        D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
-        cbvDesc.BufferLocation = m_resources[n]->GetGPUVirtualAddress();
-        cbvDesc.SizeInBytes = size;
-        Device()->CreateConstantBufferView(&cbvDesc, m_heap->GetCPUDescriptorHandleForHeapStart());
+        if (m_resourceTypes[n] == TEXTURE)
+        {
+          D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+          srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+          srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+          srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+          srvDesc.Texture2D.MipLevels = 1;
+          Device()->CreateShaderResourceView(m_resources[n].Get(), &srvDesc, m_handle);
+        } else if (m_resourceTypes[n] == CONSTANTBUFFER)
+        {
+          // Describe and create a constant buffer view
+          D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
+          cbvDesc.BufferLocation = m_resources[n]->GetGPUVirtualAddress();
+          cbvDesc.SizeInBytes = 256;
+          Device()->CreateConstantBufferView(&cbvDesc, m_handle);
+        }
         Offset(1);
       }
     } else if (m_type == D3D12_DESCRIPTOR_HEAP_TYPE_DSV)

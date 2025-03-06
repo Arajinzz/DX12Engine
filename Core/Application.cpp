@@ -3,6 +3,7 @@
 
 #include "Core/DX12Device.h"
 #include "Core/DX12CommandQueue.h"
+#include "Core/DX12FrameResource.h"
 
 namespace Core
 {
@@ -24,10 +25,14 @@ namespace Core
     // Create synchronization objects.
     CommandQueue().InitFence(FrameCount);
 
+    CreateFrameResource();
+
     // Create Cube, will also create pso and root signature and constant buffer for transformation
     cubes.push_back(new DX12Cube(GetWidth(), GetHeight(), 0.0));
     cubes.push_back(new DX12Cube(GetWidth(), GetHeight(), 0.5));
     cubes.push_back(new DX12Cube(GetWidth(), GetHeight(), -0.5));
+
+    FrameResource().Init(m_beginCommandList->Get());
 
     // this order is necessary to insert this command list in the end of the queue
     m_endCommandList = std::make_unique<DX12CommandList>();
@@ -44,6 +49,8 @@ namespace Core
 
   void Application::OnUpdate()
   {
+    FrameResource().Update();
+
     for (auto cube : cubes)
       cube->Update();
   }
