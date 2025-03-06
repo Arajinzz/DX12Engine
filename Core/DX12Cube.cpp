@@ -5,7 +5,6 @@
 #include "Core/DXApplicationHelper.h"
 #include "Core/Application.h"
 
-
 namespace Core
 {
   DX12Cube::DX12Cube(unsigned viewportWidth, unsigned viewportHeight, float padding)
@@ -22,17 +21,34 @@ namespace Core
 
     // Create an empty root signature.
     {
-      CD3DX12_DESCRIPTOR_RANGE1 ranges[1];
+      CD3DX12_DESCRIPTOR_RANGE1 ranges[2];
       ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
-      CD3DX12_ROOT_PARAMETER1 rootParameters[1];
+      ranges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+      CD3DX12_ROOT_PARAMETER1 rootParameters[2];
       rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_VERTEX);
+      rootParameters[1].InitAsDescriptorTable(1, &ranges[1], D3D12_SHADER_VISIBILITY_PIXEL);
+
+      D3D12_STATIC_SAMPLER_DESC sampler = {};
+      sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+      sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+      sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+      sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+      sampler.MipLODBias = 0;
+      sampler.MaxAnisotropy = 0;
+      sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+      sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+      sampler.MinLOD = 0.0f;
+      sampler.MaxLOD = D3D12_FLOAT32_MAX;
+      sampler.ShaderRegister = 0;
+      sampler.RegisterSpace = 0;
+      sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
       CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
-      rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+      rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 1, &sampler, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
       ComPtr<ID3DBlob> signature;
       ComPtr<ID3DBlob> error;
-      ThrowIfFailed(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &signature, &error));
+      ThrowIfFailed(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_1, &signature, &error));
       ThrowIfFailed(Device()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature)));
     }
 
@@ -174,8 +190,9 @@ namespace Core
     }
 
     // create constant buffer
-    m_constantBuffer = std::make_unique<DX12Heap>(1, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    m_constantBuffer->CreateResources();
+    m_constantBuffer = std::make_unique<DX12Heap>(2, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    m_constantBuffer->CreateResources(256 * 256); // not good
+
     // Map and initialize the constant buffer. We don't unmap this until the
     // app closes. Keeping things mapped for the lifetime of the resource is okay.
     CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
@@ -210,6 +227,8 @@ namespace Core
     m_commandList->SetDescriptorHeap(m_constantBuffer.get());
     auto handle = m_constantBuffer->Get()->GetGPUDescriptorHandleForHeapStart();
     m_commandList->Get()->SetGraphicsRootDescriptorTable(0, handle);
+    handle.ptr += Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    m_commandList->Get()->SetGraphicsRootDescriptorTable(1, handle);
     m_commandList->Get()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     m_commandList->Get()->IASetVertexBuffers(0, 1, &m_vertexBufferView);
     m_commandList->Get()->IASetIndexBuffer(&m_indexBufferView);

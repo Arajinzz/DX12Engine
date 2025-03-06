@@ -34,7 +34,7 @@ namespace Core
   }
 
   // TO REFACTOR
-  void DX12Heap::CreateResources()
+  void DX12Heap::CreateResources(unsigned size)
   {
     // other types not supported for now
     if (m_type == D3D12_DESCRIPTOR_HEAP_TYPE_RTV)
@@ -50,7 +50,7 @@ namespace Core
       for (unsigned n = 0; n < m_descriptorCount; ++n)
       {
         auto heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-        auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(256);
+        auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(size);
         ThrowIfFailed(Device()->CreateCommittedResource(
           &heapProp,
           D3D12_HEAP_FLAG_NONE,
@@ -62,18 +62,20 @@ namespace Core
         // Describe and create a constant buffer view.
         D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
         cbvDesc.BufferLocation = m_resources[n]->GetGPUVirtualAddress();
-        cbvDesc.SizeInBytes = 256;
-        auto handle = m_heap->GetCPUDescriptorHandleForHeapStart();
-        Device()->CreateConstantBufferView(&cbvDesc, handle);
+        cbvDesc.SizeInBytes = size;
+        Device()->CreateConstantBufferView(&cbvDesc, m_heap->GetCPUDescriptorHandleForHeapStart());
         Offset(1);
       }
     } else if (m_type == D3D12_DESCRIPTOR_HEAP_TYPE_DSV)
     {
+      ComPtr<ID3D12Resource> renderTarget;
+      SwapChain().GetBuffer(0, &renderTarget);
+
       D3D12_RESOURCE_DESC depthStencilDesc = {};
       depthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
       depthStencilDesc.Alignment = 0;
-      depthStencilDesc.Width = 1280;  // Swap chain width
-      depthStencilDesc.Height = 720; // Swap chain height
+      depthStencilDesc.Width = renderTarget->GetDesc().Width;  // Swap chain width
+      depthStencilDesc.Height = renderTarget->GetDesc().Height; // Swap chain height
       depthStencilDesc.DepthOrArraySize = 1;
       depthStencilDesc.MipLevels = 1;
       depthStencilDesc.Format = DXGI_FORMAT_D32_FLOAT;

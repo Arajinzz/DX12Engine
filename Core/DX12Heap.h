@@ -13,7 +13,7 @@ namespace Core
     DX12Heap(unsigned int numDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE type);
     ~DX12Heap();
 
-    void CreateResources();
+    void CreateResources(unsigned size = 256);
     void Offset(unsigned int padding);
     CD3DX12_CPU_DESCRIPTOR_HANDLE GetOffsetHandle(unsigned int Offset);
     ID3D12Resource* GetResource(unsigned int index) { return m_resources[index].Get(); }
