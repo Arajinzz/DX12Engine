@@ -1,12 +1,21 @@
 #include "stdafx.h"
 #include "WindowsApplication.h"
 
+#include <fstream>
+
 HWND Core::WindowsApplication::m_hwnd = nullptr;
+std::chrono::steady_clock::time_point Core::WindowsApplication::m_startTime;
+unsigned Core::WindowsApplication::m_frameCount;
+double Core::WindowsApplication::deltaTime;
 
 namespace Core
 {
   int WindowsApplication::Run(DirectXApplication* pApp, HINSTANCE hInstance, int nCmdShow)
   {
+    m_startTime = std::chrono::steady_clock::now();
+    m_frameCount = 0;
+    deltaTime = 1 / 60;
+
     // Parse the command line parameters
     int argc;
     LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
@@ -92,13 +101,34 @@ namespace Core
       return 0;
 
     case WM_PAINT:
+    {
       if (pApp)
       {
         pApp->OnUpdate();
         pApp->OnRender();
       }
-      return 0;
 
+      // update fps
+      auto currentTime = std::chrono::steady_clock::now();
+      double elapsedTime = std::chrono::duration_cast<std::chrono::duration<double>>(currentTime - m_startTime).count();
+      m_frameCount++;
+
+      if (elapsedTime >= 1.0)
+      {
+        double fps = m_frameCount / elapsedTime;
+        m_frameCount = 0;
+        m_startTime = currentTime;
+        deltaTime = 1 / fps;
+
+        if (pApp)
+        {
+          std::wstringstream ss;
+          ss << std::wstring(pApp->GetTitle()) << L" - " << fps;
+          SetWindowText(m_hwnd, ss.str().c_str());
+        }
+      }
+      return 0;
+    }
     case WM_DESTROY:
       PostQuitMessage(0);
       return 0;

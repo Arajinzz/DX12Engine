@@ -2,6 +2,7 @@
 #include "DX12FrameResource.h"
 
 #include "Core/DXApplicationHelper.h"
+#include "Core/WindowsApplication.h"
 
 namespace Core
 {
@@ -35,7 +36,7 @@ namespace Core
   void DX12FrameResource::Update()
   {
     auto static angle = 0.0;
-    angle += 0.002;
+    angle += 3 * WindowsApplication::deltaTime;
     if (angle > 360.0)
       angle = 0.0;
 
