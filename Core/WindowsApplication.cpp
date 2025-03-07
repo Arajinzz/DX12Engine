@@ -113,12 +113,13 @@ namespace Core
       double elapsedTime = std::chrono::duration_cast<std::chrono::duration<double>>(currentTime - m_startTime).count();
       m_frameCount++;
 
+      deltaTime = 1 / (m_frameCount / elapsedTime);
+
       if (elapsedTime >= 1.0)
       {
         double fps = m_frameCount / elapsedTime;
         m_frameCount = 0;
         m_startTime = currentTime;
-        deltaTime = 1 / fps;
 
         if (pApp)
         {
