@@ -4,12 +4,11 @@
 #include "Core/WindowsApplication.h"
 #include "Core/DXApplicationHelper.h"
 #include "Core/DX12Device.h"
-#include "Core/DX12CommandQueue.h"
 #include "Core/Application.h"
 
 namespace Core
 {
-  DX12SwapChain::DX12SwapChain()
+  DX12SwapChain::DX12SwapChain(DX12CommandQueue* queue)
   {
     // Describe and create the swap chain.
     {
@@ -24,7 +23,7 @@ namespace Core
 
       ComPtr<IDXGISwapChain1> swapChain;
       ThrowIfFailed(Factory()->CreateSwapChainForHwnd(
-        CommandQueue().GetCommandQueuePointer(), // Swap chain needs the queue so that it can force a flush on it.
+        queue->Get(), // Swap chain needs the queue so that it can force a flush on it.
         WindowsApplication::GetHwnd(),
         &swapChainDesc,
         nullptr,

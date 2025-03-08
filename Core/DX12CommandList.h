@@ -12,7 +12,7 @@ namespace Core
   class DX12CommandList
   {
   public:
-    DX12CommandList();
+    DX12CommandList(D3D12_COMMAND_LIST_TYPE type = D3D12_COMMAND_LIST_TYPE_DIRECT);
     ~DX12CommandList();
 
     ID3D12GraphicsCommandList* Get() { return m_commandList.Get(); }
@@ -32,6 +32,7 @@ namespace Core
   private:
     std::vector<ComPtr<ID3D12CommandAllocator>> m_commandAllocators;
     ComPtr<ID3D12GraphicsCommandList> m_commandList;
+    D3D12_COMMAND_LIST_TYPE m_type;
   };
 }
 

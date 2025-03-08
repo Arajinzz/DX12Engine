@@ -7,16 +7,17 @@
 namespace Core
 {
   DX12CommandQueue::DX12CommandQueue()
-    : m_commandLists()
+    : m_commandList(nullptr)
+    , m_commandQueue(nullptr)
     , m_fenceValues()
   {
     // Describe and create the command queue.
-    {
-      D3D12_COMMAND_QUEUE_DESC queueDesc = {};
-      queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-      queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-      ThrowIfFailed(Device()->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_commandQueue)));
-    }    
+    D3D12_COMMAND_QUEUE_DESC queueDesc = {};
+    queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+    queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+    ThrowIfFailed(Device()->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_commandQueue)));
+
+    m_commandList = std::make_unique<DX12CommandList>();
   }
 
   // values count represent how many framebuffer are used in the swapchain
@@ -38,20 +39,10 @@ namespace Core
     }
   }
 
-  void DX12CommandQueue::AddCommandList(ID3D12CommandList* commandList)
+  void DX12CommandQueue::ExecuteCommandList()
   {
-    m_commandLists.push_back(commandList);
-  }
-
-  void DX12CommandQueue::RemoveCommandList(ID3D12CommandList* commandList)
-  {
-    m_commandLists.erase(std::remove(m_commandLists.begin(), m_commandLists.end(), commandList), m_commandLists.end());
-  }
-
-  void DX12CommandQueue::ExecuteCommandLists()
-  {
-    // this is ugly!!!
-    CommandQueue().GetCommandQueuePointer()->ExecuteCommandLists(static_cast<UINT>(m_commandLists.size()), m_commandLists.data());
+    ID3D12CommandList* commandLists[] = { m_commandList->Get() };
+    m_commandQueue->ExecuteCommandLists(1, commandLists);
   }
 
   void DX12CommandQueue::SignalFence(unsigned int frameIndex)

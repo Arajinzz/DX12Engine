@@ -10,20 +10,19 @@ namespace Core
   Application::Application(UINT width, UINT height, std::wstring name)
     : DirectXApplication(width, height, name)
     , m_frameIndex(0)
-    , m_beginCommandList(nullptr)
-    , m_endCommandList(nullptr)
+    , m_commandQueue(nullptr)
+    , m_swapChain(nullptr)
+    , m_viewport(0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height))
+    , m_scissorRect(0, 0, static_cast<LONG>(width), static_cast<LONG>(height))
   {
   }
 
   void Application::OnInit()
   {
     LoadPipeline();
-
-    // Create the first command list
-    m_beginCommandList = std::make_unique<DX12CommandList>();
     
     // Create synchronization objects.
-    CommandQueue().InitFence(FrameCount);
+    m_commandQueue->InitFence(FrameCount);
 
     CreateFrameResource();
 
@@ -32,19 +31,13 @@ namespace Core
     cubes.push_back(new DX12Cube(GetWidth(), GetHeight(), 0.5));
     cubes.push_back(new DX12Cube(GetWidth(), GetHeight(), -0.5));
 
-    FrameResource().Init(m_beginCommandList->Get());
+    FrameResource().Init(m_commandQueue->GetCommandList()->Get());
 
-    // this order is necessary to insert this command list in the end of the queue
-    m_endCommandList = std::make_unique<DX12CommandList>();
-
-    // close all commandlists
-    m_beginCommandList->Close();
-    m_endCommandList->Close();
-
+    m_commandQueue->GetCommandList()->Close();
     // execute commands to finish setup
-    CommandQueue().ExecuteCommandLists();
+    m_commandQueue->ExecuteCommandList();
     // Wait for GPU to finish Execution
-    CommandQueue().WaitForGpu(m_frameIndex);
+    m_commandQueue->WaitForGpu(m_frameIndex);
   }
 
   void Application::OnUpdate()
@@ -64,32 +57,45 @@ namespace Core
     // However, when ExecuteCommandList() is called on a particular command 
     // list, that command list can then be reset at any time and must be before 
     // re-recording.
-    m_beginCommandList->Reset(m_frameIndex, nullptr);
-    m_endCommandList->Reset(m_frameIndex, nullptr);
+    m_commandQueue->GetCommandList()->Reset(m_frameIndex, nullptr);
 
     // Indicate that the back buffer will be used as a render target.
-    m_beginCommandList->Transition(m_rtvHeap->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+    m_commandQueue->GetCommandList()->Transition(m_rtvHeap->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+    // set heaps, this has to be the same as bundles
+    m_commandQueue->GetCommandList()->SetDescriptorHeap(FrameResource().GetHeap());
+
+    // these must be done in the same commandlist as drawing
+    // because they set a state for rendering
+    // and states they reset between command lists
+    // since we are using bundles for drawing this should be fine
+    m_commandQueue->GetCommandList()->Get()->RSSetViewports(1, &m_viewport);
+    m_commandQueue->GetCommandList()->Get()->RSSetScissorRects(1, &m_scissorRect);
+    auto rtvHandle = m_rtvHeap->GetOffsetHandle(m_frameIndex);
+    auto dsvHandle = m_dsvHeap->GetOffsetHandle(0);
+    m_commandQueue->GetCommandList()->Get()->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 
     // Record commands.
     const float clearColor[] = { 0.25f, 0.55f, 0.45f, 1.0f };
-    m_beginCommandList->ClearDepthStencilView(m_dsvHeap->GetOffsetHandle(0));
-    m_beginCommandList->ClearRenderTargetView(m_rtvHeap->GetOffsetHandle(m_frameIndex), clearColor);
-    
-    m_beginCommandList->Close();
+    m_commandQueue->GetCommandList()->ClearDepthStencilView(m_dsvHeap->GetOffsetHandle(0));
+    m_commandQueue->GetCommandList()->ClearRenderTargetView(m_rtvHeap->GetOffsetHandle(m_frameIndex), clearColor);
 
     // draw cube
     for (auto cube : cubes)
+    {
       cube->Draw(m_rtvHeap.get(), m_dsvHeap.get(), m_frameIndex);
+      m_commandQueue->GetCommandList()->Get()->ExecuteBundle(cube->GetBundle());
+    }
 
     // Indicate that the back buffer will now be used to present.
-    m_endCommandList->Transition(m_rtvHeap->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+    m_commandQueue->GetCommandList()->Transition(m_rtvHeap->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
-    m_endCommandList->Close();
+    m_commandQueue->GetCommandList()->Close();
 
-    CommandQueue().ExecuteCommandLists();
+    m_commandQueue->ExecuteCommandList();
 
     // Present the frame.
-    SwapChain().Present();
+    m_swapChain->Present();
 
     MoveToNextFrame(); // try to render next frame
   }
@@ -102,7 +108,7 @@ namespace Core
     // list in our main loop but for now, we just want to wait for setup to 
     // complete before continuing.
     // Schedule a Signal command in the queue.
-    CommandQueue().WaitForGpu(m_frameIndex);
+    m_commandQueue->WaitForGpu(m_frameIndex);
   }
 
   void Application::LoadPipeline()
@@ -111,11 +117,11 @@ namespace Core
     CreateDevice(); // Singleton
 
     // Create Command Queue
-    CreateCmdQueue(); // Singleton
+    m_commandQueue = std::make_unique<DX12CommandQueue>();
 
     // Create SwapChain
-    CreateSwapChain();
-    m_frameIndex = SwapChain().GetCurrentBackBufferIndex();
+    m_swapChain = std::make_unique<DX12SwapChain>(m_commandQueue.get());
+    m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
     // full screen transitions not supported.
     ThrowIfFailed(Factory()->MakeWindowAssociation(WindowsApplication::GetHwnd(), DXGI_MWA_NO_ALT_ENTER));
@@ -123,27 +129,27 @@ namespace Core
     // Create RTV heap
     m_rtvHeap = std::make_unique<DX12Heap>(FrameCount, D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     // Create frame resources.
-    m_rtvHeap->CreateResources();
+    m_rtvHeap->CreateResources(m_swapChain.get());
 
     // Create DSV heap
     m_dsvHeap = std::make_unique<DX12Heap>(1, D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
     // create resource
-    m_dsvHeap->CreateResources();
+    m_dsvHeap->CreateResources(m_swapChain.get());
   }
 
   void Application::MoveToNextFrame()
   {
     // Signal and increment the fence value.
-    CommandQueue().SignalFence(m_frameIndex);
+    m_commandQueue->SignalFence(m_frameIndex);
 
     // current frame Fence
-    const UINT64 currentFenceValue = CommandQueue().GetFenceValue(m_frameIndex);
+    const UINT64 currentFenceValue = m_commandQueue->GetFenceValue(m_frameIndex);
 
     // next frame
-    m_frameIndex = SwapChain().GetCurrentBackBufferIndex();
+    m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
     // If the next frame is not ready to be rendered yet, wait until
-    CommandQueue().WaitFence(m_frameIndex);
+    m_commandQueue->WaitFence(m_frameIndex);
 
     // How I understand it is, the current frame will always a fenceValue bigger than next frame
     // Why is that? because we begin with fence values 0 for both frames, but the current frame
@@ -155,6 +161,6 @@ namespace Core
     // which will be
     // currentFrame fenceValue = 1
     // nextFrame fenceValue = 2
-    CommandQueue().SetFenceValue(m_frameIndex, currentFenceValue + 1);
+    m_commandQueue->SetFenceValue(m_frameIndex, currentFenceValue + 1);
   }
 }

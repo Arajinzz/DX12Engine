@@ -14,6 +14,8 @@ namespace Core
     DX12Cube(unsigned viewportWidth, unsigned viewportHeight, float padding = 0.0);
     ~DX12Cube();
 
+    ID3D12GraphicsCommandList* GetBundle() { return m_bundle->Get(); }
+
     void Draw(DX12Heap* rtvHeap, DX12Heap* dsvHeap, unsigned frameIndex);
     void Update();
     ID3D12PipelineState* GetPSO() { return m_pipelineState.Get(); }
@@ -26,7 +28,7 @@ namespace Core
       XMFLOAT2 uv;
     };
 
-    std::unique_ptr<DX12CommandList> m_commandList;
+    std::unique_ptr<DX12CommandList> m_bundle;
 
     // root signature and pso
     ComPtr<ID3D12RootSignature> m_rootSignature;
@@ -36,9 +38,6 @@ namespace Core
     D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
     ComPtr<ID3D12Resource> m_indexBuffer;
     D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
-
-    CD3DX12_VIEWPORT m_viewport;
-    CD3DX12_RECT m_scissorRect;
 
   private:
     DX12Cube(const DX12Cube&) = delete;

@@ -34,13 +34,16 @@ namespace Core
     std::unique_ptr<DX12Heap> m_dsvHeap;
     // cube
     std::vector<DX12Cube*> cubes;
-
-    std::unique_ptr<DX12CommandList> m_beginCommandList;
-    std::unique_ptr<DX12CommandList> m_endCommandList;
+    // command queue
+    std::unique_ptr<DX12CommandQueue> m_commandQueue;
+    // swap chain
+    std::unique_ptr<DX12SwapChain> m_swapChain;
 
     // Synchronization objects.
     uint32_t m_frameIndex;
     
+    CD3DX12_VIEWPORT m_viewport;
+    CD3DX12_RECT m_scissorRect;
 
   };
 }

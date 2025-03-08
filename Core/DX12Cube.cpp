@@ -9,13 +9,11 @@
 namespace Core
 {
   DX12Cube::DX12Cube(unsigned viewportWidth, unsigned viewportHeight, float padding)
-    : m_commandList(nullptr)
-    , m_viewport(0.0f, 0.0f, static_cast<float>(viewportWidth), static_cast<float>(viewportHeight))
-    , m_scissorRect(0, 0, static_cast<LONG>(viewportWidth), static_cast<LONG>(viewportHeight))
+    : m_bundle(nullptr)
   {
     // Create the command list.
     // the class should add command list automatically to CommandQueue
-    m_commandList = std::make_unique<DX12CommandList>();
+    m_bundle = std::make_unique<DX12CommandList>(D3D12_COMMAND_LIST_TYPE_BUNDLE);
 
     // Create an empty root signature.
     {
@@ -188,7 +186,7 @@ namespace Core
       m_indexBufferView.Format = DXGI_FORMAT_R16_UINT;
     }
 
-    m_commandList->Close();
+    m_bundle->Close();
   }
 
   DX12Cube::~DX12Cube()
@@ -199,30 +197,20 @@ namespace Core
   void DX12Cube::Draw(DX12Heap* rtvHeap, DX12Heap* dsvHeap, unsigned frameIndex)
   {
     // 1 allocator
-    m_commandList->Reset(frameIndex, m_pipelineState.Get());
+    m_bundle->Reset(frameIndex, m_pipelineState.Get());
     // Set necessary state.
-    m_commandList->SetRootSignature(m_rootSignature.Get());
-
-    // these must be done in the same commandlist as drawing
-    // because they set a state for rendering
-    // and states they reset between command lists
-    m_commandList->Get()->RSSetViewports(1, &m_viewport);
-    m_commandList->Get()->RSSetScissorRects(1, &m_scissorRect);
-    auto rtvHandle = rtvHeap->GetOffsetHandle(frameIndex);
-    auto dsvHandle = dsvHeap->GetOffsetHandle(0);
-    m_commandList->Get()->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
-
-    m_commandList->SetDescriptorHeap(FrameResource().GetHeap());
+    m_bundle->SetRootSignature(m_rootSignature.Get());
+    m_bundle->SetDescriptorHeap(FrameResource().GetHeap());
     auto handle = FrameResource().GetHeap()->Get()->GetGPUDescriptorHandleForHeapStart();
-    m_commandList->Get()->SetGraphicsRootDescriptorTable(0, handle);
+    m_bundle->Get()->SetGraphicsRootDescriptorTable(0, handle);
     handle.ptr += Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    m_commandList->Get()->SetGraphicsRootDescriptorTable(1, handle);
-    m_commandList->Get()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    m_commandList->Get()->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-    m_commandList->Get()->IASetIndexBuffer(&m_indexBufferView);
-    m_commandList->Get()->DrawIndexedInstanced(36, UINT(36 / 3), 0, 0, 0);
+    m_bundle->Get()->SetGraphicsRootDescriptorTable(1, handle);
+    m_bundle->Get()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    m_bundle->Get()->IASetVertexBuffers(0, 1, &m_vertexBufferView);
+    m_bundle->Get()->IASetIndexBuffer(&m_indexBufferView);
+    m_bundle->Get()->DrawIndexedInstanced(36, UINT(36 / 3), 0, 0, 0);
     
-    m_commandList->Close();
+    m_bundle->Close();
   }
 
   void DX12Cube::Update()

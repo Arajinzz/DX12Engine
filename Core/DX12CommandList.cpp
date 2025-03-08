@@ -8,23 +8,20 @@
 
 namespace Core
 {
-  DX12CommandList::DX12CommandList()
+  DX12CommandList::DX12CommandList(D3D12_COMMAND_LIST_TYPE type)
     : m_commandAllocators(Application::FrameCount)
+    , m_type(type)
   {
     for (int n = 0; n < Application::FrameCount; ++n)
     {
-      ThrowIfFailed(Device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocators[n])));
+      ThrowIfFailed(Device()->CreateCommandAllocator(m_type, IID_PPV_ARGS(&m_commandAllocators[n])));
       // maybe bind this to the pso!!!!!!!!!!!
-      ThrowIfFailed(Device()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[n].Get(), nullptr, IID_PPV_ARGS(&m_commandList)));
+      ThrowIfFailed(Device()->CreateCommandList(0, m_type, m_commandAllocators[n].Get(), nullptr, IID_PPV_ARGS(&m_commandList)));
     }
-    DX12CommandQueue::Instance().AddCommandList(m_commandList.Get());
   }
 
   DX12CommandList::~DX12CommandList()
   {
-    // remove command list from queue
-    DX12CommandQueue::Instance().RemoveCommandList(m_commandList.Get());
-    
     for (int n = 0; n < m_commandAllocators.size(); ++n)
       m_commandAllocators[n].Reset();
     

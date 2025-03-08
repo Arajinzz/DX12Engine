@@ -3,6 +3,7 @@
 
 #include "Core/DXApplicationHelper.h"
 #include "Core/DX12Device.h"
+#include "Core/DX12SwapChain.h"
 
 namespace Core
 {
@@ -43,14 +44,14 @@ namespace Core
   }
 
   // TO REFACTOR
-  void DX12Heap::CreateResources()
+  void DX12Heap::CreateResources(DX12SwapChain* swapChain)
   {
     // other types not supported for now
     if (m_type == D3D12_DESCRIPTOR_HEAP_TYPE_RTV)
     {
       for (unsigned n = 0; n < m_descriptorCount; ++n)
       {
-        SwapChain().GetBuffer(n, &m_resources[n]);
+        swapChain->GetBuffer(n, &m_resources[n]);
         Device()->CreateRenderTargetView(m_resources[n].Get(), nullptr, m_handle);
         Offset(1);
       }
@@ -79,7 +80,7 @@ namespace Core
     } else if (m_type == D3D12_DESCRIPTOR_HEAP_TYPE_DSV)
     {
       ComPtr<ID3D12Resource> renderTarget;
-      SwapChain().GetBuffer(0, &renderTarget);
+      swapChain->GetBuffer(0, &renderTarget);
 
       D3D12_RESOURCE_DESC depthStencilDesc = {};
       depthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
