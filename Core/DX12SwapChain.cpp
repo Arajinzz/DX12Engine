@@ -19,11 +19,13 @@ namespace Core
 
   void DX12SwapChain::Init(DX12CommandQueue* queue)
   {
+    RECT rect;
+    GetClientRect(WindowsApplication::GetHwnd(), &rect);
     // Describe and create the swap chain.
     DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
     swapChainDesc.BufferCount = Application::FrameCount;
-    swapChainDesc.Width = 1280;
-    swapChainDesc.Height = 720;
+    swapChainDesc.Width = rect.right - rect.left;
+    swapChainDesc.Height = rect.bottom - rect.top;
     swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
