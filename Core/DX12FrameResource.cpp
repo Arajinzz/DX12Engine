@@ -3,6 +3,7 @@
 
 #include "Core/DXApplicationHelper.h"
 #include "Core/WindowsApplication.h"
+#include "Core/DX12SwapChain.h"
 
 namespace Core
 {
@@ -18,7 +19,7 @@ namespace Core
 
     // create command list
     m_commandList = std::make_unique<DX12CommandList>();
-    m_CbvSrvHeap->CreateResources(nullptr); // swapchain not needed
+    m_CbvSrvHeap->CreateResources(); // swapchain not needed
     m_commandList->Close();
 
     // Map and initialize the constant buffer. We don't unmap this until the
@@ -48,8 +49,9 @@ namespace Core
       XMVectorSet(0.0, 0.0, 0.0, 0.0), // lookat position
       XMVectorSet(0.0, 1.0, 0.0, 0.0) // up vector
     ));
-    // TODO: fix this
-    auto aspectRatio = static_cast<double>(1280) / 720;
+    ComPtr<ID3D12Resource> renderTarget;
+    SwapChain().GetBuffer(0, &renderTarget);
+    auto aspectRatio = static_cast<double>(renderTarget->GetDesc().Width) / renderTarget->GetDesc().Height;
     m_constantBufferData.projection = XMMatrixTranspose(XMMatrixPerspectiveFovLH(45.0, aspectRatio, 1.0, 100.0));
     memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
   }

@@ -8,35 +8,37 @@
 
 namespace Core
 {
-  DX12SwapChain::DX12SwapChain(DX12CommandQueue* queue)
+  DX12SwapChain::DX12SwapChain()
   {
-    // Describe and create the swap chain.
-    {
-      DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-      swapChainDesc.BufferCount = Application::FrameCount;
-      swapChainDesc.Width = 1280;
-      swapChainDesc.Height = 720;
-      swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-      swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-      swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-      swapChainDesc.SampleDesc.Count = 1;
-
-      ComPtr<IDXGISwapChain1> swapChain;
-      ThrowIfFailed(Factory()->CreateSwapChainForHwnd(
-        queue->Get(), // Swap chain needs the queue so that it can force a flush on it.
-        WindowsApplication::GetHwnd(),
-        &swapChainDesc,
-        nullptr,
-        nullptr,
-        &swapChain
-      ));
-      ThrowIfFailed(swapChain.As(&m_swapChain));
-    }
   }
 
   DX12SwapChain::~DX12SwapChain()
   {
     m_swapChain.Reset();
+  }
+
+  void DX12SwapChain::Init(DX12CommandQueue* queue)
+  {
+    // Describe and create the swap chain.
+    DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
+    swapChainDesc.BufferCount = Application::FrameCount;
+    swapChainDesc.Width = 1280;
+    swapChainDesc.Height = 720;
+    swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+    swapChainDesc.SampleDesc.Count = 1;
+
+    ComPtr<IDXGISwapChain1> swapChain;
+    ThrowIfFailed(Factory()->CreateSwapChainForHwnd(
+      queue->Get(), // Swap chain needs the queue so that it can force a flush on it.
+      WindowsApplication::GetHwnd(),
+      &swapChainDesc,
+      nullptr,
+      nullptr,
+      &swapChain
+    ));
+    ThrowIfFailed(swapChain.As(&m_swapChain));
   }
 
   unsigned int DX12SwapChain::GetCurrentBackBufferIndex()
@@ -51,7 +53,7 @@ namespace Core
 
   void DX12SwapChain::Present()
   {
-    // yes vsync
+    // no vsync
     ThrowIfFailed(m_swapChain->Present(0, 0));
   }
 }

@@ -11,7 +11,6 @@ namespace Core
     : DirectXApplication(width, height, name)
     , m_frameIndex(0)
     , m_commandQueue(nullptr)
-    , m_swapChain(nullptr)
     , m_viewport(0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height))
     , m_scissorRect(0, 0, static_cast<LONG>(width), static_cast<LONG>(height))
   {
@@ -95,7 +94,7 @@ namespace Core
     m_commandQueue->ExecuteCommandList();
 
     // Present the frame.
-    m_swapChain->Present();
+    SwapChain().Present();
 
     MoveToNextFrame(); // try to render next frame
   }
@@ -120,8 +119,8 @@ namespace Core
     m_commandQueue = std::make_unique<DX12CommandQueue>();
 
     // Create SwapChain
-    m_swapChain = std::make_unique<DX12SwapChain>(m_commandQueue.get());
-    m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+    CreateSwapChain(m_commandQueue.get());
+    m_frameIndex = SwapChain().GetCurrentBackBufferIndex();
 
     // full screen transitions not supported.
     ThrowIfFailed(Factory()->MakeWindowAssociation(WindowsApplication::GetHwnd(), DXGI_MWA_NO_ALT_ENTER));
@@ -129,12 +128,12 @@ namespace Core
     // Create RTV heap
     m_rtvHeap = std::make_unique<DX12Heap>(FrameCount, D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     // Create frame resources.
-    m_rtvHeap->CreateResources(m_swapChain.get());
+    m_rtvHeap->CreateResources();
 
     // Create DSV heap
     m_dsvHeap = std::make_unique<DX12Heap>(1, D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
     // create resource
-    m_dsvHeap->CreateResources(m_swapChain.get());
+    m_dsvHeap->CreateResources();
   }
 
   void Application::MoveToNextFrame()
@@ -146,7 +145,7 @@ namespace Core
     const UINT64 currentFenceValue = m_commandQueue->GetFenceValue(m_frameIndex);
 
     // next frame
-    m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+    m_frameIndex = SwapChain().GetCurrentBackBufferIndex();
 
     // If the next frame is not ready to be rendered yet, wait until
     m_commandQueue->WaitFence(m_frameIndex);

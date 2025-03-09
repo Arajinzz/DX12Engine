@@ -36,8 +36,6 @@ namespace Core
     std::vector<DX12Cube*> cubes;
     // command queue
     std::unique_ptr<DX12CommandQueue> m_commandQueue;
-    // swap chain
-    std::unique_ptr<DX12SwapChain> m_swapChain;
 
     // Synchronization objects.
     uint32_t m_frameIndex;

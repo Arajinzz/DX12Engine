@@ -20,7 +20,7 @@ namespace Core
     ~DX12Heap();
 
     void AddResource(ComPtr<ID3D12Resource> resource, ResourceType type);
-    void CreateResources(DX12SwapChain* swapChain);
+    void CreateResources();
     void Offset(unsigned int padding);
     CD3DX12_CPU_DESCRIPTOR_HANDLE GetOffsetHandle(unsigned int Offset);
     ID3D12Resource* GetResource(unsigned int index) { return m_resources[index].Get(); }
