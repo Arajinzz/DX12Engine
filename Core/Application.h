@@ -28,10 +28,6 @@ namespace Core
     void MoveToNextFrame();
 
   private:
-    // render target heap
-    std::unique_ptr<DX12Heap> m_rtvHeap;
-    // depth heap
-    std::unique_ptr<DX12Heap> m_dsvHeap;
     // cube
     std::vector<DX12Cube*> cubes;
     // command queue

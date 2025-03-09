@@ -21,6 +21,8 @@ namespace Core
     }
     ~DX12SwapChain();
 
+    DX12Heap* GetRenderHeap() { return m_rtvHeap.get(); }
+    DX12Heap* GetDepthHeap() { return m_dsvHeap.get(); }
     void Init(DX12CommandQueue* queue);
     unsigned int GetCurrentBackBufferIndex();
     void GetBuffer(unsigned int n, Microsoft::WRL::Details::ComPtrRef<Microsoft::WRL::ComPtr<ID3D12Resource>> renderTarget);
@@ -33,6 +35,10 @@ namespace Core
 
   private:
     ComPtr<IDXGISwapChain3> m_swapChain;
+    // render target heap
+    std::unique_ptr<DX12Heap> m_rtvHeap;
+    // depth heap
+    std::unique_ptr<DX12Heap> m_dsvHeap;
 
   };
 }

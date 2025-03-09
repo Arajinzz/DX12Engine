@@ -16,7 +16,7 @@ namespace Core
 
     ID3D12GraphicsCommandList* GetBundle() { return m_bundle->Get(); }
 
-    void Draw(DX12Heap* rtvHeap, DX12Heap* dsvHeap, unsigned frameIndex);
+    void Draw(unsigned frameIndex);
     void Update();
     ID3D12PipelineState* GetPSO() { return m_pipelineState.Get(); }
 

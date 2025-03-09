@@ -59,7 +59,7 @@ namespace Core
     m_commandQueue->GetCommandList()->Reset(m_frameIndex, nullptr);
 
     // Indicate that the back buffer will be used as a render target.
-    m_commandQueue->GetCommandList()->Transition(m_rtvHeap->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+    m_commandQueue->GetCommandList()->Transition(SwapChain().GetRenderHeap()->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
     // set heaps, this has to be the same as bundles
     m_commandQueue->GetCommandList()->SetDescriptorHeap(FrameResource().GetHeap());
@@ -70,24 +70,24 @@ namespace Core
     // since we are using bundles for drawing this should be fine
     m_commandQueue->GetCommandList()->Get()->RSSetViewports(1, &m_viewport);
     m_commandQueue->GetCommandList()->Get()->RSSetScissorRects(1, &m_scissorRect);
-    auto rtvHandle = m_rtvHeap->GetOffsetHandle(m_frameIndex);
-    auto dsvHandle = m_dsvHeap->GetOffsetHandle(0);
+    auto rtvHandle = SwapChain().GetRenderHeap()->GetOffsetHandle(m_frameIndex);
+    auto dsvHandle = SwapChain().GetDepthHeap()->GetOffsetHandle(0);
     m_commandQueue->GetCommandList()->Get()->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 
     // Record commands.
     const float clearColor[] = { 0.25f, 0.55f, 0.45f, 1.0f };
-    m_commandQueue->GetCommandList()->ClearDepthStencilView(m_dsvHeap->GetOffsetHandle(0));
-    m_commandQueue->GetCommandList()->ClearRenderTargetView(m_rtvHeap->GetOffsetHandle(m_frameIndex), clearColor);
+    m_commandQueue->GetCommandList()->ClearDepthStencilView(dsvHandle);
+    m_commandQueue->GetCommandList()->ClearRenderTargetView(rtvHandle, clearColor);
 
     // draw cube
     for (auto cube : cubes)
     {
-      cube->Draw(m_rtvHeap.get(), m_dsvHeap.get(), m_frameIndex);
+      cube->Draw(m_frameIndex);
       m_commandQueue->GetCommandList()->Get()->ExecuteBundle(cube->GetBundle());
     }
 
     // Indicate that the back buffer will now be used to present.
-    m_commandQueue->GetCommandList()->Transition(m_rtvHeap->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+    m_commandQueue->GetCommandList()->Transition(SwapChain().GetRenderHeap()->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
     m_commandQueue->GetCommandList()->Close();
 
@@ -118,22 +118,12 @@ namespace Core
     // Create Command Queue
     m_commandQueue = std::make_unique<DX12CommandQueue>();
 
-    // Create SwapChain
+    // Create SwapChain, swap chain creates depth buffer and render targets
     CreateSwapChain(m_commandQueue.get());
     m_frameIndex = SwapChain().GetCurrentBackBufferIndex();
 
     // full screen transitions not supported.
     ThrowIfFailed(Factory()->MakeWindowAssociation(WindowsApplication::GetHwnd(), DXGI_MWA_NO_ALT_ENTER));
-
-    // Create RTV heap
-    m_rtvHeap = std::make_unique<DX12Heap>(FrameCount, D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-    // Create frame resources.
-    m_rtvHeap->CreateResources();
-
-    // Create DSV heap
-    m_dsvHeap = std::make_unique<DX12Heap>(1, D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-    // create resource
-    m_dsvHeap->CreateResources();
   }
 
   void Application::MoveToNextFrame()

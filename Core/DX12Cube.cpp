@@ -194,7 +194,7 @@ namespace Core
   }
 
   // just a triangle for now
-  void DX12Cube::Draw(DX12Heap* rtvHeap, DX12Heap* dsvHeap, unsigned frameIndex)
+  void DX12Cube::Draw(unsigned frameIndex)
   {
     // 1 allocator
     m_bundle->Reset(frameIndex, m_pipelineState.Get());
