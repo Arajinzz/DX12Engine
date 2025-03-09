@@ -5,6 +5,7 @@
 #include "Core/DX12Heap.h"
 #include "Core/DX12CommandList.h"
 #include "Core/DX12Cube.h"
+#include "Core/DX12Context.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -25,19 +26,13 @@ namespace Core
 
   private:
     void LoadPipeline();
-    void MoveToNextFrame();
 
   private:
+    // main context
+    std::unique_ptr<DX12Context> m_context;
+
     // cube
     std::vector<DX12Cube*> cubes;
-    // command queue
-    std::unique_ptr<DX12CommandQueue> m_commandQueue;
-
-    // Synchronization objects.
-    uint32_t m_frameIndex;
-    
-    CD3DX12_VIEWPORT m_viewport;
-    CD3DX12_RECT m_scissorRect;
 
   };
 }

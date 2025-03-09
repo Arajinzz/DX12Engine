@@ -21,7 +21,7 @@ namespace Core
       return instance;
     }
     
-    void Init(ID3D12GraphicsCommandList* commandList);
+    void Init(DX12CommandList* commandList);
     void Update();
     DX12Heap* GetHeap() { return m_CbvSrvHeap.get(); }
     

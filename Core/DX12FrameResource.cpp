@@ -29,9 +29,9 @@ namespace Core
     memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
   }
 
-  void DX12FrameResource::Init(ID3D12GraphicsCommandList* commandList)
+  void DX12FrameResource::Init(DX12CommandList* commandList)
   {
-    m_texture->Init(commandList);
+    m_texture->Init(commandList->Get());
   }
 
   void DX12FrameResource::Update()
