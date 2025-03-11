@@ -49,9 +49,11 @@ namespace Core
       XMVectorSet(0.0, 0.0, 0.0, 0.0), // lookat position
       XMVectorSet(0.0, 1.0, 0.0, 0.0) // up vector
     ));
-    ComPtr<ID3D12Resource> renderTarget;
-    SwapChain().GetBuffer(0, &renderTarget);
-    auto aspectRatio = static_cast<double>(renderTarget->GetDesc().Width) / renderTarget->GetDesc().Height;
+    RECT rect;
+    GetClientRect(WindowsApplication::GetHwnd(), &rect);
+    auto width = rect.right - rect.left;
+    auto height = rect.bottom - rect.top;
+    auto aspectRatio = static_cast<double>(width) / height;
     m_constantBufferData.projection = XMMatrixTranspose(XMMatrixPerspectiveFovLH(45.0, aspectRatio, 1.0, 100.0));
     memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
   }

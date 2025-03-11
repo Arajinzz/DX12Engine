@@ -19,6 +19,7 @@ namespace Core
     DX12Heap(unsigned int numDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE type);
     ~DX12Heap();
 
+    void SetSwapChain(DX12SwapChain* swapChain);
     void AddResource(ComPtr<ID3D12Resource> resource, ResourceType type);
     void CreateResources();
     void Offset(unsigned int padding);
@@ -39,5 +40,6 @@ namespace Core
     D3D12_DESCRIPTOR_HEAP_TYPE m_type;
     CD3DX12_CPU_DESCRIPTOR_HANDLE m_handle;
     unsigned m_counter;
+    DX12SwapChain* m_swapChain;
   };
 }
