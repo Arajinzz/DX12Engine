@@ -36,11 +36,6 @@ namespace Core
     m_heap.Reset();
   }
 
-  void DX12Heap::SetSwapChain(DX12SwapChain* swapChain)
-  {
-    m_swapChain = swapChain;
-  }
-
   void DX12Heap::AddResource(ComPtr<ID3D12Resource> resource, ResourceType type)
   {
     m_resources[m_counter] = resource;
@@ -56,7 +51,7 @@ namespace Core
     {
       for (unsigned n = 0; n < m_descriptorCount; ++n)
       {
-        m_swapChain->GetBuffer(n, &m_resources[n]);
+        SwapChain().GetBuffer(n, &m_resources[n]);
         Device()->CreateRenderTargetView(m_resources[n].Get(), nullptr, m_handle);
         Offset(1);
       }
@@ -85,7 +80,7 @@ namespace Core
     } else if (m_type == D3D12_DESCRIPTOR_HEAP_TYPE_DSV)
     {
       ComPtr<ID3D12Resource> renderTarget;
-      m_swapChain->GetBuffer(0, &renderTarget);
+      SwapChain().GetBuffer(0, &renderTarget);
 
       D3D12_RESOURCE_DESC depthStencilDesc = {};
       depthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;

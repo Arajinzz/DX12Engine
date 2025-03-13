@@ -25,10 +25,6 @@ namespace Core
 
     // Create synchronization objects.
     m_commandQueue->InitFence(Application::FrameCount);
-
-    // Create swap chain
-    m_swapChain = std::make_unique<DX12SwapChain>();
-    m_swapChain->Init(m_commandQueue.get());
   }
 
   DX12Context::~DX12Context()
@@ -37,7 +33,7 @@ namespace Core
 
   void DX12Context::Init()
   {
-    m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+    m_frameIndex = SwapChain().GetCurrentBackBufferIndex();
   }
 
   void DX12Context::Execute()
@@ -62,7 +58,7 @@ namespace Core
     const UINT64 currentFenceValue = m_commandQueue->GetFenceValue(m_frameIndex);
 
     // next frame
-    m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+    m_frameIndex = SwapChain().GetCurrentBackBufferIndex();
 
     // If the next frame is not ready to be rendered yet, wait until
     m_commandQueue->WaitFence(m_frameIndex);
@@ -80,11 +76,6 @@ namespace Core
     m_commandQueue->SetFenceValue(m_frameIndex, currentFenceValue + 1);
   }
 
-  void DX12Context::Present()
-  {
-    m_swapChain->Present();
-  }
-
   void DX12Context::PrepareForRendering()
   {
     // Command list allocators can only be reset when the associated 
@@ -96,7 +87,7 @@ namespace Core
     m_commandList->Reset(m_frameIndex, nullptr);
 
     // Indicate that the back buffer will be used as a render target.
-    m_commandList->Transition(m_swapChain->GetRenderHeap()->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+    m_commandList->Transition(SwapChain().GetRenderHeap()->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
     // set heaps, this has to be the same as bundles
     m_commandQueue->GetCommandList()->SetDescriptorHeap(FrameResource().GetHeap());
@@ -107,8 +98,8 @@ namespace Core
     // since we are using bundles for drawing this should be fine
     m_commandList->Get()->RSSetViewports(1, &m_viewport);
     m_commandList->Get()->RSSetScissorRects(1, &m_scissorRect);
-    auto rtvHandle = m_swapChain->GetRenderHeap()->GetOffsetHandle(m_frameIndex);
-    auto dsvHandle = m_swapChain->GetDepthHeap()->GetOffsetHandle(0);
+    auto rtvHandle = SwapChain().GetRenderHeap()->GetOffsetHandle(m_frameIndex);
+    auto dsvHandle = SwapChain().GetDepthHeap()->GetOffsetHandle(0);
     m_commandList->Get()->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 
     // Record commands.
@@ -126,6 +117,6 @@ namespace Core
   void DX12Context::PrepareForPresenting()
   {
     // Indicate that the back buffer will now be used to present.
-    m_commandList->Transition(m_swapChain->GetRenderHeap()->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+    m_commandList->Transition(SwapChain().GetRenderHeap()->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
   }
 }

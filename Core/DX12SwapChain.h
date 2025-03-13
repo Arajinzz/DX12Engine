@@ -2,6 +2,9 @@
 
 #include "Core/DX12CommandQueue.h"
 
+#define CreateSwapChain(Queue) DX12SwapChain::Instance().Init(Queue)
+#define SwapChain() DX12SwapChain::Instance()
+
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
@@ -11,7 +14,11 @@ namespace Core
   {
 
   public:
-    DX12SwapChain();
+    static DX12SwapChain& Instance()
+    {
+      static DX12SwapChain instance;
+      return instance;
+    }
     ~DX12SwapChain();
 
     DX12Heap* GetRenderHeap() { return m_rtvHeap.get(); }
@@ -22,7 +29,7 @@ namespace Core
     void Present();
 
   private:
-    
+    DX12SwapChain();
     DX12SwapChain(const DX12SwapChain&) = delete;
     DX12SwapChain& operator= (const DX12SwapChain&) = delete;
 

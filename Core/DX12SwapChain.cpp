@@ -44,13 +44,11 @@ namespace Core
 
     // Create RTV heap
     m_rtvHeap = std::make_unique<DX12Heap>(Application::FrameCount, D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-    m_rtvHeap->SetSwapChain(this);
     // Create frame resources.
     m_rtvHeap->CreateResources();
 
     // Create DSV heap
     m_dsvHeap = std::make_unique<DX12Heap>(1, D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-    m_dsvHeap->SetSwapChain(this);
     // create resource
     m_dsvHeap->CreateResources();
   }

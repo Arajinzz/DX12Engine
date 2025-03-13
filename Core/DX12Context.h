@@ -19,7 +19,6 @@ namespace Core
     void Execute();
     void WaitForGpu();
     void MoveToNextFrame();
-    void Present();
 
     void PrepareForRendering();
     // for now draws only cubes
@@ -34,9 +33,6 @@ namespace Core
     std::unique_ptr<DX12CommandQueue> m_commandQueue;
     // command list associated to command queue
     DX12CommandList* m_commandList; // owned by command queue
-
-    // swapchain
-    std::unique_ptr<DX12SwapChain> m_swapChain;
 
     // Synchronization objects.
     uint32_t m_frameIndex;
