@@ -23,6 +23,7 @@ namespace Core
   private:
     static HWND m_hwnd;
     static std::chrono::steady_clock::time_point m_startTime;
+    static std::chrono::steady_clock::time_point m_lastTime;
     static unsigned m_frameCount;
     static bool m_shouldResize;
   };

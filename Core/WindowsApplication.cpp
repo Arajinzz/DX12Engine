@@ -5,6 +5,7 @@
 
 HWND Core::WindowsApplication::m_hwnd = nullptr;
 std::chrono::steady_clock::time_point Core::WindowsApplication::m_startTime;
+std::chrono::steady_clock::time_point Core::WindowsApplication::m_lastTime;
 unsigned Core::WindowsApplication::m_frameCount;
 double Core::WindowsApplication::deltaTime;
 bool Core::WindowsApplication::m_shouldResize;
@@ -16,6 +17,7 @@ namespace Core
     m_shouldResize = false;
 
     m_startTime = std::chrono::steady_clock::now();
+    m_lastTime = std::chrono::steady_clock::now();
     m_frameCount = 0;
     deltaTime = 1 / 60;
 
@@ -129,7 +131,9 @@ namespace Core
       double elapsedTime = std::chrono::duration_cast<std::chrono::duration<double>>(currentTime - m_startTime).count();
       m_frameCount++;
 
-      deltaTime = 1 / (m_frameCount / elapsedTime);
+      // calculate delta time
+      deltaTime = std::chrono::duration_cast<std::chrono::duration<double>>(currentTime - m_lastTime).count();
+      m_lastTime = currentTime;
 
       if (elapsedTime >= 1.0)
       {
