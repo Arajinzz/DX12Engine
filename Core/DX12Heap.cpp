@@ -123,6 +123,14 @@ namespace Core
     m_handle.Offset(padding, m_descriptorSize);
   }
 
+  void DX12Heap::Reset()
+  {
+    for (unsigned n = 0; n < m_descriptorCount; ++n)
+      m_resources[n].Reset();
+    // clear resources but keep heap
+    m_handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_heap->GetCPUDescriptorHandleForHeapStart());
+  }
+
   CD3DX12_CPU_DESCRIPTOR_HANDLE DX12Heap::GetOffsetHandle(unsigned int Offset)
   {
     return CD3DX12_CPU_DESCRIPTOR_HANDLE(m_heap->GetCPUDescriptorHandleForHeapStart(), Offset, m_descriptorSize);

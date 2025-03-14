@@ -21,7 +21,8 @@ namespace Core
     virtual void OnUpdate() override;
     virtual void OnRender() override;
     virtual void OnDestroy() override;
-    
+    virtual void OnResize(unsigned width, unsigned height) override;
+ 
     static const uint32_t FrameCount = 2;
 
   private:

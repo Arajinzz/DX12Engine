@@ -7,11 +7,14 @@ HWND Core::WindowsApplication::m_hwnd = nullptr;
 std::chrono::steady_clock::time_point Core::WindowsApplication::m_startTime;
 unsigned Core::WindowsApplication::m_frameCount;
 double Core::WindowsApplication::deltaTime;
+bool Core::WindowsApplication::m_shouldResize;
 
 namespace Core
 {
   int WindowsApplication::Run(DirectXApplication* pApp, HINSTANCE hInstance, int nCmdShow)
   {
+    m_shouldResize = false;
+
     m_startTime = std::chrono::steady_clock::now();
     m_frameCount = 0;
     deltaTime = 1 / 60;
@@ -86,6 +89,16 @@ namespace Core
     }
     return 0;
 
+    case WM_SIZE:
+      if (pApp)
+      {
+        RECT rect;
+        GetClientRect(hWnd, &rect);
+        auto width = rect.right - rect.left;
+        auto height = rect.bottom - rect.top;
+        pApp->OnResize(width, height);
+      }
+      return 0;
     case WM_KEYDOWN:
       if (pApp)
       {
@@ -107,6 +120,9 @@ namespace Core
         pApp->OnUpdate();
         pApp->OnRender();
       }
+
+      // enable resizing
+      m_shouldResize = true;
 
       // update fps
       auto currentTime = std::chrono::steady_clock::now();

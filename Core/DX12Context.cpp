@@ -24,7 +24,7 @@ namespace Core
     m_commandList = m_commandQueue->GetCommandList();
 
     // Create synchronization objects.
-    m_commandQueue->InitFence(Application::FrameCount);
+    m_commandQueue->InitFence();
   }
 
   DX12Context::~DX12Context()
@@ -74,6 +74,16 @@ namespace Core
     // currentFrame fenceValue = 1
     // nextFrame fenceValue = 2
     m_commandQueue->SetFenceValue(m_frameIndex, currentFenceValue + 1);
+  }
+
+  void DX12Context::Resize(unsigned width, unsigned height)
+  {
+    m_viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height));
+    m_scissorRect = CD3DX12_RECT(0, 0, static_cast<LONG>(width), static_cast<LONG>(height));
+
+    m_frameIndex = SwapChain().GetCurrentBackBufferIndex();
+    
+    m_commandQueue->ResetFence();
   }
 
   void DX12Context::PrepareForRendering()

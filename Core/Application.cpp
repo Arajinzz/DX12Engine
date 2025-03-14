@@ -76,6 +76,24 @@ namespace Core
     m_context->WaitForGpu();
   }
 
+  void Application::OnResize(unsigned width, unsigned height)
+  {
+    if (WindowsApplication::Resizable())
+    {
+      // make sure that GPU is not doing anything
+      m_context->WaitForGpu();
+
+      m_width = width;
+      m_height = height;
+
+      // resize swapchain
+      SwapChain().Resize(width, height);
+
+      // adapt viewport and rect in context
+      m_context->Resize(width, height);
+    }
+  }
+
   void Application::LoadPipeline()
   {
     // Create Device

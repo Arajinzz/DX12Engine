@@ -13,6 +13,7 @@ namespace Core
   public:
     static int Run(DirectXApplication* pApp, HINSTANCE hInstance, int nCmdShow);
     static HWND GetHwnd() { return m_hwnd; }
+    static bool Resizable() { return m_shouldResize; }
     
     static double deltaTime;
 
@@ -23,6 +24,7 @@ namespace Core
     static HWND m_hwnd;
     static std::chrono::steady_clock::time_point m_startTime;
     static unsigned m_frameCount;
+    static bool m_shouldResize;
   };
 }
 

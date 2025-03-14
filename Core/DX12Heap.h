@@ -22,6 +22,7 @@ namespace Core
     void AddResource(ComPtr<ID3D12Resource> resource, ResourceType type);
     void CreateResources();
     void Offset(unsigned int padding);
+    void Reset();
     CD3DX12_CPU_DESCRIPTOR_HANDLE GetOffsetHandle(unsigned int Offset);
     ID3D12Resource* GetResource(unsigned int index) { return m_resources[index].Get(); }
     ID3D12DescriptorHeap* Get() { return m_heap.Get(); }

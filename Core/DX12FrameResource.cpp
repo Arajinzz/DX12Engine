@@ -51,7 +51,9 @@ namespace Core
     ));
     ComPtr<ID3D12Resource> renderTarget;
     SwapChain().GetBuffer(0, &renderTarget);
-    auto aspectRatio = static_cast<double>(renderTarget->GetDesc().Width) / renderTarget->GetDesc().Height;
+    auto width = renderTarget->GetDesc().Width;
+    auto height = renderTarget->GetDesc().Height;
+    auto aspectRatio = static_cast<double>(width) / height;
     m_constantBufferData.projection = XMMatrixTranspose(XMMatrixPerspectiveFovLH(45.0, aspectRatio, 1.0, 100.0));
     memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
   }

@@ -16,9 +16,10 @@ namespace Core
     ID3D12CommandQueue* Get() { return m_commandQueue.Get(); }
     DX12CommandList* GetCommandList() { return m_commandList.get(); }
     
-    void InitFence(unsigned int valuesCount);
+    void InitFence();
 
     void ExecuteCommandList();
+    void ResetFence();
 
     void SignalFence(unsigned int frameIndex);
     void WaitFence(unsigned int frameIndex);

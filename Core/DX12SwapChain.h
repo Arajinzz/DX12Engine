@@ -27,6 +27,7 @@ namespace Core
     unsigned int GetCurrentBackBufferIndex();
     void GetBuffer(unsigned int n, Microsoft::WRL::Details::ComPtrRef<Microsoft::WRL::ComPtr<ID3D12Resource>> renderTarget);
     void Present();
+    void Resize(unsigned width, unsigned height);
 
   private:
     DX12SwapChain();

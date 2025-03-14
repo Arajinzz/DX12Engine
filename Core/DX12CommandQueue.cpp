@@ -4,6 +4,8 @@
 #include "Core/DXApplicationHelper.h"
 #include "Core/DX12Device.h"
 
+#include "Core/Application.h"
+
 namespace Core
 {
   DX12CommandQueue::DX12CommandQueue()
@@ -21,12 +23,12 @@ namespace Core
   }
 
   // values count represent how many framebuffer are used in the swapchain
-  void DX12CommandQueue::InitFence(unsigned int valuesCount)
+  void DX12CommandQueue::InitFence()
   {
     // Create Fence
     ThrowIfFailed(Device()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
 
-    for (unsigned n = 0; n < valuesCount; ++n)
+    for (unsigned n = 0; n < Application::FrameCount; ++n)
       m_fenceValues.push_back(0);
 
     m_fenceValues[0]++; // start from buffer number 0
@@ -45,6 +47,13 @@ namespace Core
     m_commandQueue->ExecuteCommandLists(1, commandLists);
   }
 
+  void DX12CommandQueue::ResetFence()
+  {
+    m_fence.Reset();
+    m_fenceValues.clear();
+    InitFence();
+  }
+
   void DX12CommandQueue::SignalFence(unsigned int frameIndex)
   {
     ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), m_fenceValues[frameIndex]));
@@ -53,7 +62,8 @@ namespace Core
   void DX12CommandQueue::WaitFence(unsigned int frameIndex)
   {
     // gpu didn't finish yet
-    if (m_fence->GetCompletedValue() < m_fenceValues[frameIndex])
+    auto completedValue = m_fence->GetCompletedValue();
+    if (completedValue < m_fenceValues[frameIndex])
     {
       // Wait until the fence has been processed.
       ThrowIfFailed(m_fence->SetEventOnCompletion(m_fenceValues[frameIndex], m_fenceEvent));

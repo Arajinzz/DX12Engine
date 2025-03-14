@@ -20,6 +20,8 @@ namespace Core
     void WaitForGpu();
     void MoveToNextFrame();
 
+    void Resize(unsigned width, unsigned height);
+
     void PrepareForRendering();
     // for now draws only cubes
     void Draw(DX12Cube* cube);
