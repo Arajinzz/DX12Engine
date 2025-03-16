@@ -140,7 +140,10 @@ namespace Core
     {
       Vertex vertex;
       vertex.position = { pMesh->mVertices[i].x, pMesh->mVertices[i].y, pMesh->mVertices[i].z };
-      vertex.color = { 1.0, 1.0, 1.0, 1.0 };
+      float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+      float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+      float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+      vertex.color = { r, g, b, 1.0};
       vertex.uv = { pMesh->mTextureCoords[0][i].x, pMesh->mTextureCoords[0][i].y };
       m_vertices.push_back(vertex);
     }
