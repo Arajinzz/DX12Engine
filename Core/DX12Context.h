@@ -2,7 +2,7 @@
 
 #include "Core/DX12CommandQueue.h"
 #include "Core/DX12CommandList.h"
-#include "Core/DX12Cube.h"
+#include "Core/DX12Model.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -24,7 +24,7 @@ namespace Core
 
     void PrepareForRendering();
     // for now draws only cubes
-    void Draw(DX12Cube* cube);
+    void Draw(DX12Model* cube);
     void PrepareForPresenting();
 
     DX12CommandQueue* GetCommandQueue() { return m_commandQueue.get(); }

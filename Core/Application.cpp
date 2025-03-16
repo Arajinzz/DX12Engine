@@ -20,9 +20,8 @@ namespace Core
     CreateFrameResource();
 
     // Create Cube, will also create pso and root signature and constant buffer for transformation
-    cubes.push_back(new DX12Cube(GetWidth(), GetHeight(), 0.0));
-    cubes.push_back(new DX12Cube(GetWidth(), GetHeight(), 0.5));
-    cubes.push_back(new DX12Cube(GetWidth(), GetHeight(), -0.5));
+    models.push_back(new DX12Model());
+    models[0]->LoadModel("models\\suzanne.obj");
 
     FrameResource().Init(m_context->GetCommandList());
 
@@ -37,8 +36,8 @@ namespace Core
   {
     FrameResource().Update();
 
-    for (auto cube : cubes)
-      cube->Update();
+    for (auto model : models)
+      model->Update();
   }
 
   void Application::OnRender()
@@ -47,10 +46,10 @@ namespace Core
     // Reset and transition to Rendering state
     m_context->PrepareForRendering(); // set heaps, rects ...etc
 
-    // draw cube
-    for (auto cube : cubes)
+    // draw models
+    for (auto model : models)
     {
-      m_context->Draw(cube);
+      m_context->Draw(model);
     }
 
     // transition to present state

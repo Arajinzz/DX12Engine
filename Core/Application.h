@@ -4,7 +4,7 @@
 #include "Core/DX12SwapChain.h"
 #include "Core/DX12Heap.h"
 #include "Core/DX12CommandList.h"
-#include "Core/DX12Cube.h"
+#include "Core/DX12Model.h"
 #include "Core/DX12Context.h"
 
 using namespace DirectX;
@@ -32,8 +32,8 @@ namespace Core
     // main context
     std::unique_ptr<DX12Context> m_context;
 
-    // cube
-    std::vector<DX12Cube*> cubes;
+    // models
+    std::vector<DX12Model*> models;
 
   };
 }

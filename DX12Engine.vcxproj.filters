@@ -75,9 +75,6 @@
     <ClCompile Include="Core\DX12CommandList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\DX12Cube.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Core\DX12FrameResource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -159,9 +156,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\DX12CommandList.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\DX12Cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\DX12FrameResource.h">

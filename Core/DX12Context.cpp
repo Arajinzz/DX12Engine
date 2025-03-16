@@ -118,10 +118,10 @@ namespace Core
     m_commandList->ClearRenderTargetView(rtvHandle, clearColor);
   }
 
-  void DX12Context::Draw(DX12Cube* cube)
+  void DX12Context::Draw(DX12Model* model)
   {
-    cube->Draw(m_frameIndex);
-    m_commandList->Get()->ExecuteBundle(cube->GetBundle());
+    model->Draw(m_frameIndex);
+    m_commandList->Get()->ExecuteBundle(model->GetBundle());
   }
 
   void DX12Context::PrepareForPresenting()
