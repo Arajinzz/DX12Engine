@@ -93,7 +93,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;$(SolutionDir)dep/stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
@@ -112,7 +112,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;$(SolutionDir)dep/stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
@@ -131,7 +131,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;$(SolutionDir)dep/stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
@@ -150,7 +150,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;$(SolutionDir)dep/stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
@@ -354,6 +354,26 @@
     <ClInclude Include="Core\DX12ConstantBuffer.h" />
     <ClInclude Include="Core\DX12Context.h" />
     <ClInclude Include="Core\DX12Model.h" />
+    <ClInclude Include="dep\stb\stb_connected_components.h" />
+    <ClInclude Include="dep\stb\stb_c_lexer.h" />
+    <ClInclude Include="dep\stb\stb_divide.h" />
+    <ClInclude Include="dep\stb\stb_ds.h" />
+    <ClInclude Include="dep\stb\stb_dxt.h" />
+    <ClInclude Include="dep\stb\stb_easy_font.h" />
+    <ClInclude Include="dep\stb\stb_herringbone_wang_tile.h" />
+    <ClInclude Include="dep\stb\stb_hexwave.h" />
+    <ClInclude Include="dep\stb\stb_image.h" />
+    <ClInclude Include="dep\stb\stb_image_resize2.h" />
+    <ClInclude Include="dep\stb\stb_image_write.h" />
+    <ClInclude Include="dep\stb\stb_include.h" />
+    <ClInclude Include="dep\stb\stb_leakcheck.h" />
+    <ClInclude Include="dep\stb\stb_perlin.h" />
+    <ClInclude Include="dep\stb\stb_rect_pack.h" />
+    <ClInclude Include="dep\stb\stb_sprintf.h" />
+    <ClInclude Include="dep\stb\stb_textedit.h" />
+    <ClInclude Include="dep\stb\stb_tilemap_editor.h" />
+    <ClInclude Include="dep\stb\stb_truetype.h" />
+    <ClInclude Include="dep\stb\stb_voxel_render.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Core\WindowsApplication.h" />
   </ItemGroup>

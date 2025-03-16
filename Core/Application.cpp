@@ -21,7 +21,7 @@ namespace Core
 
     // Create Cube, will also create pso and root signature and constant buffer for transformation
     models.push_back(new DX12Model());
-    models[0]->LoadModel("models\\suzanne.obj");
+    models[0]->LoadModel("models\\cube.obj");
 
     FrameResource().Init(m_context->GetCommandList());
 
