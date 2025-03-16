@@ -93,13 +93,14 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/imgui/backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3dcompiler.lib;dxgi.lib;d3d12.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3dcompiler.lib;dxgi.lib;d3d12.lib;dxguid.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dep/assimp/lib/x64/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -111,7 +112,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/imgui/backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
@@ -119,7 +120,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3dcompiler.lib;dxgi.lib;d3d12.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3dcompiler.lib;dxgi.lib;d3d12.lib;dxguid.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dep/assimp/lib/x64/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -129,13 +131,14 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/imgui/backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3dcompiler.lib;dxgi.lib;d3d12.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3dcompiler.lib;dxgi.lib;d3d12.lib;dxguid.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dep/assimp/lib/x64/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -147,7 +150,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/imgui/backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
@@ -155,7 +158,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3dcompiler.lib;dxgi.lib;d3d12.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3dcompiler.lib;dxgi.lib;d3d12.lib;dxguid.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dep/assimp/lib/x64/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -231,6 +235,7 @@
     <ClCompile Include="Core\DX12Texture.cpp" />
     <ClCompile Include="Core\DX12ConstantBuffer.cpp" />
     <ClCompile Include="Core\DX12Context.cpp" />
+    <ClCompile Include="Core\DX12Model.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -245,6 +250,90 @@
     <ClInclude Include="Core\DirectXApplication.h" />
     <ClInclude Include="Core\DXApplicationHelper.h" />
     <ClInclude Include="Core\DX12Cube.h" />
+    <ClInclude Include="dep\assimp\include\assimp\aabb.h" />
+    <ClInclude Include="dep\assimp\include\assimp\ai_assert.h" />
+    <ClInclude Include="dep\assimp\include\assimp\anim.h" />
+    <ClInclude Include="dep\assimp\include\assimp\AssertHandler.h" />
+    <ClInclude Include="dep\assimp\include\assimp\Base64.hpp" />
+    <ClInclude Include="dep\assimp\include\assimp\BaseImporter.h" />
+    <ClInclude Include="dep\assimp\include\assimp\Bitmap.h" />
+    <ClInclude Include="dep\assimp\include\assimp\BlobIOSystem.h" />
+    <ClInclude Include="dep\assimp\include\assimp\ByteSwapper.h" />
+    <ClInclude Include="dep\assimp\include\assimp\camera.h" />
+    <ClInclude Include="dep\assimp\include\assimp\cexport.h" />
+    <ClInclude Include="dep\assimp\include\assimp\cfileio.h" />
+    <ClInclude Include="dep\assimp\include\assimp\cimport.h" />
+    <ClInclude Include="dep\assimp\include\assimp\ColladaMetaData.h" />
+    <ClInclude Include="dep\assimp\include\assimp\color4.h" />
+    <ClInclude Include="dep\assimp\include\assimp\commonMetaData.h" />
+    <ClInclude Include="dep\assimp\include\assimp\Compiler\poppack1.h" />
+    <ClInclude Include="dep\assimp\include\assimp\Compiler\pstdint.h" />
+    <ClInclude Include="dep\assimp\include\assimp\Compiler\pushpack1.h" />
+    <ClInclude Include="dep\assimp\include\assimp\config.h" />
+    <ClInclude Include="dep\assimp\include\assimp\CreateAnimMesh.h" />
+    <ClInclude Include="dep\assimp\include\assimp\DefaultIOStream.h" />
+    <ClInclude Include="dep\assimp\include\assimp\DefaultIOSystem.h" />
+    <ClInclude Include="dep\assimp\include\assimp\DefaultLogger.hpp" />
+    <ClInclude Include="dep\assimp\include\assimp\defs.h" />
+    <ClInclude Include="dep\assimp\include\assimp\Exceptional.h" />
+    <ClInclude Include="dep\assimp\include\assimp\Exporter.hpp" />
+    <ClInclude Include="dep\assimp\include\assimp\fast_atof.h" />
+    <ClInclude Include="dep\assimp\include\assimp\GenericProperty.h" />
+    <ClInclude Include="dep\assimp\include\assimp\GltfMaterial.h" />
+    <ClInclude Include="dep\assimp\include\assimp\Hash.h" />
+    <ClInclude Include="dep\assimp\include\assimp\Importer.hpp" />
+    <ClInclude Include="dep\assimp\include\assimp\importerdesc.h" />
+    <ClInclude Include="dep\assimp\include\assimp\IOStream.hpp" />
+    <ClInclude Include="dep\assimp\include\assimp\IOStreamBuffer.h" />
+    <ClInclude Include="dep\assimp\include\assimp\IOSystem.hpp" />
+    <ClInclude Include="dep\assimp\include\assimp\light.h" />
+    <ClInclude Include="dep\assimp\include\assimp\LineSplitter.h" />
+    <ClInclude Include="dep\assimp\include\assimp\LogAux.h" />
+    <ClInclude Include="dep\assimp\include\assimp\Logger.hpp" />
+    <ClInclude Include="dep\assimp\include\assimp\LogStream.hpp" />
+    <ClInclude Include="dep\assimp\include\assimp\material.h" />
+    <ClInclude Include="dep\assimp\include\assimp\MathFunctions.h" />
+    <ClInclude Include="dep\assimp\include\assimp\matrix3x3.h" />
+    <ClInclude Include="dep\assimp\include\assimp\matrix4x4.h" />
+    <ClInclude Include="dep\assimp\include\assimp\MemoryIOWrapper.h" />
+    <ClInclude Include="dep\assimp\include\assimp\mesh.h" />
+    <ClInclude Include="dep\assimp\include\assimp\metadata.h" />
+    <ClInclude Include="dep\assimp\include\assimp\NullLogger.hpp" />
+    <ClInclude Include="dep\assimp\include\assimp\ObjMaterial.h" />
+    <ClInclude Include="dep\assimp\include\assimp\ParsingUtils.h" />
+    <ClInclude Include="dep\assimp\include\assimp\pbrmaterial.h" />
+    <ClInclude Include="dep\assimp\include\assimp\port\AndroidJNI\AndroidJNIIOSystem.h" />
+    <ClInclude Include="dep\assimp\include\assimp\port\AndroidJNI\BundledAssetIOSystem.h" />
+    <ClInclude Include="dep\assimp\include\assimp\postprocess.h" />
+    <ClInclude Include="dep\assimp\include\assimp\Profiler.h" />
+    <ClInclude Include="dep\assimp\include\assimp\ProgressHandler.hpp" />
+    <ClInclude Include="dep\assimp\include\assimp\qnan.h" />
+    <ClInclude Include="dep\assimp\include\assimp\quaternion.h" />
+    <ClInclude Include="dep\assimp\include\assimp\RemoveComments.h" />
+    <ClInclude Include="dep\assimp\include\assimp\revision.h" />
+    <ClInclude Include="dep\assimp\include\assimp\scene.h" />
+    <ClInclude Include="dep\assimp\include\assimp\SceneCombiner.h" />
+    <ClInclude Include="dep\assimp\include\assimp\SGSpatialSort.h" />
+    <ClInclude Include="dep\assimp\include\assimp\SkeletonMeshBuilder.h" />
+    <ClInclude Include="dep\assimp\include\assimp\SmallVector.h" />
+    <ClInclude Include="dep\assimp\include\assimp\SmoothingGroups.h" />
+    <ClInclude Include="dep\assimp\include\assimp\SpatialSort.h" />
+    <ClInclude Include="dep\assimp\include\assimp\StandardShapes.h" />
+    <ClInclude Include="dep\assimp\include\assimp\StreamReader.h" />
+    <ClInclude Include="dep\assimp\include\assimp\StreamWriter.h" />
+    <ClInclude Include="dep\assimp\include\assimp\StringComparison.h" />
+    <ClInclude Include="dep\assimp\include\assimp\StringUtils.h" />
+    <ClInclude Include="dep\assimp\include\assimp\Subdivision.h" />
+    <ClInclude Include="dep\assimp\include\assimp\texture.h" />
+    <ClInclude Include="dep\assimp\include\assimp\TinyFormatter.h" />
+    <ClInclude Include="dep\assimp\include\assimp\types.h" />
+    <ClInclude Include="dep\assimp\include\assimp\vector2.h" />
+    <ClInclude Include="dep\assimp\include\assimp\vector3.h" />
+    <ClInclude Include="dep\assimp\include\assimp\version.h" />
+    <ClInclude Include="dep\assimp\include\assimp\Vertex.h" />
+    <ClInclude Include="dep\assimp\include\assimp\XmlParser.h" />
+    <ClInclude Include="dep\assimp\include\assimp\XMLTools.h" />
+    <ClInclude Include="dep\assimp\include\assimp\ZipArchiveIOSystem.h" />
     <ClInclude Include="dep\imgui\backends\imgui_impl_dx11.h" />
     <ClInclude Include="dep\imgui\backends\imgui_impl_dx12.h" />
     <ClInclude Include="dep\imgui\backends\imgui_impl_win32.h" />
@@ -266,8 +355,19 @@
     <ClInclude Include="Core\DX12Texture.h" />
     <ClInclude Include="Core\DX12ConstantBuffer.h" />
     <ClInclude Include="Core\DX12Context.h" />
+    <ClInclude Include="Core\DX12Model.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Core\WindowsApplication.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dep\assimp\include\assimp\color4.inl" />
+    <None Include="dep\assimp\include\assimp\material.inl" />
+    <None Include="dep\assimp\include\assimp\matrix3x3.inl" />
+    <None Include="dep\assimp\include\assimp\matrix4x4.inl" />
+    <None Include="dep\assimp\include\assimp\quaternion.inl" />
+    <None Include="dep\assimp\include\assimp\SmoothingGroups.inl" />
+    <None Include="dep\assimp\include\assimp\vector2.inl" />
+    <None Include="dep\assimp\include\assimp\vector3.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
