@@ -27,12 +27,19 @@ namespace
 namespace Core
 {
   DX12Texture::DX12Texture(DX12Heap* heap)
+    : m_textureData()
   {
+    // load texture
+    unsigned char* img = stbi_load("textures\\brick.png", &m_width, &m_height, &m_channels, 0);
+    m_textureData.reserve(m_width * m_height * m_channels);
+    memcpy(m_textureData.data(), img, m_width * m_height * m_channels * sizeof(uint8_t));
+    stbi_image_free(img);
+
     D3D12_RESOURCE_DESC textureDesc = {};
     textureDesc.MipLevels = 1;
     textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    textureDesc.Width = 256;
-    textureDesc.Height = 256;
+    textureDesc.Width = m_width;
+    textureDesc.Height = m_height;
     textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
     textureDesc.DepthOrArraySize = 1;
     textureDesc.SampleDesc.Count = 1;
@@ -75,8 +82,8 @@ namespace Core
     std::vector<UINT8> texture = GenerateTextureData(256, 256, 4);
     D3D12_SUBRESOURCE_DATA textureData = {};
     textureData.pData = texture.data();
-    textureData.RowPitch = 256 * 4; // width * pixelSize
-    textureData.SlicePitch = textureData.RowPitch * 256; // rowpitch * height
+    textureData.RowPitch = m_width * m_channels; // width * pixelSize
+    textureData.SlicePitch = textureData.RowPitch * m_height; // rowpitch * height
 
     const UINT subresourceCount = 1 * 1;
     const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_texture.Get(), 0, subresourceCount);

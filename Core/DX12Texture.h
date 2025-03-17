@@ -18,6 +18,12 @@ namespace Core
   private:
     ComPtr<ID3D12Resource> m_texture;
     ComPtr<ID3D12Resource> m_texUploadHeap;
+    std::vector<uint8_t> m_textureData;
+
+    // metadata
+    int m_width;
+    int m_height;
+    int m_channels;
 
   private:
     DX12Texture(const DX12Texture&) = delete;
