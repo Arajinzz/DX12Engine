@@ -23,6 +23,8 @@ namespace Core
     void Resize(unsigned width, unsigned height);
 
   private:
+    void CreateDepthResource();
+
     DX12SwapChain(const DX12SwapChain&) = delete;
     DX12SwapChain& operator= (const DX12SwapChain&) = delete;
 
@@ -32,6 +34,8 @@ namespace Core
     std::unique_ptr<DX12Heap> m_rtvHeap;
     // depth heap
     std::unique_ptr<DX12Heap> m_dsvHeap;
+    // depth resource
+    ComPtr<ID3D12Resource> m_depthResource;
 
   };
 }

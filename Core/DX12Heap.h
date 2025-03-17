@@ -10,27 +10,25 @@ namespace Core
   enum ResourceType
   {
     TEXTURE,
-    CONSTANTBUFFER
+    CONSTANTBUFFER,
+    DEPTH,
+    RENDERTARGET
   };
 
   class DX12Heap
   {
   public:
-    DX12Heap(unsigned int numDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE type);
+    DX12Heap(D3D12_DESCRIPTOR_HEAP_TYPE type);
     ~DX12Heap();
 
-    void CreateTextureView();
-    void CreateConstantView();
-    void CreateRenderView();
-    void CreateDepthView();
+    void CreateHeap();
+    void ResetResources();
+    void ResetHeap();
 
-    void AddRenderResource();
-    void AddDepthResource();
-    void AddConstantResource();
-    void AddDepthResource();
+    void AddResource(ComPtr<ID3D12Resource> resource, ResourceType type);
+    void CreateViews();
 
     void Offset(unsigned int padding);
-    void Reset();
 
     CD3DX12_CPU_DESCRIPTOR_HANDLE GetOffsetHandle(unsigned int Offset);
     ID3D12Resource* GetResource(unsigned int index) { return m_resources[index].Get(); }
@@ -45,9 +43,7 @@ namespace Core
     std::vector<ComPtr<ID3D12Resource>> m_resources;
     std::vector<ResourceType> m_resourceTypes;
     unsigned int m_descriptorSize;
-    unsigned int m_descriptorCount;
     D3D12_DESCRIPTOR_HEAP_TYPE m_type;
     CD3DX12_CPU_DESCRIPTOR_HANDLE m_handle;
-    unsigned m_counter;
   };
 }

@@ -13,13 +13,12 @@ namespace Core
     , m_constantBufferData()
     , m_pCbvDataBegin(nullptr)
   {
-    m_CbvSrvHeap = std::make_unique<DX12Heap>(2, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    m_CbvSrvHeap = std::make_unique<DX12Heap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     m_constantBuffer = std::make_unique<DX12ConstantBuffer>(m_CbvSrvHeap.get());
     m_texture = std::make_unique<DX12Texture>(m_CbvSrvHeap.get());
 
     // create command list
     m_commandList = std::make_unique<DX12CommandList>();
-    m_CbvSrvHeap->CreateResources(); // swapchain not needed
     m_commandList->Close();
 
     // Map and initialize the constant buffer. We don't unmap this until the

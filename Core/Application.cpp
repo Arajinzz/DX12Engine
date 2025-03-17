@@ -85,9 +85,6 @@ namespace Core
       m_width = width;
       m_height = height;
 
-      // resize swapchain
-      SwapChain().Resize(width, height);
-
       // adapt viewport and rect in context
       m_context->Resize(width, height);
     }
@@ -101,9 +98,6 @@ namespace Core
     // Create Context
     // Create SwapChain, swap chain creates depth buffer and render targets
     m_context = std::make_unique<DX12Context>();
-
-    // Init Context
-    m_context->Init();
 
     // full screen transitions not supported.
     ThrowIfFailed(Factory()->MakeWindowAssociation(WindowsApplication::GetHwnd(), DXGI_MWA_NO_ALT_ENTER));
