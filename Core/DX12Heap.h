@@ -19,10 +19,19 @@ namespace Core
     DX12Heap(unsigned int numDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE type);
     ~DX12Heap();
 
-    void AddResource(ComPtr<ID3D12Resource> resource, ResourceType type);
-    void CreateResources();
+    void CreateTextureView();
+    void CreateConstantView();
+    void CreateRenderView();
+    void CreateDepthView();
+
+    void AddRenderResource();
+    void AddDepthResource();
+    void AddConstantResource();
+    void AddDepthResource();
+
     void Offset(unsigned int padding);
     void Reset();
+
     CD3DX12_CPU_DESCRIPTOR_HANDLE GetOffsetHandle(unsigned int Offset);
     ID3D12Resource* GetResource(unsigned int index) { return m_resources[index].Get(); }
     ID3D12DescriptorHeap* Get() { return m_heap.Get(); }

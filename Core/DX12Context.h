@@ -3,6 +3,7 @@
 #include "Core/DX12CommandQueue.h"
 #include "Core/DX12CommandList.h"
 #include "Core/DX12Model.h"
+#include "Core/DX12SwapChain.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -15,7 +16,7 @@ namespace Core
     DX12Context();
     ~DX12Context();
 
-    void Init();
+    void Present();
     void Execute();
     void WaitForGpu();
     void MoveToNextFrame();
@@ -31,6 +32,8 @@ namespace Core
     DX12CommandList* GetCommandList() { return m_commandList; }
 
   private:
+    // the swapchain
+    std::unique_ptr<DX12SwapChain> m_swapChain;
     // command queue
     std::unique_ptr<DX12CommandQueue> m_commandQueue;
     // command list associated to command queue

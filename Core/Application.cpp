@@ -58,8 +58,8 @@ namespace Core
     // execute command list
     m_context->Execute();
 
-    // Present the frame.
-    SwapChain().Present();
+    // Present the frame, swap chain will do that
+    m_context->Present();
 
     m_context->MoveToNextFrame(); // try to render next frame
   }
@@ -99,10 +99,8 @@ namespace Core
     CreateDevice(); // Singleton
 
     // Create Context
-    m_context = std::make_unique<DX12Context>();
-
     // Create SwapChain, swap chain creates depth buffer and render targets
-    CreateSwapChain(m_context->GetCommandQueue());
+    m_context = std::make_unique<DX12Context>();
 
     // Init Context
     m_context->Init();

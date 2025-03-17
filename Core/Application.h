@@ -1,9 +1,6 @@
 #pragma once
 
-#include "DirectXApplication.h"
-#include "Core/DX12SwapChain.h"
-#include "Core/DX12Heap.h"
-#include "Core/DX12CommandList.h"
+#include "Core/DirectXApplication.h"
 #include "Core/DX12Model.h"
 #include "Core/DX12Context.h"
 

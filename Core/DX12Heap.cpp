@@ -36,6 +36,34 @@ namespace Core
     m_heap.Reset();
   }
 
+  void DX12Heap::CreateTextureView()
+  {
+  }
+
+  void DX12Heap::CreateConstantView()
+  {
+  }
+
+  void DX12Heap::CreateRenderView()
+  {
+  }
+
+  void DX12Heap::CreateDepthView()
+  {
+  }
+
+  void DX12Heap::AddRenderResource()
+  {
+  }
+
+  void DX12Heap::AddDepthResource()
+  {
+  }
+
+  void DX12Heap::AddConstantResource()
+  {
+  }
+
   void DX12Heap::AddResource(ComPtr<ID3D12Resource> resource, ResourceType type)
   {
     m_resources[m_counter] = resource;
