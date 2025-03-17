@@ -7,23 +7,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-namespace
-{
-  std::vector<UINT8> GenerateTextureData(unsigned texW, unsigned texH, unsigned pixelSize)
-  {
-    int width, height, channels;
-    unsigned char* img = stbi_load("textures\\brick.png", &width, &height, &channels, 0);
-
-    std::vector<UINT8> data;
-
-    data.reserve(texW * texH * pixelSize);
-    
-    memcpy(data.data(), img, texW * texH * pixelSize * sizeof(UINT8));
-    
-    return data;
-  }
-}
-
 namespace Core
 {
   DX12Texture::DX12Texture(DX12Heap* heap)
@@ -79,9 +62,8 @@ namespace Core
   {
     // Copy data to the intermediate upload heap and then schedule 
     // a copy from the upload heap to the diffuse texture.
-    std::vector<UINT8> texture = GenerateTextureData(256, 256, 4);
     D3D12_SUBRESOURCE_DATA textureData = {};
-    textureData.pData = texture.data();
+    textureData.pData = m_textureData.data();
     textureData.RowPitch = m_width * m_channels; // width * pixelSize
     textureData.SlicePitch = textureData.RowPitch * m_height; // rowpitch * height
 
