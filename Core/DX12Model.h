@@ -32,8 +32,7 @@ namespace Core
 
     // bundle
     std::unique_ptr<DX12CommandList> m_bundle;
-    // root signature and pso
-    ComPtr<ID3D12RootSignature> m_rootSignature;
+    // pso
     ComPtr<ID3D12PipelineState> m_pipelineState;
 
     ComPtr<ID3D12Resource> m_vertexBuffer;
