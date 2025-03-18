@@ -12,6 +12,7 @@ namespace Core
   Application::Application(UINT width, UINT height, std::wstring name)
     : DirectXApplication(width, height, name)
     , m_context(nullptr)
+    , m_triangleCount(0)
   {
   }
 
@@ -41,7 +42,9 @@ namespace Core
       translation.z = z * 25;
       model->Setup();
       model->SetTranslation(translation);
-      model->LoadModel("models\\cube.obj");
+      model->LoadModel("models\\suzanne.obj");
+
+      m_triangleCount += model->GetTriangleCount();
     }
 
     FrameResource().Init(m_context->GetCommandList());

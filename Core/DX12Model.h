@@ -22,6 +22,8 @@ namespace Core
     // workaround!!!
     DX12Heap* GetHeapDesc() { return m_descHeap.get(); }
 
+    unsigned GetTriangleCount() { return m_indices.size() / 3; }
+
     void SetTranslation(XMFLOAT3 translate) { m_translation = translate; };
 
   private:
