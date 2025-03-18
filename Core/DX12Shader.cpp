@@ -6,12 +6,9 @@
 
 namespace Core
 {
-  DX12Shader::DX12Shader(const char* path)
-    : m_ranges()
-    , m_rootParameters()
+  DX12Shader::DX12Shader(const wchar_t* path)
+    : m_rootParameters()
   {
-    ComPtr<ID3DBlob> vertexShader;
-    ComPtr<ID3DBlob> pixelShader;
     ComPtr<ID3DBlob> errorBlob;
     // Enable better shader debugging with the graphics debugging tools.
     UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
@@ -22,8 +19,8 @@ namespace Core
       return std::wstring(assetsPath) + assetName;
       };
 
-    ThrowIfFailed(D3DCompileFromFile(GetAssetFullPath(L"shaders.hlsl").c_str(), nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &vertexShader, &errorBlob));
-    ThrowIfFailed(D3DCompileFromFile(GetAssetFullPath(L"shaders.hlsl").c_str(), nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pixelShader, nullptr));
+    ThrowIfFailed(D3DCompileFromFile(GetAssetFullPath(path).c_str(), nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &m_vertexShader, &errorBlob));
+    ThrowIfFailed(D3DCompileFromFile(GetAssetFullPath(path).c_str(), nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &m_pixelShader, nullptr));
   }
 
   DX12Shader::~DX12Shader()
@@ -47,8 +44,17 @@ namespace Core
     sampler.RegisterSpace = 0;
     sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
+    std::vector<CD3DX12_DESCRIPTOR_RANGE1> ranges(m_rootParameters.size());
+    std::vector<CD3DX12_ROOT_PARAMETER1> rootParams(m_rootParameters.size());
+
+    for (unsigned i = 0; i < m_rootParameters.size(); ++i)
+    {
+      ranges[i].Init(m_rootParameters[i].type, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+      rootParams[i].InitAsDescriptorTable(1, &ranges[i], m_rootParameters[i].visibility);
+    }
+
     CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
-    rootSignatureDesc.Init_1_1(m_rootParameters.size(), m_rootParameters.data(), 1, &sampler, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+    rootSignatureDesc.Init_1_1(rootParams.size(), rootParams.data(), 1, &sampler, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
     ComPtr<ID3DBlob> signature;
     ComPtr<ID3DBlob> error;
@@ -63,12 +69,6 @@ namespace Core
 
   void DX12Shader::AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE type, D3D12_SHADER_VISIBILITY visibility)
   {
-    CD3DX12_DESCRIPTOR_RANGE1 range;
-    range.Init(type, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
-    m_ranges.push_back(range);
-
-    CD3DX12_ROOT_PARAMETER1 rootParameter;
-    rootParameter.InitAsDescriptorTable(1, &m_ranges[m_ranges.size() - 1], visibility);
-    m_rootParameters.push_back(rootParameter);
+    m_rootParameters.push_back({ type, visibility });
   }
 }

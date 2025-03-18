@@ -8,18 +8,19 @@
 namespace Core
 {
   DX12FrameResource::DX12FrameResource()
-    : m_commandList(nullptr)
-    , m_CbvSrvHeap(nullptr)
+    : m_CbvSrvHeap(nullptr)
     , m_constantBufferData()
     , m_pCbvDataBegin(nullptr)
   {
     m_CbvSrvHeap = std::make_unique<DX12Heap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     m_constantBuffer = std::make_unique<DX12ConstantBuffer>(m_CbvSrvHeap.get());
     m_texture = std::make_unique<DX12Texture>(m_CbvSrvHeap.get());
+    m_shader = std::make_unique<DX12Shader>(L"shaders.hlsl"); // shared between models
 
-    // create command list
-    m_commandList = std::make_unique<DX12CommandList>();
-    m_commandList->Close();
+    m_shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
+    m_shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL);
+
+    m_shader->CreateRootSignature();
 
     // Map and initialize the constant buffer. We don't unmap this until the
     // app closes. Keeping things mapped for the lifetime of the resource is okay.

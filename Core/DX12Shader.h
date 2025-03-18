@@ -9,7 +9,7 @@ namespace Core
   class DX12Shader
   {
   public:
-    DX12Shader(const char* path);
+    DX12Shader(const wchar_t* path);
     ~DX12Shader();
 
     void CreateRootSignature();
@@ -21,13 +21,18 @@ namespace Core
     ID3D12RootSignature* GetRootSignature() { return m_rootSignature.Get(); }
 
   private:
+    struct RootParam
+    {
+      D3D12_DESCRIPTOR_RANGE_TYPE type;
+      D3D12_SHADER_VISIBILITY visibility;
+    };
+
     ComPtr<ID3D12RootSignature> m_rootSignature;
 
     ComPtr<ID3DBlob> m_vertexShader;
     ComPtr<ID3DBlob> m_pixelShader;
 
-    std::vector<CD3DX12_DESCRIPTOR_RANGE1> m_ranges;
-    std::vector<CD3DX12_ROOT_PARAMETER1> m_rootParameters;
+    std::vector<RootParam> m_rootParameters;
 
   private:
     DX12Shader(const DX12Shader&) = delete;

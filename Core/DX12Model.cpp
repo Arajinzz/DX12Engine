@@ -33,9 +33,9 @@ namespace Core
     // Describe and create the graphics pipeline state object (PSO).
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
     psoDesc.InputLayout = { inputElementDescs, _countof(inputElementDescs) };
-    psoDesc.pRootSignature = m_rootSignature.Get();
-    psoDesc.VS = CD3DX12_SHADER_BYTECODE(vertexShader.Get());
-    psoDesc.PS = CD3DX12_SHADER_BYTECODE(pixelShader.Get());
+    psoDesc.pRootSignature = FrameResource().GetShader()->GetRootSignature();
+    psoDesc.VS = CD3DX12_SHADER_BYTECODE(FrameResource().GetShader()->GetVertexShader());
+    psoDesc.PS = CD3DX12_SHADER_BYTECODE(FrameResource().GetShader()->GetPixelShader());
     psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
     psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
     psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
@@ -62,7 +62,7 @@ namespace Core
     // 1 allocator
     m_bundle->Reset(frameIndex, m_pipelineState.Get());
     // Set necessary state.
-    m_bundle->SetRootSignature(m_rootSignature.Get());
+    m_bundle->SetRootSignature(FrameResource().GetShader()->GetRootSignature());
     m_bundle->SetDescriptorHeap(FrameResource().GetHeap());
     auto handle = FrameResource().GetHeap()->Get()->GetGPUDescriptorHandleForHeapStart();
     m_bundle->Get()->SetGraphicsRootDescriptorTable(0, handle);
