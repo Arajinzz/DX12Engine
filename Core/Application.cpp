@@ -40,9 +40,9 @@ namespace Core
       translation.x = dist(gen) * 10;
       translation.y = dist(gen) * 5;
       translation.z = z * 25;
-      model->Setup();
-      model->SetTranslation(translation);
       model->LoadModel("models\\suzanne.obj");
+      model->Setup(m_context->GetCommandList()->Get());
+      model->SetTranslation(translation);
 
       m_triangleCount += model->GetTriangleCount();
     }

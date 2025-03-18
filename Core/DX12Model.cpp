@@ -32,6 +32,7 @@ namespace Core
     // Create the command list.
     // the class should add command list automatically to CommandQueue
     m_bundle = std::make_unique<DX12CommandList>(D3D12_COMMAND_LIST_TYPE_BUNDLE);
+    m_bundle->Close();
   }
 
   DX12Model::~DX12Model()
@@ -40,7 +41,7 @@ namespace Core
     m_descHeap.reset();
   }
 
-  void DX12Model::Setup()
+  void DX12Model::Setup(ID3D12GraphicsCommandList* commandList)
   {
     // order has to be correct. FrameResource already adds CBV then SRV
     // so we have CBV, SRV, CBV
@@ -82,6 +83,9 @@ namespace Core
     psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
     psoDesc.SampleDesc.Count = 1;
     ThrowIfFailed(Device()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
+
+    SetupVertexBuffer(commandList);
+    SetupIndexBuffer(commandList);
   }
 
   void DX12Model::Draw(unsigned frameIndex)
@@ -144,63 +148,6 @@ namespace Core
       m_indices.push_back(face.mIndices[1]);
       m_indices.push_back(face.mIndices[2]);
     }
-
-    const unsigned vertexBufferSize = m_vertices.size() * sizeof(Vertex);
-    const unsigned indexBufferSize = m_indices.size() * sizeof(uint16_t);
-
-    {
-      // Note: using upload heaps to transfer static data like vert buffers is not 
-      // recommended. Every time the GPU needs it, the upload heap will be marshalled 
-      // over. Please read up on Default Heap usage. An upload heap is used here for 
-      // code simplicity and because there are very few verts to actually transfer.
-      auto heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-      auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
-      ThrowIfFailed(Device()->CreateCommittedResource(
-        &heapProps,
-        D3D12_HEAP_FLAG_NONE,
-        &resDesc,
-        D3D12_RESOURCE_STATE_GENERIC_READ,
-        nullptr,
-        IID_PPV_ARGS(&m_vertexBuffer)));
-
-      // Copy the triangle data to the vertex buffer.
-      UINT8* pVertexDataBegin;
-      CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
-      ThrowIfFailed(m_vertexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pVertexDataBegin)));
-      memcpy(pVertexDataBegin, m_vertices.data(), vertexBufferSize);
-      m_vertexBuffer->Unmap(0, nullptr);
-
-      // Initialize the vertex buffer view.
-      m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
-      m_vertexBufferView.StrideInBytes = sizeof(Vertex);
-      m_vertexBufferView.SizeInBytes = vertexBufferSize;
-    }
-
-    {
-      auto heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-      auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize);
-      ThrowIfFailed(Device()->CreateCommittedResource(
-        &heapProps,
-        D3D12_HEAP_FLAG_NONE,
-        &resDesc,
-        D3D12_RESOURCE_STATE_GENERIC_READ,
-        nullptr,
-        IID_PPV_ARGS(&m_indexBuffer)));
-
-      // Copy the index data to the index buffer.
-      UINT8* pIndexDataBegin;
-      CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
-      ThrowIfFailed(m_indexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pIndexDataBegin)));
-      memcpy(pIndexDataBegin, m_indices.data(), indexBufferSize);
-      m_indexBuffer->Unmap(0, nullptr);
-
-      // Initialize the index buffer view.
-      m_indexBufferView.BufferLocation = m_indexBuffer->GetGPUVirtualAddress();
-      m_indexBufferView.SizeInBytes = indexBufferSize;
-      m_indexBufferView.Format = DXGI_FORMAT_R16_UINT;
-    }
-
-    m_bundle->Close();
   }
 
   void DX12Model::Update()
@@ -213,5 +160,86 @@ namespace Core
       XMMatrixIdentity() * XMMatrixRotationZ(m_angle) * XMMatrixRotationY(m_angle * 2) * XMMatrixRotationX(m_angle) *
       XMMatrixTranslation(m_translation.x, m_translation.y, m_translation.z)
     ));
+  }
+
+  void DX12Model::SetupVertexBuffer(ID3D12GraphicsCommandList* commandList)
+  {
+    const unsigned vertexBufferSize = m_vertices.size() * sizeof(Vertex);
+    auto uploadHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+    auto defaultHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+    auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
+    ThrowIfFailed(Device()->CreateCommittedResource(
+      &defaultHeapProps,
+      D3D12_HEAP_FLAG_NONE,
+      &resDesc,
+      D3D12_RESOURCE_STATE_COMMON,
+      nullptr,
+      IID_PPV_ARGS(&m_vertexBuffer)));
+
+    ThrowIfFailed(Device()->CreateCommittedResource(
+      &uploadHeapProps,
+      D3D12_HEAP_FLAG_NONE,
+      &resDesc,
+      D3D12_RESOURCE_STATE_GENERIC_READ,
+      nullptr,
+      IID_PPV_ARGS(&m_vertexBufferUploadHeap)));
+
+    // copy data to intermediate upload heap
+    D3D12_SUBRESOURCE_DATA vertexData = {};
+    vertexData.pData = m_vertices.data();
+    vertexData.RowPitch = vertexBufferSize;
+    vertexData.SlicePitch = vertexData.RowPitch;
+
+    auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(m_vertexBuffer.Get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
+    auto barrier2 = CD3DX12_RESOURCE_BARRIER::Transition(m_vertexBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+    commandList->ResourceBarrier(1, &barrier1);
+    UpdateSubresources<1>(commandList, m_vertexBuffer.Get(), m_vertexBufferUploadHeap.Get(), 0, 0, 1, &vertexData);
+    commandList->ResourceBarrier(1, &barrier2);
+
+    // Initialize the vertex buffer view.
+    m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
+    m_vertexBufferView.StrideInBytes = sizeof(Vertex);
+    m_vertexBufferView.SizeInBytes = vertexBufferSize;
+  }
+
+  void DX12Model::SetupIndexBuffer(ID3D12GraphicsCommandList* commandList)
+  {
+    const unsigned indexBufferSize = m_indices.size() * sizeof(uint16_t);
+    auto uploadHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+    auto defaultHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+    auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize);
+    ThrowIfFailed(Device()->CreateCommittedResource(
+      &defaultHeapProps,
+      D3D12_HEAP_FLAG_NONE,
+      &resDesc,
+      D3D12_RESOURCE_STATE_COMMON,
+      nullptr,
+      IID_PPV_ARGS(&m_indexBuffer)));
+
+    ThrowIfFailed(Device()->CreateCommittedResource(
+      &uploadHeapProps,
+      D3D12_HEAP_FLAG_NONE,
+      &resDesc,
+      D3D12_RESOURCE_STATE_GENERIC_READ,
+      nullptr,
+      IID_PPV_ARGS(&m_indexBufferUploadHeap)));
+
+    // Copy data to the intermediate upload heap and then schedule a copy 
+        // from the upload heap to the index buffer.
+    D3D12_SUBRESOURCE_DATA indexData = {};
+    indexData.pData = m_indices.data();
+    indexData.RowPitch = indexBufferSize;
+    indexData.SlicePitch = indexData.RowPitch;
+
+    auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(m_indexBuffer.Get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
+    auto barrier2 = CD3DX12_RESOURCE_BARRIER::Transition(m_indexBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_INDEX_BUFFER);
+    commandList->ResourceBarrier(1, &barrier1);
+    UpdateSubresources<1>(commandList, m_indexBuffer.Get(), m_indexBufferUploadHeap.Get(), 0, 0, 1, &indexData);
+    commandList->ResourceBarrier(1, &barrier2);
+
+    // Initialize the index buffer view.
+    m_indexBufferView.BufferLocation = m_indexBuffer->GetGPUVirtualAddress();
+    m_indexBufferView.SizeInBytes = indexBufferSize;
+    m_indexBufferView.Format = DXGI_FORMAT_R16_UINT;
   }
 }

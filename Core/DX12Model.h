@@ -15,7 +15,7 @@ namespace Core
     ~DX12Model();
 
     ID3D12GraphicsCommandList* GetBundle() { return m_bundle->Get(); }
-    virtual void Setup();
+    virtual void Setup(ID3D12GraphicsCommandList* commandList);
     virtual void Draw(unsigned frameIndex);
     virtual void LoadModel(const char* path);
     virtual void Update();
@@ -25,6 +25,10 @@ namespace Core
     unsigned GetTriangleCount() { return m_indices.size() / 3; }
 
     void SetTranslation(XMFLOAT3 translate) { m_translation = translate; };
+
+  private:
+    void SetupVertexBuffer(ID3D12GraphicsCommandList* commandList);
+    void SetupIndexBuffer(ID3D12GraphicsCommandList* commandList);
 
   private:
     struct Vertex
@@ -49,8 +53,11 @@ namespace Core
 
     // buffers
     ComPtr<ID3D12Resource> m_vertexBuffer;
-    ComPtr<ID3D12Resource> m_indexBuffer;
+    ComPtr<ID3D12Resource> m_vertexBufferUploadHeap;
     D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+
+    ComPtr<ID3D12Resource> m_indexBuffer;
+    ComPtr<ID3D12Resource> m_indexBufferUploadHeap;
     D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
 
     // descriptor heap
