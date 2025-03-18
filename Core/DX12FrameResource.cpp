@@ -14,7 +14,7 @@ namespace Core
   {
     m_CbvSrvHeap = std::make_unique<DX12Heap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     m_constantBuffer = std::make_unique<DX12ConstantBuffer>(m_CbvSrvHeap.get());
-    m_texture = std::make_unique<DX12Texture>(m_CbvSrvHeap.get());
+    m_texture = std::make_unique<DX12Texture>("textures\\brick.png", m_CbvSrvHeap.get());
     m_shader = std::make_unique<DX12Shader>(L"shaders.hlsl"); // shared between models
 
     m_shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
