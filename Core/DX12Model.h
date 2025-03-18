@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/DX12CommandList.h"
+#include "Core/DX12ConstantBuffer.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -14,9 +15,12 @@ namespace Core
     ~DX12Model();
 
     ID3D12GraphicsCommandList* GetBundle() { return m_bundle->Get(); }
+    virtual void Setup();
     virtual void Draw(unsigned frameIndex);
     virtual void LoadModel(const char* path);
     virtual void Update();
+    // workaround!!!
+    DX12Heap* GetHeapDesc() { return m_descHeap.get(); }
 
   private:
     struct Vertex
@@ -35,10 +39,16 @@ namespace Core
     // pso
     ComPtr<ID3D12PipelineState> m_pipelineState;
 
+    // buffers
     ComPtr<ID3D12Resource> m_vertexBuffer;
     ComPtr<ID3D12Resource> m_indexBuffer;
     D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
     D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
+
+    // descriptor heap
+    std::unique_ptr<DX12Heap> m_descHeap;
+    // constant buffer
+    std::unique_ptr<DX12ConstantBuffer> m_constantBuffer;
 
   private:
     DX12Model(const DX12Model&) = delete;

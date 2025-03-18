@@ -24,28 +24,16 @@ namespace Core
     
     void Init(DX12CommandList* commandList);
     void Update();
-    DX12Heap* GetHeap() { return m_CbvSrvHeap.get(); }
     DX12Shader* GetShader() { return m_shader.get(); }
+    DX12Texture* GetTexture() { return m_texture.get(); }
+    DX12ConstantBuffer* GetConstantBuffer() { return m_constantBuffer.get(); }
     
     ~DX12FrameResource();
 
   private:
-    struct SceneConstantBuffer
-    {
-      XMMATRIX model;
-      XMMATRIX view;
-      XMMATRIX projection;
-      float padding[16]; // Padding so the constant buffer is 256-byte aligned.
-    };
-
-    std::unique_ptr<DX12Heap> m_CbvSrvHeap;
     std::unique_ptr<DX12Texture> m_texture;
     std::unique_ptr<DX12ConstantBuffer> m_constantBuffer;
     std::unique_ptr<DX12Shader> m_shader;
-
-    // data
-    SceneConstantBuffer m_constantBufferData;
-    UINT8* m_pCbvDataBegin;
 
   private:
     DX12FrameResource();

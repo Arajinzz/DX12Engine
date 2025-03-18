@@ -10,8 +10,10 @@ namespace Core
   class DX12Texture
   {
   public:
-    DX12Texture(const char* path, DX12Heap* heap);
+    DX12Texture(const char* path);
     ~DX12Texture();
+
+    ID3D12Resource* GetResource() { return m_texture.Get(); }
 
     void Init(ID3D12GraphicsCommandList* commandList);
 

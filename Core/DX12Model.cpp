@@ -4,6 +4,7 @@
 #include "Core/DX12Device.h"
 #include "Core/DXApplicationHelper.h"
 #include "Core/DX12FrameResource.h"
+#include "Core/WindowsApplication.h"
 
 #include <fstream>
 
@@ -17,10 +18,41 @@ namespace Core
     : m_vertices()
     , m_indices()
     , m_bundle(nullptr)
+    , m_descHeap(nullptr)
+    , m_constantBuffer(nullptr)
   {
+    // create heap
+    m_descHeap = std::make_unique<DX12Heap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+    // create constant buffer
+    m_constantBuffer = std::make_unique<DX12ConstantBuffer>();
+
     // Create the command list.
     // the class should add command list automatically to CommandQueue
     m_bundle = std::make_unique<DX12CommandList>(D3D12_COMMAND_LIST_TYPE_BUNDLE);
+  }
+
+  DX12Model::~DX12Model()
+  {
+    m_bundle.reset();
+    m_descHeap.reset();
+  }
+
+  void DX12Model::Setup()
+  {
+    FrameResource().GetShader()->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
+
+    // order has to be correct. FrameResource already adds CBV then SRV
+    // so we have CBV, SRV, CBV
+    m_descHeap->AddResource(FrameResource().GetConstantBuffer()->GetResource(), CONSTANTBUFFER);
+    m_descHeap->AddResource(FrameResource().GetTexture()->GetResource(), TEXTURE);
+    m_descHeap->AddResource(m_constantBuffer->GetResource(), CONSTANTBUFFER);
+    
+    // constant buffers
+    FrameResource().GetConstantBuffer()->MapToResource(m_descHeap->GetResource(0));
+    m_constantBuffer->MapToResource(m_descHeap->GetResource(2));
+
+    FrameResource().GetShader()->CreateRootSignature();
 
     // Define the vertex input layout.
     D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
@@ -52,22 +84,23 @@ namespace Core
     ThrowIfFailed(Device()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
   }
 
-  DX12Model::~DX12Model()
-  {
-    m_bundle.reset();
-  }
-
   void DX12Model::Draw(unsigned frameIndex)
   {
     // 1 allocator
     m_bundle->Reset(frameIndex, m_pipelineState.Get());
     // Set necessary state.
     m_bundle->SetRootSignature(FrameResource().GetShader()->GetRootSignature());
-    m_bundle->SetDescriptorHeap(FrameResource().GetHeap());
-    auto handle = FrameResource().GetHeap()->Get()->GetGPUDescriptorHandleForHeapStart();
+    m_bundle->SetDescriptorHeap(m_descHeap.get());
+    
+    auto handle = m_descHeap->Get()->GetGPUDescriptorHandleForHeapStart();
     m_bundle->Get()->SetGraphicsRootDescriptorTable(0, handle);
+
     handle.ptr += Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     m_bundle->Get()->SetGraphicsRootDescriptorTable(1, handle);
+
+    handle.ptr += Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    m_bundle->Get()->SetGraphicsRootDescriptorTable(2, handle);
+
     m_bundle->Get()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     m_bundle->Get()->IASetVertexBuffers(0, 1, &m_vertexBufferView);
     m_bundle->Get()->IASetIndexBuffer(&m_indexBufferView);
@@ -172,5 +205,13 @@ namespace Core
 
   void DX12Model::Update()
   {
+    auto static angle = 0.0;
+    angle += 3 * WindowsApplication::deltaTime;
+    if (angle > 360.0)
+      angle = 0.0;
+
+    m_constantBuffer->SetModel(XMMatrixTranspose(
+      XMMatrixIdentity() * XMMatrixRotationZ(angle) * XMMatrixRotationY(angle * 2) * XMMatrixRotationX(angle) * XMMatrixTranslation(sin(angle), 0.0, 0.0)
+    ));
   }
 }

@@ -1,9 +1,17 @@
 cbuffer SceneConstantBuffer : register(b0)
 {
-    float4x4 model;
-    float4x4 view;
-    float4x4 projection;
-    float4 padding[4];
+    float4x4 s_model;
+    float4x4 s_view;
+    float4x4 s_projection;
+    float4 s_padding[4];
+};
+
+cbuffer ModelConstantBuffer : register(b1)
+{
+    float4x4 m_model;
+    float4x4 m_view;
+    float4x4 m_projection;
+    float4 m_padding[4];
 };
 
 Texture2D g_texture : register(t0);
@@ -21,9 +29,9 @@ PSInput VSMain(float4 position : POSITION, float4 color : COLOR, float2 uv : TEX
     PSInput result;
     
     float4 pos = float4(position.xyz, 1.0);
-    float4 worldPos = mul(pos, model);
-    float4 viewPos = mul(worldPos, view);
-    float4 clipPos = mul(viewPos, projection);
+    float4 worldPos = mul(pos, m_model);
+    float4 viewPos = mul(worldPos, s_view);
+    float4 clipPos = mul(viewPos, s_projection);
     
     result.position = clipPos;
     result.color = color;

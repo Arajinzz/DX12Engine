@@ -108,9 +108,6 @@ namespace Core
     // Indicate that the back buffer will be used as a render target.
     m_commandList->Transition(m_swapChain->GetRenderHeap()->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-    // set heaps, this has to be the same as bundles
-    m_commandQueue->GetCommandList()->SetDescriptorHeap(FrameResource().GetHeap());
-
     // these must be done in the same commandlist as drawing
     // because they set a state for rendering
     // and states they reset between command lists
@@ -129,6 +126,8 @@ namespace Core
 
   void DX12Context::Draw(DX12Model* model)
   {
+    // set heaps, this has to be the same as bundles
+    m_commandQueue->GetCommandList()->SetDescriptorHeap(model->GetHeapDesc());
     model->Draw(m_frameIndex);
     m_commandList->Get()->ExecuteBundle(model->GetBundle());
   }

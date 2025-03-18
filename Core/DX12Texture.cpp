@@ -9,7 +9,7 @@
 
 namespace Core
 {
-  DX12Texture::DX12Texture(const char* path, DX12Heap* heap)
+  DX12Texture::DX12Texture(const char* path)
     : m_textureData()
   {
     // load texture
@@ -50,8 +50,6 @@ namespace Core
       D3D12_RESOURCE_STATE_GENERIC_READ,
       nullptr,
       IID_PPV_ARGS(&m_texUploadHeap)));
-
-    heap->AddResource(m_texture, TEXTURE);
   }
 
   DX12Texture::~DX12Texture()

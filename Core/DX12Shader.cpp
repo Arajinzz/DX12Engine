@@ -47,10 +47,18 @@ namespace Core
     std::vector<CD3DX12_DESCRIPTOR_RANGE1> ranges(m_rootParameters.size());
     std::vector<CD3DX12_ROOT_PARAMETER1> rootParams(m_rootParameters.size());
 
+    auto cbvCount = 0;
+    auto srvCount = 0;
+
     for (unsigned i = 0; i < m_rootParameters.size(); ++i)
     {
-      ranges[i].Init(m_rootParameters[i].type, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+      auto count = m_rootParameters[i].type == D3D12_DESCRIPTOR_RANGE_TYPE_CBV ? cbvCount : srvCount;
+
+      ranges[i].Init(m_rootParameters[i].type, 1, count, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
       rootParams[i].InitAsDescriptorTable(1, &ranges[i], m_rootParameters[i].visibility);
+    
+      cbvCount += 1 * m_rootParameters[i].type == D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+      srvCount += 1 * m_rootParameters[i].type == D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
     }
 
     CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
