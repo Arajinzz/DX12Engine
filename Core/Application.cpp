@@ -34,9 +34,11 @@ namespace Core
     for (auto model : models)
     {
       XMFLOAT3 translation;
+      auto z = dist(gen);
+      z = z < 0 ? z * -1 : z;
       translation.x = dist(gen) * 10;
       translation.y = dist(gen) * 5;
-      translation.z = dist(gen) * 25;
+      translation.z = z * 25;
       model->Setup();
       model->SetTranslation(translation);
       model->LoadModel("models\\cube.obj");
