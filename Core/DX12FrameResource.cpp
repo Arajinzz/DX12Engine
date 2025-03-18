@@ -36,7 +36,7 @@ namespace Core
       XMMatrixIdentity() * XMMatrixRotationZ(angle) * XMMatrixRotationY(angle * 2) * XMMatrixRotationX(angle) * XMMatrixTranslation(sin(angle), 0.0, 0.0)
     ));
     m_constantBuffer->SetView(XMMatrixTranspose(XMMatrixLookAtLH(
-      XMVectorSet(0.0, 0.0, -5.0, 0.0), // camera position
+      XMVectorSet(0.0, 0.0, -10.0, 0.0), // camera position
       XMVectorSet(0.0, 0.0, 0.0, 0.0), // lookat position
       XMVectorSet(0.0, 1.0, 0.0, 0.0) // up vector
     )));

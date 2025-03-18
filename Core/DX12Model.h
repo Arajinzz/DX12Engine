@@ -34,6 +34,7 @@ namespace Core
 
     // for testing
     XMFLOAT3 m_translation;
+    float m_angle;
 
     // data
     std::vector<Vertex> m_vertices;

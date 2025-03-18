@@ -21,6 +21,7 @@ namespace Core
     , m_descHeap(nullptr)
     , m_constantBuffer(nullptr)
     , m_translation(0.0f, 0.0f, 0.0f)
+    , m_angle(0.0f)
   {
     // create heap
     m_descHeap = std::make_unique<DX12Heap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -204,13 +205,12 @@ namespace Core
 
   void DX12Model::Update()
   {
-    auto static angle = 0.0;
-    angle += 3 * WindowsApplication::deltaTime;
-    if (angle > 360.0)
-      angle = 0.0;
+    m_angle += 3 * WindowsApplication::deltaTime;
+    if (m_angle > 360.0)
+      m_angle = 0.0;
 
     m_constantBuffer->SetModel(XMMatrixTranspose(
-      XMMatrixIdentity() * XMMatrixRotationZ(angle) * XMMatrixRotationY(angle * 2) * XMMatrixRotationX(angle) * 
+      XMMatrixIdentity() * XMMatrixRotationZ(m_angle) * XMMatrixRotationY(m_angle * 2) * XMMatrixRotationX(m_angle) *
       XMMatrixTranslation(m_translation.x, m_translation.y, m_translation.z)
     ));
   }

@@ -5,6 +5,8 @@
 #include "Core/DX12CommandQueue.h"
 #include "Core/DX12FrameResource.h"
 
+#include <random>
+
 namespace Core
 {
   Application::Application(UINT width, UINT height, std::wstring name)
@@ -20,17 +22,21 @@ namespace Core
     CreateFrameResource();
 
     // Create Cube, will also create pso and root signature and constant buffer for transformation
-    models.push_back(new DX12Model());
-    models.push_back(new DX12Model());
-    models.push_back(new DX12Model());
-    models.push_back(new DX12Model());
+    auto modelNumber = 100;
+    for (int i = 0; i < modelNumber; ++i)
+      models.push_back(new DX12Model());
+
+    std::random_device rd;  // Seed from hardware
+    std::mt19937 gen(rd()); // Mersenne Twister PRNG
+    std::uniform_real_distribution<float> dist(-1.0f, 1.0f); // Range [0,1]
+
 
     for (auto model : models)
     {
       XMFLOAT3 translation;
-      translation.x = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 10;
-      translation.y = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2;
-      translation.z = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2;
+      translation.x = dist(gen) * 10;
+      translation.y = dist(gen) * 5;
+      translation.z = dist(gen) * 25;
       model->Setup();
       model->SetTranslation(translation);
       model->LoadModel("models\\cube.obj");
