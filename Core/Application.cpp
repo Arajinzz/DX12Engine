@@ -21,10 +21,18 @@ namespace Core
 
     // Create Cube, will also create pso and root signature and constant buffer for transformation
     models.push_back(new DX12Model());
+    models.push_back(new DX12Model());
+    models.push_back(new DX12Model());
+    models.push_back(new DX12Model());
 
     for (auto model : models)
     {
+      XMFLOAT3 translation;
+      translation.x = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 10;
+      translation.y = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2;
+      translation.z = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2;
       model->Setup();
+      model->SetTranslation(translation);
       model->LoadModel("models\\cube.obj");
     }
 
@@ -54,7 +62,6 @@ namespace Core
     // draw models
     for (auto model : models)
     {
-
       m_context->Draw(model);
     }
 

@@ -22,6 +22,8 @@ namespace Core
     // workaround!!!
     DX12Heap* GetHeapDesc() { return m_descHeap.get(); }
 
+    void SetTranslation(XMFLOAT3 translate) { m_translation = translate; };
+
   private:
     struct Vertex
     {
@@ -29,6 +31,9 @@ namespace Core
       XMFLOAT4 color;
       XMFLOAT2 uv;
     };
+
+    // for testing
+    XMFLOAT3 m_translation;
 
     // data
     std::vector<Vertex> m_vertices;

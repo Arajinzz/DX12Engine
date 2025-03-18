@@ -20,6 +20,7 @@ namespace Core
     , m_bundle(nullptr)
     , m_descHeap(nullptr)
     , m_constantBuffer(nullptr)
+    , m_translation(0.0f, 0.0f, 0.0f)
   {
     // create heap
     m_descHeap = std::make_unique<DX12Heap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -40,8 +41,6 @@ namespace Core
 
   void DX12Model::Setup()
   {
-    FrameResource().GetShader()->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
-
     // order has to be correct. FrameResource already adds CBV then SRV
     // so we have CBV, SRV, CBV
     m_descHeap->AddResource(FrameResource().GetConstantBuffer()->GetResource(), CONSTANTBUFFER);
@@ -211,7 +210,8 @@ namespace Core
       angle = 0.0;
 
     m_constantBuffer->SetModel(XMMatrixTranspose(
-      XMMatrixIdentity() * XMMatrixRotationZ(angle) * XMMatrixRotationY(angle * 2) * XMMatrixRotationX(angle) * XMMatrixTranslation(sin(angle), 0.0, 0.0)
+      XMMatrixIdentity() * XMMatrixRotationZ(angle) * XMMatrixRotationY(angle * 2) * XMMatrixRotationX(angle) * 
+      XMMatrixTranslation(m_translation.x, m_translation.y, m_translation.z)
     ));
   }
 }

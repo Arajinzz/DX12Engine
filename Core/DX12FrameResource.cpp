@@ -15,6 +15,9 @@ namespace Core
 
     m_shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
     m_shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL);
+    // this was in setup for model but since each model do this it will not work
+    // this has to be rethinked
+    m_shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
   }
 
   void DX12FrameResource::Init(DX12CommandList* commandList)
