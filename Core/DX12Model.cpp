@@ -108,7 +108,7 @@ namespace Core
     m_bundle->Get()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     m_bundle->Get()->IASetVertexBuffers(0, 1, &m_vertexBufferView);
     m_bundle->Get()->IASetIndexBuffer(&m_indexBufferView);
-    m_bundle->Get()->DrawIndexedInstanced(m_indices.size(), m_indices.size() / 3, 0, 0, 0);
+    m_bundle->Get()->DrawIndexedInstanced(m_indices.size(), 1, 0, 0, 0);
 
     m_bundle->Close();
   }
