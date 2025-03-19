@@ -31,7 +31,6 @@ namespace Core
     std::mt19937 gen(rd()); // Mersenne Twister PRNG
     std::uniform_real_distribution<float> dist(-1.0f, 1.0f); // Range [0,1]
 
-
     for (auto model : models)
     {
       XMFLOAT3 translation;
