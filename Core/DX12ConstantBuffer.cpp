@@ -22,6 +22,13 @@ namespace Core
       IID_PPV_ARGS(&m_buffer)));
 
     FrameResource().AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
+    FrameResource().AddResource(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, m_buffer.Get());
+
+    // Map and initialize the constant buffer. We don't unmap this until the
+    // app closes. Keeping things mapped for the lifetime of the resource is okay.
+    CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
+    ThrowIfFailed(m_buffer->Map(0, &readRange, reinterpret_cast<void**>(&m_pCbvDataBegin)));
+    memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
   }
 
   DX12ConstantBuffer::~DX12ConstantBuffer()
@@ -43,15 +50,6 @@ namespace Core
   void DX12ConstantBuffer::SetProjection(XMMATRIX proj)
   {
     m_constantBufferData.projection = proj;
-    memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
-  }
-
-  void DX12ConstantBuffer::MapToResource(ID3D12Resource* resource)
-  {
-    // Map and initialize the constant buffer. We don't unmap this until the
-    // app closes. Keeping things mapped for the lifetime of the resource is okay.
-    CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
-    ThrowIfFailed(resource->Map(0, &readRange, reinterpret_cast<void**>(&m_pCbvDataBegin)));
     memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
   }
 }

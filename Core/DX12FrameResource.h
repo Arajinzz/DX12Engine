@@ -24,12 +24,12 @@ namespace Core
     }
     
     void CreateResources(DX12CommandList* commandList);
+    void AddResource(D3D12_DESCRIPTOR_RANGE_TYPE type, ID3D12Resource* resource);
     void Update();
     void AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE type, D3D12_SHADER_VISIBILITY visibility);
-
+    void InitHeapDesc(DX12Heap* heapDesc);
+    // !!??
     DX12Shader* GetShader() { return m_shader.get(); }
-    DX12Texture* GetTexture() { return m_texture.get(); }
-    DX12ConstantBuffer* GetConstantBuffer() { return m_constantBuffer.get(); }
     
     ~DX12FrameResource();
 
@@ -37,6 +37,10 @@ namespace Core
     std::unique_ptr<DX12Texture> m_texture;
     std::unique_ptr<DX12ConstantBuffer> m_constantBuffer;
     std::unique_ptr<DX12Shader> m_shader;
+
+    // keep track of resources on the application
+    std::vector<ID3D12Resource*> m_cbvResources;
+    std::vector<ID3D12Resource*> m_srvResources;
 
   private:
     DX12FrameResource();

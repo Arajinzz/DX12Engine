@@ -54,6 +54,7 @@ namespace Core
 
     // Add param to frame resource, this will be added to all shaders in FrameResource
     FrameResource().AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL);
+    FrameResource().AddResource(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, m_texture.Get());
   }
 
   DX12Texture::~DX12Texture()

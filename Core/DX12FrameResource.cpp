@@ -13,6 +13,8 @@ namespace Core
     : m_constantBuffer(nullptr)
     , m_texture(nullptr)
     , m_shader(nullptr)
+    , m_cbvResources()
+    , m_srvResources()
   {
   }
 
@@ -24,6 +26,14 @@ namespace Core
     m_constantBuffer = std::make_unique<DX12ConstantBuffer>();
     m_texture = std::make_unique<DX12Texture>("textures\\brick.png"); // shared between models
     m_texture->Init(commandList->Get());
+  }
+
+  void DX12FrameResource::AddResource(D3D12_DESCRIPTOR_RANGE_TYPE type, ID3D12Resource* resource)
+  {
+    if (type == D3D12_DESCRIPTOR_RANGE_TYPE_CBV)
+      m_cbvResources.push_back(resource);
+    else if (type == D3D12_DESCRIPTOR_RANGE_TYPE_SRV)
+      m_srvResources.push_back(resource);
   }
 
   void DX12FrameResource::Update()
@@ -55,7 +65,21 @@ namespace Core
     m_shader->AddParameter(type, visibility);
   }
 
+  void DX12FrameResource::InitHeapDesc(DX12Heap* heapDesc)
+  {
+    for (auto resource : m_cbvResources)
+      heapDesc->AddResource(resource, CONSTANTBUFFER);
+
+    for (auto resource : m_srvResources)
+      heapDesc->AddResource(resource, TEXTURE);
+  }
+
   DX12FrameResource::~DX12FrameResource()
   {
+    m_shader.reset();
+    m_cbvResources.clear();
+    m_srvResources.clear();
+    m_constantBuffer.reset();
+    m_texture.reset();
   }
 }

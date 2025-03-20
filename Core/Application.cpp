@@ -67,9 +67,7 @@ namespace Core
 
     // draw meshes
     for (auto mesh : m_meshes)
-    {
       m_context->Draw(mesh);
-    }
 
     // transition to present state
     m_context->PrepareForPresenting();
