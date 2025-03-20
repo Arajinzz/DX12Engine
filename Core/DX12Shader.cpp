@@ -7,7 +7,8 @@
 namespace Core
 {
   DX12Shader::DX12Shader(const wchar_t* path)
-    : m_rootParameters()
+    : m_cbvParameters()
+    , m_srvParameters()
   {
     ComPtr<ID3DBlob> errorBlob;
     // Enable better shader debugging with the graphics debugging tools.
@@ -25,6 +26,7 @@ namespace Core
 
   DX12Shader::~DX12Shader()
   {
+    m_rootSignature.Reset();
   }
 
   void DX12Shader::CreateRootSignature()
@@ -44,21 +46,19 @@ namespace Core
     sampler.RegisterSpace = 0;
     sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-    std::vector<CD3DX12_DESCRIPTOR_RANGE1> ranges(m_rootParameters.size());
-    std::vector<CD3DX12_ROOT_PARAMETER1> rootParams(m_rootParameters.size());
+    std::vector<CD3DX12_DESCRIPTOR_RANGE1> ranges(m_cbvParameters.size() + m_srvParameters.size());
+    std::vector<CD3DX12_ROOT_PARAMETER1> rootParams(m_cbvParameters.size() + m_srvParameters.size());
 
-    auto cbvCount = 0;
-    auto srvCount = 0;
-
-    for (unsigned i = 0; i < m_rootParameters.size(); ++i)
+    for (unsigned i = 0; i < m_cbvParameters.size(); ++i)
     {
-      auto count = m_rootParameters[i].type == D3D12_DESCRIPTOR_RANGE_TYPE_CBV ? cbvCount : srvCount;
+      ranges[i].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, i, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+      rootParams[i].InitAsDescriptorTable(1, &ranges[i], m_cbvParameters[i]);
+    }
 
-      ranges[i].Init(m_rootParameters[i].type, 1, count, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
-      rootParams[i].InitAsDescriptorTable(1, &ranges[i], m_rootParameters[i].visibility);
-    
-      cbvCount += 1 * m_rootParameters[i].type == D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
-      srvCount += 1 * m_rootParameters[i].type == D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+    for (unsigned i = 0; i < m_srvParameters.size(); ++i)
+    {
+      ranges[i + m_cbvParameters.size()].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, i, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+      rootParams[i + m_cbvParameters.size()].InitAsDescriptorTable(1, &ranges[i + m_cbvParameters.size()], m_srvParameters[i]);
     }
 
     CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
@@ -77,6 +77,9 @@ namespace Core
 
   void DX12Shader::AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE type, D3D12_SHADER_VISIBILITY visibility)
   {
-    m_rootParameters.push_back({ type, visibility });
+    if (type == D3D12_DESCRIPTOR_RANGE_TYPE_CBV)
+      m_cbvParameters.push_back(visibility);
+    else if (type == D3D12_DESCRIPTOR_RANGE_TYPE_SRV)
+      m_srvParameters.push_back(visibility);
   }
 }

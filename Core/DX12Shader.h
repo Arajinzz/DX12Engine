@@ -5,12 +5,6 @@ using Microsoft::WRL::ComPtr;
 
 namespace Core
 {
-  struct RootParam
-  {
-    D3D12_DESCRIPTOR_RANGE_TYPE type;
-    D3D12_SHADER_VISIBILITY visibility;
-  };
-
   // will contain root signature and shader compilation
   class DX12Shader
   {
@@ -32,7 +26,8 @@ namespace Core
     ComPtr<ID3DBlob> m_vertexShader;
     ComPtr<ID3DBlob> m_pixelShader;
 
-    std::vector<RootParam> m_rootParameters;
+    std::vector<D3D12_SHADER_VISIBILITY> m_cbvParameters;
+    std::vector<D3D12_SHADER_VISIBILITY> m_srvParameters;
 
   private:
     DX12Shader(const DX12Shader&) = delete;

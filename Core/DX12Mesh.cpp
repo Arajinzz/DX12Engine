@@ -33,15 +33,14 @@ namespace Core
 
   void DX12Mesh::SetupMesh(ID3D12GraphicsCommandList* commandList)
   {
-    // order has to be correct. FrameResource already adds CBV then SRV
-    // so we have CBV, SRV, CBV
+    // order has to be correct. always constant buffers first
     m_descHeap->AddResource(FrameResource().GetConstantBuffer()->GetResource(), CONSTANTBUFFER);
-    m_descHeap->AddResource(FrameResource().GetTexture()->GetResource(), TEXTURE);
     m_descHeap->AddResource(m_constantBuffer->GetResource(), CONSTANTBUFFER);
+    m_descHeap->AddResource(FrameResource().GetTexture()->GetResource(), TEXTURE);
 
     // constant buffers
     FrameResource().GetConstantBuffer()->MapToResource(m_descHeap->GetResource(0));
-    m_constantBuffer->MapToResource(m_descHeap->GetResource(2));
+    m_constantBuffer->MapToResource(m_descHeap->GetResource(1));
 
     FrameResource().GetShader()->CreateRootSignature();
 
