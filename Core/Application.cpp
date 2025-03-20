@@ -22,6 +22,9 @@ namespace Core
     LoadPipeline();
 
     CreateFrameResource();
+    
+    // create resources before doing anything
+    FrameResource().CreateResources(m_context->GetCommandList());
 
     // Create Cube, will also create pso and root signature and constant buffer for transformation
     auto modelNumber = 1;
@@ -40,8 +43,6 @@ namespace Core
       mesh->SetTranslation(translation);
       m_triangleCount += mesh->GetTriangleCount();
     }
-
-    FrameResource().Init(m_context->GetCommandList());
 
     // Execute command lists
     m_context->Execute();

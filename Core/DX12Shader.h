@@ -5,6 +5,12 @@ using Microsoft::WRL::ComPtr;
 
 namespace Core
 {
+  struct RootParam
+  {
+    D3D12_DESCRIPTOR_RANGE_TYPE type;
+    D3D12_SHADER_VISIBILITY visibility;
+  };
+
   // will contain root signature and shader compilation
   class DX12Shader
   {
@@ -21,12 +27,6 @@ namespace Core
     ID3D12RootSignature* GetRootSignature() { return m_rootSignature.Get(); }
 
   private:
-    struct RootParam
-    {
-      D3D12_DESCRIPTOR_RANGE_TYPE type;
-      D3D12_SHADER_VISIBILITY visibility;
-    };
-
     ComPtr<ID3D12RootSignature> m_rootSignature;
 
     ComPtr<ID3DBlob> m_vertexShader;

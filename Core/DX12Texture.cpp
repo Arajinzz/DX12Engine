@@ -3,6 +3,7 @@
 
 #include "Core/DX12Device.h"
 #include "Core/DXApplicationHelper.h"
+#include "Core/DX12FrameResource.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -50,6 +51,9 @@ namespace Core
       D3D12_RESOURCE_STATE_GENERIC_READ,
       nullptr,
       IID_PPV_ARGS(&m_texUploadHeap)));
+
+    // Add param to frame resource, this will be added to all shaders in FrameResource
+    FrameResource().AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL);
   }
 
   DX12Texture::~DX12Texture()

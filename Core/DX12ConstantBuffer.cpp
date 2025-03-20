@@ -3,6 +3,7 @@
 
 #include "Core/DXApplicationHelper.h"
 #include "Core/DX12Device.h"
+#include "Core/DX12FrameResource.h"
 
 namespace Core
 {
@@ -19,6 +20,8 @@ namespace Core
       D3D12_RESOURCE_STATE_GENERIC_READ,
       nullptr,
       IID_PPV_ARGS(&m_buffer)));
+
+    FrameResource().AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
   }
 
   DX12ConstantBuffer::~DX12ConstantBuffer()

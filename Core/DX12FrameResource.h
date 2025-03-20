@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Core/DX12CommandList.h"
-#include "Core/DX12Texture.h"
-#include "Core/DX12ConstantBuffer.h"
 #include "Core/DX12Shader.h"
 
 using namespace DirectX;
@@ -13,6 +11,9 @@ using Microsoft::WRL::ComPtr;
 
 namespace Core
 {
+  class DX12Texture;
+  class DX12ConstantBuffer;
+
   class DX12FrameResource
   {
   public:
@@ -22,8 +23,10 @@ namespace Core
       return instance;
     }
     
-    void Init(DX12CommandList* commandList);
+    void CreateResources(DX12CommandList* commandList);
     void Update();
+    void AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE type, D3D12_SHADER_VISIBILITY visibility);
+
     DX12Shader* GetShader() { return m_shader.get(); }
     DX12Texture* GetTexture() { return m_texture.get(); }
     DX12ConstantBuffer* GetConstantBuffer() { return m_constantBuffer.get(); }

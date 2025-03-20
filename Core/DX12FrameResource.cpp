@@ -4,24 +4,25 @@
 #include "Core/DXApplicationHelper.h"
 #include "Core/WindowsApplication.h"
 #include "Core/DX12SwapChain.h"
+#include "Core/DX12Texture.h"
+#include "Core/DX12ConstantBuffer.h"
 
 namespace Core
 {
   DX12FrameResource::DX12FrameResource()
+    : m_constantBuffer(nullptr)
+    , m_texture(nullptr)
+    , m_shader(nullptr)
   {
-    m_constantBuffer = std::make_unique<DX12ConstantBuffer>();
-    m_texture = std::make_unique<DX12Texture>("textures\\brick.png");
-    m_shader = std::make_unique<DX12Shader>(L"shaders.hlsl"); // shared between models
-
-    m_shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
-    m_shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL);
-    // this was in setup for model but since each model do this it will not work
-    // this has to be rethinked
-    m_shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
   }
 
-  void DX12FrameResource::Init(DX12CommandList* commandList)
+  void DX12FrameResource::CreateResources(DX12CommandList* commandList)
   {
+    // Shader first because constant buffers and textures modify the root signature of this shader
+    m_shader = std::make_unique<DX12Shader>(L"shaders.hlsl"); // shared between models
+    
+    m_constantBuffer = std::make_unique<DX12ConstantBuffer>();
+    m_texture = std::make_unique<DX12Texture>("textures\\brick.png"); // shared between models
     m_texture->Init(commandList->Get());
   }
 
@@ -47,6 +48,11 @@ namespace Core
     auto height = rect.bottom - rect.top;
     auto aspectRatio = static_cast<double>(width) / height;
     m_constantBuffer->SetProjection(XMMatrixTranspose(XMMatrixPerspectiveFovLH(45.0, aspectRatio, 1.0, 1000.0)));
+  }
+
+  void DX12FrameResource::AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE type, D3D12_SHADER_VISIBILITY visibility)
+  {
+    m_shader->AddParameter(type, visibility);
   }
 
   DX12FrameResource::~DX12FrameResource()
