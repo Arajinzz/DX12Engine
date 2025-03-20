@@ -46,7 +46,7 @@ namespace Core
     auto width = rect.right - rect.left;
     auto height = rect.bottom - rect.top;
     auto aspectRatio = static_cast<double>(width) / height;
-    m_constantBuffer->SetProjection(XMMatrixTranspose(XMMatrixPerspectiveFovLH(45.0, aspectRatio, 1.0, 100.0)));
+    m_constantBuffer->SetProjection(XMMatrixTranspose(XMMatrixPerspectiveFovLH(45.0, aspectRatio, 1.0, 1000.0)));
   }
 
   DX12FrameResource::~DX12FrameResource()

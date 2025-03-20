@@ -13,6 +13,7 @@ namespace Core
     : DirectXApplication(width, height, name)
     , m_context(nullptr)
     , m_triangleCount(0)
+    , m_meshes()
   {
   }
 
@@ -23,27 +24,21 @@ namespace Core
     CreateFrameResource();
 
     // Create Cube, will also create pso and root signature and constant buffer for transformation
-    auto modelNumber = 100;
+    auto modelNumber = 1;
     for (int i = 0; i < modelNumber; ++i)
-      models.push_back(new DX12Model());
+      m_meshes.push_back(new DX12Mesh());
 
     std::random_device rd;  // Seed from hardware
     std::mt19937 gen(rd()); // Mersenne Twister PRNG
     std::uniform_real_distribution<float> dist(-1.0f, 1.0f); // Range [0,1]
 
-    for (auto model : models)
+    for (auto mesh : m_meshes)
     {
-      XMFLOAT3 translation;
-      auto z = dist(gen);
-      z = z < 0 ? z * -1 : z;
-      translation.x = dist(gen) * 10;
-      translation.y = dist(gen) * 5;
-      translation.z = z * 25;
-      model->LoadModel("models\\suzanne.obj");
-      model->Setup(m_context->GetCommandList()->Get());
-      model->SetTranslation(translation);
-
-      m_triangleCount += model->GetTriangleCount();
+      XMFLOAT3 translation = {0, 0, -5};
+      mesh->LoadMesh("models\\suzanne.obj");
+      mesh->SetupMesh(m_context->GetCommandList()->Get());
+      mesh->SetTranslation(translation);
+      m_triangleCount += mesh->GetTriangleCount();
     }
 
     FrameResource().Init(m_context->GetCommandList());
@@ -59,8 +54,8 @@ namespace Core
   {
     FrameResource().Update();
 
-    for (auto model : models)
-      model->Update();
+    for (auto mesh: m_meshes)
+      mesh->UpdateMesh();
   }
 
   void Application::OnRender()
@@ -69,10 +64,10 @@ namespace Core
     // Reset and transition to Rendering state
     m_context->PrepareForRendering(); // set heaps, rects ...etc
 
-    // draw models
-    for (auto model : models)
+    // draw meshes
+    for (auto mesh : m_meshes)
     {
-      m_context->Draw(model);
+      m_context->Draw(mesh);
     }
 
     // transition to present state

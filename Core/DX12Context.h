@@ -2,7 +2,7 @@
 
 #include "Core/DX12CommandQueue.h"
 #include "Core/DX12CommandList.h"
-#include "Core/DX12Model.h"
+#include "Core/DX12Mesh.h"
 #include "Core/DX12SwapChain.h"
 
 using namespace DirectX;
@@ -24,8 +24,7 @@ namespace Core
     void Resize(unsigned width, unsigned height);
 
     void PrepareForRendering();
-    // for now draws only cubes
-    void Draw(DX12Model* cube);
+    void Draw(DX12Mesh* mesh);
     void PrepareForPresenting();
 
     DX12CommandQueue* GetCommandQueue() { return m_commandQueue.get(); }

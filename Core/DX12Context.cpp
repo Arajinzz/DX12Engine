@@ -124,12 +124,11 @@ namespace Core
     m_commandList->ClearRenderTargetView(rtvHandle, clearColor);
   }
 
-  void DX12Context::Draw(DX12Model* model)
+  void DX12Context::Draw(DX12Mesh* mesh)
   {
     // set heaps, this has to be the same as bundles
-    m_commandQueue->GetCommandList()->SetDescriptorHeap(model->GetHeapDesc());
-    model->Draw(m_frameIndex);
-    m_commandList->Get()->ExecuteBundle(model->GetBundle());
+    m_commandQueue->GetCommandList()->SetDescriptorHeap(mesh->GetHeapDesc());
+    mesh->DrawMesh(m_frameIndex, m_commandList->Get()); // executes bundles
   }
 
   void DX12Context::PrepareForPresenting()

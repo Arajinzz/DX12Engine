@@ -8,27 +8,13 @@
 
 #include <fstream>
 
-#include <assimp\Importer.hpp>
-#include <assimp\scene.h>
-#include <assimp\postprocess.h>
-
 namespace Core
 {
   DX12Model::DX12Model()
     : m_vertices()
     , m_indices()
     , m_bundle(nullptr)
-    , m_descHeap(nullptr)
-    , m_constantBuffer(nullptr)
-    , m_translation(0.0f, 0.0f, 0.0f)
-    , m_angle(0.0f)
   {
-    // create heap
-    m_descHeap = std::make_unique<DX12Heap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-    // create constant buffer
-    m_constantBuffer = std::make_unique<DX12ConstantBuffer>();
-
     // Create the command list.
     // the class should add command list automatically to CommandQueue
     m_bundle = std::make_unique<DX12CommandList>(D3D12_COMMAND_LIST_TYPE_BUNDLE);
@@ -38,23 +24,10 @@ namespace Core
   DX12Model::~DX12Model()
   {
     m_bundle.reset();
-    m_descHeap.reset();
   }
 
   void DX12Model::Setup(ID3D12GraphicsCommandList* commandList)
   {
-    // order has to be correct. FrameResource already adds CBV then SRV
-    // so we have CBV, SRV, CBV
-    m_descHeap->AddResource(FrameResource().GetConstantBuffer()->GetResource(), CONSTANTBUFFER);
-    m_descHeap->AddResource(FrameResource().GetTexture()->GetResource(), TEXTURE);
-    m_descHeap->AddResource(m_constantBuffer->GetResource(), CONSTANTBUFFER);
-    
-    // constant buffers
-    FrameResource().GetConstantBuffer()->MapToResource(m_descHeap->GetResource(0));
-    m_constantBuffer->MapToResource(m_descHeap->GetResource(2));
-
-    FrameResource().GetShader()->CreateRootSignature();
-
     // Define the vertex input layout.
     D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
     {
@@ -88,15 +61,15 @@ namespace Core
     SetupIndexBuffer(commandList);
   }
 
-  void DX12Model::Draw(unsigned frameIndex)
+  void DX12Model::Draw(unsigned frameIndex, DX12Heap* heapDesc)
   {
     // 1 allocator
     m_bundle->Reset(frameIndex, m_pipelineState.Get());
     // Set necessary state.
     m_bundle->SetRootSignature(FrameResource().GetShader()->GetRootSignature());
-    m_bundle->SetDescriptorHeap(m_descHeap.get());
+    m_bundle->SetDescriptorHeap(heapDesc);
     
-    auto handle = m_descHeap->Get()->GetGPUDescriptorHandleForHeapStart();
+    auto handle = heapDesc->Get()->GetGPUDescriptorHandleForHeapStart();
     m_bundle->Get()->SetGraphicsRootDescriptorTable(0, handle);
 
     handle.ptr += Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -113,17 +86,8 @@ namespace Core
     m_bundle->Close();
   }
 
-  void DX12Model::LoadModel(const char* path)
+  void DX12Model::LoadModel(const aiMesh* pMesh)
   {
-    Assimp::Importer importer;
-
-    const aiScene* pModel = importer.ReadFile(path,
-      aiProcess_Triangulate |
-      aiProcess_JoinIdenticalVertices |
-      aiProcess_ConvertToLeftHanded);
-
-    const auto pMesh = pModel->mMeshes[0];
-
     m_vertices.reserve(pMesh->mNumVertices);
 
     for (unsigned i = 0; i < pMesh->mNumVertices; ++i)
@@ -134,7 +98,10 @@ namespace Core
       float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
       float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
       vertex.color = { r, g, b, 1.0};
-      vertex.uv = { pMesh->mTextureCoords[0][i].x, pMesh->mTextureCoords[0][i].y };
+      if (pMesh->mTextureCoords[0])
+        vertex.uv = { pMesh->mTextureCoords[0][i].x, pMesh->mTextureCoords[0][i].y };
+      else
+        vertex.uv = { 0.0f, 0.0f };
       m_vertices.push_back(vertex);
     }
     
@@ -148,18 +115,6 @@ namespace Core
       m_indices.push_back(face.mIndices[1]);
       m_indices.push_back(face.mIndices[2]);
     }
-  }
-
-  void DX12Model::Update()
-  {
-    m_angle += 3 * WindowsApplication::deltaTime;
-    if (m_angle > 360.0)
-      m_angle = 0.0;
-
-    m_constantBuffer->SetModel(XMMatrixTranspose(
-      XMMatrixIdentity() * XMMatrixRotationZ(m_angle) * XMMatrixRotationY(m_angle * 2) * XMMatrixRotationX(m_angle) *
-      XMMatrixTranslation(m_translation.x, m_translation.y, m_translation.z)
-    ));
   }
 
   void DX12Model::SetupVertexBuffer(ID3D12GraphicsCommandList* commandList)

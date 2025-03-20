@@ -3,6 +3,7 @@
 #include "Core/DirectXApplication.h"
 #include "Core/DX12Model.h"
 #include "Core/DX12Context.h"
+#include "Core/DX12Mesh.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -31,8 +32,8 @@ namespace Core
     // main context
     std::unique_ptr<DX12Context> m_context;
 
-    // models
-    std::vector<DX12Model*> models;
+    // meshes
+    std::vector<DX12Mesh*> m_meshes;
 
   };
 }

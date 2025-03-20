@@ -3,6 +3,10 @@
 #include "Core/DX12CommandList.h"
 #include "Core/DX12ConstantBuffer.h"
 
+#include <assimp\Importer.hpp>
+#include <assimp\scene.h>
+#include <assimp\postprocess.h>
+
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
@@ -16,15 +20,9 @@ namespace Core
 
     ID3D12GraphicsCommandList* GetBundle() { return m_bundle->Get(); }
     virtual void Setup(ID3D12GraphicsCommandList* commandList);
-    virtual void Draw(unsigned frameIndex);
-    virtual void LoadModel(const char* path);
-    virtual void Update();
-    // workaround!!!
-    DX12Heap* GetHeapDesc() { return m_descHeap.get(); }
-
+    virtual void Draw(unsigned frameIndex, DX12Heap* heapDesc);
+    virtual void LoadModel(const aiMesh* pMesh);
     unsigned GetTriangleCount() { return m_indices.size() / 3; }
-
-    void SetTranslation(XMFLOAT3 translate) { m_translation = translate; };
 
   private:
     void SetupVertexBuffer(ID3D12GraphicsCommandList* commandList);
@@ -37,10 +35,6 @@ namespace Core
       XMFLOAT4 color;
       XMFLOAT2 uv;
     };
-
-    // for testing
-    XMFLOAT3 m_translation;
-    float m_angle;
 
     // data
     std::vector<Vertex> m_vertices;
@@ -59,11 +53,6 @@ namespace Core
     ComPtr<ID3D12Resource> m_indexBuffer;
     ComPtr<ID3D12Resource> m_indexBufferUploadHeap;
     D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
-
-    // descriptor heap
-    std::unique_ptr<DX12Heap> m_descHeap;
-    // constant buffer
-    std::unique_ptr<DX12ConstantBuffer> m_constantBuffer;
 
   private:
     DX12Model(const DX12Model&) = delete;
