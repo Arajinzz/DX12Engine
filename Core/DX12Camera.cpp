@@ -70,7 +70,7 @@ namespace Core
 
   void DX12Camera::Update()
   {
-    float speed = 10000.0 * WindowsApplication::deltaTime;
+    float speed = 100.0f;
     XMFLOAT3 desiredPosition;
     desiredPosition.x = m_cameraPosition.x + m_translation.x * speed;
     desiredPosition.y = m_cameraPosition.y + m_translation.y * speed;
