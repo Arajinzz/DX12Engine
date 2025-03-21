@@ -11,8 +11,8 @@ namespace Core
     DX12Camera(float fov , float nearPlane, float farPlane);
     ~DX12Camera();
     
-    void Translate(XMFLOAT3 translation);
-    void Rotate(XMMATRIX rotationMatrix);
+    void Translate(float x, float z);
+    void Rotate(float yaw, float pitch);
     // update aspect ratio
     void Update();
 

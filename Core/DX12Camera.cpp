@@ -23,14 +23,17 @@ namespace Core
   {
   }
 
-  void DX12Camera::Translate(XMFLOAT3 translation)
+  void DX12Camera::Translate(float x, float z)
   {
-    m_view = m_view * XMMatrixTranspose(XMMatrixTranslation(translation.x, translation.y, translation.z));
+    m_view = m_view * XMMatrixTranspose(XMMatrixTranslation(x, 0.0f, z));
   }
 
-  void DX12Camera::Rotate(XMMATRIX rotationMatrix)
+  void DX12Camera::Rotate(float yaw, float pitch)
   {
-    m_view = m_view * rotationMatrix;
+    XMMATRIX rotationYaw = XMMatrixRotationY(yaw);
+    XMMATRIX rotationPitch = XMMatrixRotationX(pitch);
+    XMMATRIX rotationMatrix = rotationPitch * rotationYaw;
+    m_view = rotationMatrix * m_view;
   }
 
   void DX12Camera::Update()

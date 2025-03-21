@@ -109,27 +109,28 @@ namespace Core
 
   void Application::OnKeyDown(UINT8 key)
   {
-    XMFLOAT3 translation = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    float x = 0.0;
+    float z = 0.0;
     float speed = WindowsApplication::deltaTime * 100;
 
     if (key == 0x57)
     { // W
-      translation.z = -speed;
+      z = -speed;
     }
     else if (key == 0x41)
     { // A
-      translation.x = speed;
+      x = speed;
     }
     else if (key == 0x53)
     { // S
-      translation.z = speed;
+      z = speed;
     }
     else if (key == 0x44)
     { // D
-      translation.x = -speed;
+      x = -speed;
     }
     
-    FrameResource().GetCamera()->Translate(translation);
+    FrameResource().GetCamera()->Translate(x, z);
   }
 
   void Application::OnKeyUp(UINT8 key)
@@ -138,10 +139,7 @@ namespace Core
 
   void Application::OnMouseMove(float yaw, float pitch)
   {
-    XMMATRIX rotationYaw = XMMatrixRotationY(yaw);
-    XMMATRIX rotationPitch = XMMatrixRotationX(pitch);
-    XMMATRIX rotationMatrix = rotationPitch * rotationYaw;
-    FrameResource().GetCamera()->Rotate(rotationMatrix);
+    FrameResource().GetCamera()->Rotate(yaw, pitch);
   }
 
   void Application::LoadPipeline()
