@@ -33,9 +33,6 @@ namespace Core
     static unsigned m_frameCount;
     static bool m_shouldResize;
     static MousePosition m_lastMousePos;
-    static float m_yaw;
-    static float m_pitch;
-    const static float sensitivity;
   };
 }
 

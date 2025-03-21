@@ -11,16 +11,11 @@ unsigned Core::WindowsApplication::m_frameCount;
 double Core::WindowsApplication::deltaTime;
 bool Core::WindowsApplication::m_shouldResize;
 MousePosition Core::WindowsApplication::m_lastMousePos;
-float Core::WindowsApplication::m_yaw;
-float Core::WindowsApplication::m_pitch;
-const float Core::WindowsApplication::sensitivity = 0.00001f;
 
 namespace Core
 {
   int WindowsApplication::Run(DirectXApplication* pApp, HINSTANCE hInstance, int nCmdShow)
   {
-    m_yaw = 0.0f;
-    m_pitch = 0.0f;
     m_lastMousePos = { 0.0f, 0.0f };
     m_shouldResize = false;
 
@@ -150,16 +145,8 @@ namespace Core
 
         auto deltaX = xPos - m_lastMousePos.xPos;
         auto deltaY = yPos - m_lastMousePos.yPos;
-        
-        m_yaw += deltaX * sensitivity;
-        m_pitch += deltaY * sensitivity;
 
-        m_yaw = min(m_yaw, 89.0f);
-        m_yaw = max(m_yaw, -89.0f);
-        m_pitch = min(m_pitch, 89.0f);
-        m_pitch = max(m_pitch, -89.0f);
-
-        pApp->OnMouseMove(m_yaw, m_pitch);
+        pApp->OnMouseMove(deltaX, deltaY);
         
         m_lastMousePos = { static_cast<float>(xPos), static_cast<float>(yPos) };
       }

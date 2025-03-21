@@ -23,7 +23,7 @@ namespace Core
 
     virtual void OnKeyDown(UINT8 key) override;
     virtual void OnKeyUp(UINT8 key) override;
-    virtual void OnMouseMove(float yaw, float pitch) override;
+    virtual void OnMouseMove(float dx, float dy) override;
  
     static const uint32_t FrameCount = 2;
 

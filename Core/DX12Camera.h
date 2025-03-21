@@ -12,7 +12,7 @@ namespace Core
     ~DX12Camera();
     
     void Translate(float x, float z);
-    void Rotate(float yaw, float pitch);
+    void Rotate(float dx, float dy);
     // update aspect ratio
     void Update();
 
@@ -28,6 +28,8 @@ namespace Core
     XMFLOAT3 m_cameraPosition;
     XMFLOAT3 m_lookAt;
     XMFLOAT3 m_up;
+    float m_pitch;
+    float m_yaw;
 
   private:
     DX12Camera(const DX12Camera&) = delete;

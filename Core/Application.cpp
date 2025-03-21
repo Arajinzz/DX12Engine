@@ -137,9 +137,9 @@ namespace Core
   {
   }
 
-  void Application::OnMouseMove(float yaw, float pitch)
+  void Application::OnMouseMove(float dx, float dy)
   {
-    FrameResource().GetCamera()->Rotate(yaw, pitch);
+    FrameResource().GetCamera()->Rotate(dx, dy);
   }
 
   void Application::LoadPipeline()
