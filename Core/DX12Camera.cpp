@@ -34,6 +34,7 @@ namespace Core
     , m_up(0.0f, 1.0f, 0.0)
     , m_pitch(0.0f)
     , m_yaw(0.0f)
+    , m_translation(0.0f, 0.0f, 0.0f)
   {
   }
 
@@ -46,10 +47,9 @@ namespace Core
     XMFLOAT3 translation = {x, 0.0, z};
     auto rotatedTranslation = XMVector3Transform(XMLoadFloat3(&translation), XMMatrixRotationRollPitchYaw(m_pitch, m_yaw, 0.0f));
     XMStoreFloat3(&translation, rotatedTranslation);
-
-    m_cameraPosition.x += translation.x;
-    m_cameraPosition.y += translation.y;
-    m_cameraPosition.z += translation.z;
+    m_translation.x = translation.x;
+    m_translation.y = translation.y;
+    m_translation.z = translation.z;
   }
 
   void DX12Camera::Rotate(float dx, float dy)
@@ -70,6 +70,18 @@ namespace Core
 
   void DX12Camera::Update()
   {
+    float speed = 1000.0 * WindowsApplication::deltaTime;
+    XMFLOAT3 desiredPosition;
+    desiredPosition.x = m_cameraPosition.x + m_translation.x * speed;
+    desiredPosition.y = m_cameraPosition.y + m_translation.y * speed;
+    desiredPosition.z = m_cameraPosition.z + m_translation.z * speed;
+    float smoothFactor = 0.1f;
+    XMVECTOR currentPos = XMLoadFloat3(&m_cameraPosition);
+    XMVECTOR targetPos = XMLoadFloat3(&desiredPosition);
+    XMVECTOR newPos = XMVectorLerp(currentPos, targetPos, 0.1);
+    // smoothed position
+    XMStoreFloat3(&m_cameraPosition, newPos);
+
     XMFLOAT3 cameraTarget;
     cameraTarget.x = m_cameraPosition.x + m_lookAt.x;
     cameraTarget.y = m_cameraPosition.y + m_lookAt.y;
@@ -80,6 +92,9 @@ namespace Core
       XMVectorSet(cameraTarget.x, cameraTarget.y, cameraTarget.z, 0.0), // lookat position
       XMVectorSet(m_up.x, m_up.y, m_up.z, 0.0) // up vector
     ));
+
+    // reset translation
+    m_translation = { 0.0f, 0.0f, 0.0f };
 
     RECT rect;
     GetClientRect(WindowsApplication::GetHwnd(), &rect);

@@ -28,6 +28,7 @@ namespace Core
     XMFLOAT3 m_cameraPosition;
     XMFLOAT3 m_lookAt;
     XMFLOAT3 m_up;
+    XMFLOAT3 m_translation;
     float m_pitch;
     float m_yaw;
 

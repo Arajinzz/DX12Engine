@@ -111,23 +111,22 @@ namespace Core
   {
     float x = 0.0;
     float z = 0.0;
-    float speed = WindowsApplication::deltaTime * 100;
 
     if (key == 0x57)
     { // W
-      z = speed;
+      z = 1.0;
     }
     else if (key == 0x41)
     { // A
-      x = -speed;
+      x = -1.0;
     }
     else if (key == 0x53)
     { // S
-      z = -speed;
+      z = -1.0;
     }
     else if (key == 0x44)
     { // D
-      x = speed;
+      x = 1.0;
     }
     
     FrameResource().GetCamera()->Translate(x, z);
