@@ -20,7 +20,7 @@ namespace Core
   void DX12FrameResource::CreateResources(DX12CommandList* commandList)
   {
     // create camera
-    m_camera = std::make_unique<DX12Camera>(45.0, 0.0001f, 100000.0f);
+    m_camera = std::make_unique<DX12Camera>(45.0, 0.1f, 100000.0f);
 
     // Shader first because constant buffers and textures modify the root signature of this shader
     m_shader = std::make_unique<DX12Shader>(L"shaders.hlsl"); // shared between models
@@ -29,6 +29,8 @@ namespace Core
     m_shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
     m_shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
     m_shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL);
+
+    FrameResource().GetShader()->CreateRootSignature();
 
     m_constantBuffer = std::make_unique<DX12ConstantBuffer>();
     m_texture = std::make_unique<DX12Texture>("textures\\brick.png"); // shared between models

@@ -36,7 +36,6 @@ namespace Core
     std::vector<DX12ConstantBuffer*> constantBuffers = { m_constantBuffer.get() };
     std::vector<DX12Texture*> textures = {};
     FrameResource().InitHeapDesc(m_descHeap.get(), constantBuffers, textures);
-    FrameResource().GetShader()->CreateRootSignature();
 
     for (const auto& model : m_models)
       model->Setup(commandList);

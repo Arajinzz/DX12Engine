@@ -37,10 +37,10 @@ namespace Core
 
     for (auto mesh : m_meshes)
     {
-      XMFLOAT3 translation = {5 * dist(gen), 5 * dist(gen), 5 * dist(gen) };
+      //XMFLOAT3 translation = {5 * dist(gen), 5 * dist(gen), 5 * dist(gen) };
       mesh->LoadMesh("models\\sponza.obj");
       mesh->SetupMesh(m_context->GetCommandList()->Get());
-      mesh->SetTranslation(translation);
+      //mesh->SetTranslation(translation);
       m_triangleCount += mesh->GetTriangleCount();
     }
 
