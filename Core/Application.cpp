@@ -136,6 +136,14 @@ namespace Core
   {
   }
 
+  void Application::OnMouseMove(float yaw, float pitch)
+  {
+  }
+
+  void Application::OnMouseLeftButtonDown(int, int)
+  {
+  }
+
   void Application::LoadPipeline()
   {
     // Create Device

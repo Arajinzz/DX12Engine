@@ -115,6 +115,27 @@ namespace Core
       }
       return 0;
 
+    case WM_LBUTTONDOWN:
+      if (pApp)
+      {
+
+      }
+      return 0;
+    
+    case WM_LBUTTONUP:
+      if (pApp)
+      {
+
+      }
+      return 0;
+
+    case WM_MOUSEMOVE:
+      if (pApp)
+      {
+
+      }
+      return 0;
+
     case WM_PAINT:
     {
       if (pApp)

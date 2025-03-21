@@ -20,6 +20,8 @@ namespace Core
     // Samples override the event handlers to handle specific messages.
     virtual void OnKeyDown(UINT8 /*key*/) {}
     virtual void OnKeyUp(UINT8 /*key*/) {}
+    virtual void OnMouseMove(float /* yaw */, float /* pitch */) {}
+    virtual void OnMouseLeftButtonDown(int /* xPos */, int /* yPos */) {}
 
     // Accessors.
     UINT GetWidth() const { return m_width; }
