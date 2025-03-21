@@ -138,6 +138,10 @@ namespace Core
 
   void Application::OnMouseMove(float yaw, float pitch)
   {
+    XMMATRIX rotationYaw = XMMatrixRotationY(yaw);
+    XMMATRIX rotationPitch = XMMatrixRotationX(pitch);
+    XMMATRIX rotationMatrix = rotationPitch * rotationYaw;
+    FrameResource().GetCamera()->Rotate(rotationMatrix);
   }
 
   void Application::LoadPipeline()

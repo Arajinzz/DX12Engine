@@ -2,6 +2,7 @@
 #include "WindowsApplication.h"
 
 #include <fstream>
+#include <algorithm>
 
 HWND Core::WindowsApplication::m_hwnd = nullptr;
 std::chrono::steady_clock::time_point Core::WindowsApplication::m_startTime;
@@ -9,11 +10,18 @@ std::chrono::steady_clock::time_point Core::WindowsApplication::m_lastTime;
 unsigned Core::WindowsApplication::m_frameCount;
 double Core::WindowsApplication::deltaTime;
 bool Core::WindowsApplication::m_shouldResize;
+MousePosition Core::WindowsApplication::m_lastMousePos;
+float Core::WindowsApplication::m_yaw;
+float Core::WindowsApplication::m_pitch;
+const float Core::WindowsApplication::sensitivity = 0.00001f;
 
 namespace Core
 {
   int WindowsApplication::Run(DirectXApplication* pApp, HINSTANCE hInstance, int nCmdShow)
   {
+    m_yaw = 0.0f;
+    m_pitch = 0.0f;
+    m_lastMousePos = { 0.0f, 0.0f };
     m_shouldResize = false;
 
     m_startTime = std::chrono::steady_clock::now();
@@ -118,6 +126,11 @@ namespace Core
     case WM_LBUTTONDOWN:
       if (pApp)
       {
+        auto xPos = LOWORD(lParam);
+        auto yPos = HIWORD(lParam);
+
+        m_lastMousePos = { static_cast<float>(xPos), static_cast<float>(yPos) };
+
         SetCapture(hWnd);
       }
       return 0;
@@ -132,7 +145,23 @@ namespace Core
     case WM_MOUSEMOVE:
       if (pApp && (wParam & MK_LBUTTON)) // only when LBUTTON is held
       {
-        pApp->OnMouseMove(0, 0);
+        auto xPos = LOWORD(lParam);
+        auto yPos = HIWORD(lParam);
+
+        auto deltaX = xPos - m_lastMousePos.xPos;
+        auto deltaY = yPos - m_lastMousePos.yPos;
+        
+        m_yaw += deltaX * sensitivity;
+        m_pitch += deltaY * sensitivity;
+
+        m_yaw = min(m_yaw, 89.0f);
+        m_yaw = max(m_yaw, -89.0f);
+        m_pitch = min(m_pitch, 89.0f);
+        m_pitch = max(m_pitch, -89.0f);
+
+        pApp->OnMouseMove(m_yaw, m_pitch);
+        
+        m_lastMousePos = { static_cast<float>(xPos), static_cast<float>(yPos) };
       }
       return 0;
 

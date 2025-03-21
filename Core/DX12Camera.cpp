@@ -28,16 +28,9 @@ namespace Core
     m_view = m_view * XMMatrixTranspose(XMMatrixTranslation(translation.x, translation.y, translation.z));
   }
 
-  void DX12Camera::RotateX(float angle)
+  void DX12Camera::Rotate(XMMATRIX rotationMatrix)
   {
-  }
-
-  void DX12Camera::RotateY(float angle)
-  {
-  }
-
-  void DX12Camera::RotateZ(float angle)
-  {
+    m_view = m_view * rotationMatrix;
   }
 
   void DX12Camera::Update()

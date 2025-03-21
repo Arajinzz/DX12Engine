@@ -12,10 +12,7 @@ namespace Core
     ~DX12Camera();
     
     void Translate(XMFLOAT3 translation);
-    // in degrees
-    void RotateX(float angle);
-    void RotateY(float angle);
-    void RotateZ(float angle);
+    void Rotate(XMMATRIX rotationMatrix);
     // update aspect ratio
     void Update();
 
