@@ -24,7 +24,6 @@ namespace Core
     }
     
     void CreateResources(DX12CommandList* commandList);
-    void AddResource(D3D12_DESCRIPTOR_RANGE_TYPE type, ID3D12Resource* resource);
     void Update();
     void AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE type, D3D12_SHADER_VISIBILITY visibility);
     void InitHeapDesc(DX12Heap* heapDesc, std::vector<DX12ConstantBuffer*> constantBuffers, std::vector<DX12Texture*> textures);
