@@ -33,14 +33,6 @@ namespace Core
 
   void DX12FrameResource::Update()
   {
-    auto static angle = 0.0;
-    angle += 3 * WindowsApplication::deltaTime;
-    if (angle > 360.0)
-      angle = 0.0;
-
-    m_constantBuffer->SetModel(XMMatrixTranspose(
-      XMMatrixIdentity() * XMMatrixRotationZ(angle) * XMMatrixRotationY(angle * 2) * XMMatrixRotationX(angle) * XMMatrixTranslation(sin(angle), 0.0, 0.0)
-    ));
     m_constantBuffer->SetView(XMMatrixTranspose(XMMatrixLookAtLH(
       XMVectorSet(0.0, 0.0, -10.0, 0.0), // camera position
       XMVectorSet(0.0, 0.0, 0.0, 0.0), // lookat position
