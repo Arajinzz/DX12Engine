@@ -115,19 +115,19 @@ namespace Core
 
     if (key == 0x57)
     { // W
-      z = -speed;
+      z = speed;
     }
     else if (key == 0x41)
     { // A
-      x = speed;
+      x = -speed;
     }
     else if (key == 0x53)
     { // S
-      z = speed;
+      z = -speed;
     }
     else if (key == 0x44)
     { // D
-      x = -speed;
+      x = speed;
     }
     
     FrameResource().GetCamera()->Translate(x, z);

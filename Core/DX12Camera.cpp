@@ -9,14 +9,10 @@ namespace Core
     : m_fov(fov)
     , m_near(nearPlane)
     , m_far(farPlane)
+    , m_cameraPosition(0.0f, 0.0f, -10.0f)
+    , m_lookAt(0.0f, 0.0f, 0.0f)
+    , m_up(0.0f, 1.0f, 0.0)
   {
-    m_view = XMMatrixTranspose(XMMatrixLookAtLH(
-      XMVectorSet(0.0, 0.0, -10.0, 0.0), // camera position
-      XMVectorSet(0.0, 0.0, 0.0, 0.0), // lookat position
-      XMVectorSet(0.0, 1.0, 0.0, 0.0) // up vector
-    ));
-
-    m_projection = XMMatrixTranspose(XMMatrixPerspectiveFovLH(m_fov, 16/9, m_near, m_far));
   }
 
   DX12Camera::~DX12Camera()
@@ -25,7 +21,12 @@ namespace Core
 
   void DX12Camera::Translate(float x, float z)
   {
-    m_view = m_view * XMMatrixTranspose(XMMatrixTranslation(x, 0.0f, z));
+    m_cameraPosition.x += x;
+    m_cameraPosition.z += z;
+
+    // change lookat
+    m_lookAt.x += x;
+    m_lookAt.z += z;
   }
 
   void DX12Camera::Rotate(float yaw, float pitch)
@@ -38,6 +39,12 @@ namespace Core
 
   void DX12Camera::Update()
   {
+    m_view = XMMatrixTranspose(XMMatrixLookAtLH(
+      XMVectorSet(m_cameraPosition.x, m_cameraPosition.y, m_cameraPosition.z, 0.0), // camera position
+      XMVectorSet(m_lookAt.x, m_lookAt.y, m_lookAt.z, 0.0), // lookat position
+      XMVectorSet(m_up.x, m_up.y, m_up.z, 0.0) // up vector
+    ));
+
     RECT rect;
     GetClientRect(WindowsApplication::GetHwnd(), &rect);
     auto width = rect.right - rect.left;

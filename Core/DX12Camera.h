@@ -25,6 +25,9 @@ namespace Core
     float m_fov;
     float m_near;
     float m_far;
+    XMFLOAT3 m_cameraPosition;
+    XMFLOAT3 m_lookAt;
+    XMFLOAT3 m_up;
 
   private:
     DX12Camera(const DX12Camera&) = delete;
