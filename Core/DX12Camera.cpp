@@ -25,6 +25,7 @@ namespace Core
 
   void DX12Camera::Translate(XMFLOAT3 translation)
   {
+    m_view = m_view * XMMatrixTranspose(XMMatrixTranslation(translation.x, translation.y, translation.z));
   }
 
   void DX12Camera::RotateX(float angle)

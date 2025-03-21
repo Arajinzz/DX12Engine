@@ -30,6 +30,7 @@ namespace Core
     void InitHeapDesc(DX12Heap* heapDesc, std::vector<DX12ConstantBuffer*> constantBuffers, std::vector<DX12Texture*> textures);
     // !!??
     DX12Shader* GetShader() { return m_shader.get(); }
+    DX12Camera* GetCamera() { return m_camera.get(); }
     
     ~DX12FrameResource();
 

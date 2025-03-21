@@ -109,10 +109,27 @@ namespace Core
 
   void Application::OnKeyDown(UINT8 key)
   {
-    //if (key == 0x57) // W
-    //else if (key == 0x41) // A
-    //else if (key == 0x53) // S
-    //else if (key == 0x44) // D
+    XMFLOAT3 translation = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    float speed = WindowsApplication::deltaTime * 100;
+
+    if (key == 0x57)
+    { // W
+      translation.z = -speed;
+    }
+    else if (key == 0x41)
+    { // A
+      translation.x = speed;
+    }
+    else if (key == 0x53)
+    { // S
+      translation.z = speed;
+    }
+    else if (key == 0x44)
+    { // D
+      translation.x = -speed;
+    }
+    
+    FrameResource().GetCamera()->Translate(translation);
   }
 
   void Application::OnKeyUp(UINT8 key)
