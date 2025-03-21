@@ -20,7 +20,7 @@ namespace Core
   void DX12FrameResource::CreateResources(DX12CommandList* commandList)
   {
     // create camera
-    m_camera = std::make_unique<DX12Camera>(45.0, 1.0, 100.0);
+    m_camera = std::make_unique<DX12Camera>(45.0, 0.0001f, 100000.0f);
 
     // Shader first because constant buffers and textures modify the root signature of this shader
     m_shader = std::make_unique<DX12Shader>(L"shaders.hlsl"); // shared between models

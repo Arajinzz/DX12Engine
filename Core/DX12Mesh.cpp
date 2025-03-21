@@ -58,7 +58,9 @@ namespace Core
     const aiScene* pModel = importer.ReadFile(path,
       aiProcess_Triangulate |
       aiProcess_JoinIdenticalVertices |
-      aiProcess_ConvertToLeftHanded);
+      aiProcess_ConvertToLeftHanded |
+      aiProcess_GenNormals |
+      aiProcess_CalcTangentSpace);
 
     m_transformation = pModel->mRootNode->mTransformation;
 
@@ -73,9 +75,9 @@ namespace Core
 
   void DX12Mesh::UpdateMesh()
   {
-    m_angle += 100 * WindowsApplication::deltaTime;
+    /*m_angle += 100 * WindowsApplication::deltaTime;
     if (m_angle > 360.0)
-      m_angle = 0.0;
+      m_angle = 0.0;*/
 
     XMMATRIX T = XMMatrixTranslation(m_translation.x, m_translation.y, m_translation.z);
     XMMATRIX R = XMMatrixRotationY(XMConvertToRadians(m_angle));
@@ -88,7 +90,7 @@ namespace Core
   {
     unsigned count = 0;
     for (const auto& model : m_models)
-      count = model->GetTriangleCount();
+      count += model->GetTriangleCount();
     return count;
   }
 }
