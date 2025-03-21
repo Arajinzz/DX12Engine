@@ -32,7 +32,7 @@ namespace Core
     struct Vertex
     {
       XMFLOAT3 position;
-      XMFLOAT4 color;
+      XMFLOAT3 normal;
       XMFLOAT2 uv;
     };
 

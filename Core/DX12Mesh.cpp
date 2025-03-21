@@ -69,6 +69,10 @@ namespace Core
       auto model = std::make_unique<DX12Model>();
       model->LoadModel(pMesh);
       m_models.emplace_back(model.release());
+
+      // testing
+      const auto material = pModel->mMaterials[pMesh->mMaterialIndex];
+      auto name = material->GetName();
     }
   }
 

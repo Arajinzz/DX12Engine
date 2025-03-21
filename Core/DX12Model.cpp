@@ -32,8 +32,8 @@ namespace Core
     D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 28, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+        { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
     };
 
     // Describe and create the graphics pipeline state object (PSO).
@@ -94,14 +94,10 @@ namespace Core
     {
       Vertex vertex;
       vertex.position = { pMesh->mVertices[i].x, pMesh->mVertices[i].y, pMesh->mVertices[i].z };
-      float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-      float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-      float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-      vertex.color = { r, g, b, 1.0};
-      if (pMesh->mTextureCoords[0])
+      if (pMesh->HasNormals())
+        vertex.normal = { pMesh->mNormals[i].x, pMesh->mNormals[i].y, pMesh->mNormals[i].z };
+      if (pMesh->HasTextureCoords(0))
         vertex.uv = { pMesh->mTextureCoords[0][i].x, pMesh->mTextureCoords[0][i].y };
-      else
-        vertex.uv = { 0.0f, 0.0f };
       m_vertices.push_back(vertex);
     }
     

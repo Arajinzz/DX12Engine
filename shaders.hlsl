@@ -20,11 +20,11 @@ SamplerState g_sampler : register(s0);
 struct PSInput
 {
     float4 position : SV_POSITION;
-    float4 color : COLOR;
+    float3 normal : NORMAL;
     float2 uv : TEXCOORD;
 };
 
-PSInput VSMain(float4 position : POSITION, float4 color : COLOR, float2 uv : TEXCOORD)
+PSInput VSMain(float4 position : POSITION, float3 normal : NORMAL, float2 uv : TEXCOORD)
 {
     PSInput result;
     
@@ -34,7 +34,7 @@ PSInput VSMain(float4 position : POSITION, float4 color : COLOR, float2 uv : TEX
     float4 clipPos = mul(viewPos, s_projection);
     
     result.position = clipPos;
-    result.color = color;
+    result.normal = normal;
     result.uv = uv;
 
     return result;
@@ -42,5 +42,5 @@ PSInput VSMain(float4 position : POSITION, float4 color : COLOR, float2 uv : TEX
 
 float4 PSMain(PSInput input) : SV_TARGET
 {
-    return g_texture.Sample(g_sampler, input.uv) * input.color;
+    return g_texture.Sample(g_sampler, input.uv) * float4(input.normal, 1.0);
 }
