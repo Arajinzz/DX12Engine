@@ -14,8 +14,7 @@ namespace Core
     ~DX12Texture();
 
     ID3D12Resource* GetResource() { return m_texture.Get(); }
-
-    void Init(ID3D12GraphicsCommandList* commandList);
+    void CopyToGPU(ID3D12GraphicsCommandList* commandList);
 
   private:
     ComPtr<ID3D12Resource> m_texture;

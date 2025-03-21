@@ -13,6 +13,7 @@ namespace Core
     DX12ConstantBuffer();
     ~DX12ConstantBuffer();
 
+    ID3D12Resource* GetResource() { return m_buffer.Get(); }
     void SetModel(XMMATRIX model);
     void SetView(XMMATRIX view);
     void SetProjection(XMMATRIX proj);

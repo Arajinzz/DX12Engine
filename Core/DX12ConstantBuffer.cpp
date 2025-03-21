@@ -21,9 +21,6 @@ namespace Core
       nullptr,
       IID_PPV_ARGS(&m_buffer)));
 
-    FrameResource().AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
-    FrameResource().AddResource(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, m_buffer.Get());
-
     // Map and initialize the constant buffer. We don't unmap this until the
     // app closes. Keeping things mapped for the lifetime of the resource is okay.
     CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.

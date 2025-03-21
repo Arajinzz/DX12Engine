@@ -13,8 +13,6 @@ namespace Core
     : m_constantBuffer(nullptr)
     , m_texture(nullptr)
     , m_shader(nullptr)
-    , m_cbvResources()
-    , m_srvResources()
   {
   }
 
@@ -23,17 +21,14 @@ namespace Core
     // Shader first because constant buffers and textures modify the root signature of this shader
     m_shader = std::make_unique<DX12Shader>(L"shaders.hlsl"); // shared between models
     
+    // add slots
+    m_shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
+    m_shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
+    m_shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL);
+
     m_constantBuffer = std::make_unique<DX12ConstantBuffer>();
     m_texture = std::make_unique<DX12Texture>("textures\\brick.png"); // shared between models
-    m_texture->Init(commandList->Get());
-  }
-
-  void DX12FrameResource::AddResource(D3D12_DESCRIPTOR_RANGE_TYPE type, ID3D12Resource* resource)
-  {
-    if (type == D3D12_DESCRIPTOR_RANGE_TYPE_CBV)
-      m_cbvResources.push_back(resource);
-    else if (type == D3D12_DESCRIPTOR_RANGE_TYPE_SRV)
-      m_srvResources.push_back(resource);
+    m_texture->CopyToGPU(commandList->Get());
   }
 
   void DX12FrameResource::Update()
@@ -65,20 +60,21 @@ namespace Core
     m_shader->AddParameter(type, visibility);
   }
 
-  void DX12FrameResource::InitHeapDesc(DX12Heap* heapDesc)
+  void DX12FrameResource::InitHeapDesc(DX12Heap* heapDesc, std::vector<DX12ConstantBuffer*> constantBuffers, std::vector<DX12Texture*> textures)
   {
-    for (auto resource : m_cbvResources)
-      heapDesc->AddResource(resource, CONSTANTBUFFER);
+    // always Globals first
+    heapDesc->AddResource(m_constantBuffer->GetResource(), CONSTANTBUFFER);
+    for (auto constantBuffer : constantBuffers)
+      heapDesc->AddResource(constantBuffer->GetResource(), CONSTANTBUFFER);
 
-    for (auto resource : m_srvResources)
-      heapDesc->AddResource(resource, TEXTURE);
+    heapDesc->AddResource(m_texture->GetResource(), TEXTURE);
+    for (auto texture : textures)
+      heapDesc->AddResource(texture->GetResource(), TEXTURE);
   }
 
   DX12FrameResource::~DX12FrameResource()
   {
     m_shader.reset();
-    m_cbvResources.clear();
-    m_srvResources.clear();
     m_constantBuffer.reset();
     m_texture.reset();
   }

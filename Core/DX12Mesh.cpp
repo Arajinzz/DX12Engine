@@ -33,7 +33,9 @@ namespace Core
 
   void DX12Mesh::SetupMesh(ID3D12GraphicsCommandList* commandList)
   {
-    FrameResource().InitHeapDesc(m_descHeap.get());
+    std::vector<DX12ConstantBuffer*> constantBuffers = { m_constantBuffer.get() };
+    std::vector<DX12Texture*> textures = {};
+    FrameResource().InitHeapDesc(m_descHeap.get(), constantBuffers, textures);
     FrameResource().GetShader()->CreateRootSignature();
 
     for (const auto& model : m_models)
@@ -77,7 +79,7 @@ namespace Core
 
     XMMATRIX T = XMMatrixTranslation(m_translation.x, m_translation.y, m_translation.z);
     XMMATRIX R = XMMatrixRotationY(XMConvertToRadians(m_angle));
-    XMMATRIX S = XMMatrixScaling(3, 1, 1);
+    XMMATRIX S = XMMatrixScaling(1, 1, 1);
 
     m_constantBuffer->SetModel(XMMatrixTranspose(S * R * T));
   }

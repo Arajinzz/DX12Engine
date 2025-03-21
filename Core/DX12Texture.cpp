@@ -51,17 +51,13 @@ namespace Core
       D3D12_RESOURCE_STATE_GENERIC_READ,
       nullptr,
       IID_PPV_ARGS(&m_texUploadHeap)));
-
-    // Add param to frame resource, this will be added to all shaders in FrameResource
-    FrameResource().AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL);
-    FrameResource().AddResource(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, m_texture.Get());
   }
 
   DX12Texture::~DX12Texture()
   {
   }
 
-  void DX12Texture::Init(ID3D12GraphicsCommandList* commandList)
+  void DX12Texture::CopyToGPU(ID3D12GraphicsCommandList* commandList)
   {
     // Copy data to the intermediate upload heap and then schedule 
     // a copy from the upload heap to the diffuse texture.
