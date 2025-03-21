@@ -2,6 +2,7 @@
 
 #include "Core/DX12CommandList.h"
 #include "Core/DX12Shader.h"
+#include "Core/DX12Camera.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -36,6 +37,7 @@ namespace Core
     std::unique_ptr<DX12Texture> m_texture;
     std::unique_ptr<DX12ConstantBuffer> m_constantBuffer;
     std::unique_ptr<DX12Shader> m_shader;
+    std::unique_ptr<DX12Camera> m_camera;
 
   private:
     DX12FrameResource();

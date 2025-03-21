@@ -20,6 +20,9 @@ namespace Core
     virtual void OnRender() override;
     virtual void OnDestroy() override;
     virtual void OnResize(unsigned width, unsigned height) override;
+
+    virtual void OnKeyDown(UINT8 key) override;
+    virtual void OnKeyUp(UINT8 key) override;
  
     static const uint32_t FrameCount = 2;
 

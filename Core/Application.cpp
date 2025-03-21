@@ -107,6 +107,18 @@ namespace Core
     }
   }
 
+  void Application::OnKeyDown(UINT8 key)
+  {
+    //if (key == 0x57) // W
+    //else if (key == 0x41) // A
+    //else if (key == 0x53) // S
+    //else if (key == 0x44) // D
+  }
+
+  void Application::OnKeyUp(UINT8 key)
+  {
+  }
+
   void Application::LoadPipeline()
   {
     // Create Device
