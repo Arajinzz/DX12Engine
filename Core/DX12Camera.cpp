@@ -43,15 +43,20 @@ namespace Core
 
   void DX12Camera::Translate(float x, float z)
   {
-    m_cameraPosition.x += x;
-    m_cameraPosition.z += z;
+    XMFLOAT3 translation = {x, 0.0, z};
+    auto rotatedTranslation = XMVector3Transform(XMLoadFloat3(&translation), XMMatrixRotationRollPitchYaw(m_pitch, m_yaw, 0.0f));
+    XMStoreFloat3(&translation, rotatedTranslation);
+
+    m_cameraPosition.x += translation.x;
+    m_cameraPosition.y += translation.y;
+    m_cameraPosition.z += translation.z;
   }
 
   void DX12Camera::Rotate(float dx, float dy)
   {
     const XMFLOAT3 forward = { 0.0f, 0.0f, 1.0f };
     const float pi = 3.14159265f;
-    auto sensitivity = 0.001f;
+    auto sensitivity = 0.005f;
     m_yaw = wrap_angle(m_yaw + dx * sensitivity);
     m_pitch = std::clamp(m_pitch + dy * sensitivity, 0.995f * -pi / 2.0f, 0.995f * pi / 2.0f);
     XMVECTOR forwardVec = XMLoadFloat3(&forward);
