@@ -140,10 +140,6 @@ namespace Core
   {
   }
 
-  void Application::OnMouseLeftButtonDown(int, int)
-  {
-  }
-
   void Application::LoadPipeline()
   {
     // Create Device

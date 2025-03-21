@@ -118,21 +118,21 @@ namespace Core
     case WM_LBUTTONDOWN:
       if (pApp)
       {
-
+        SetCapture(hWnd);
       }
       return 0;
     
     case WM_LBUTTONUP:
       if (pApp)
       {
-
+        ReleaseCapture();
       }
       return 0;
 
     case WM_MOUSEMOVE:
-      if (pApp)
+      if (pApp && (wParam & MK_LBUTTON)) // only when LBUTTON is held
       {
-
+        pApp->OnMouseMove(0, 0);
       }
       return 0;
 
