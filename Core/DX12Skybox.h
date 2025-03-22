@@ -2,6 +2,7 @@
 
 #include "Core/DX12Texture.h"
 #include "Core/DX12Mesh.h"
+#include "Core/DX12Shader.h"
 
 namespace Core
 {
@@ -16,7 +17,6 @@ namespace Core
 
   private:
     std::unique_ptr<DX12Mesh> m_cube;
-    std::unique_ptr<DX12Texture> m_cubeMap;
 
   private:
     DX12Skybox(const DX12Skybox&) = delete;

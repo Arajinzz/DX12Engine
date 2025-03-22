@@ -114,6 +114,44 @@ namespace Core
     }
   }
 
+  void DX12Mesh::LoadMeshSkyboxSpecific(const char* path)
+  {
+    Assimp::Importer importer;
+
+    const aiScene* pModel = importer.ReadFile(path,
+      aiProcess_Triangulate |
+      aiProcess_JoinIdenticalVertices |
+      aiProcess_ConvertToLeftHanded |
+      aiProcess_GenNormals |
+      aiProcess_CalcTangentSpace);
+
+    const auto pMesh = pModel->mMeshes[0];
+    auto model = std::make_unique<DX12Model>();
+    model->LoadModel(pMesh);
+
+    auto shader = std::make_unique<DX12Shader>(L"skybox_shaders.hlsl");
+    // add slots
+    shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
+    shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
+    shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL);
+    // create rootSignature
+    shader->CreateRootSignature();
+
+    std::vector<std::string> paths(6);
+    paths[0] = "skybox\\bluecloud_rt.jpg";
+    paths[1] = "skybox\\bluecloud_lt.jpg";
+    paths[2] = "skybox\\bluecloud_up.jpg";
+    paths[3] = "skybox\\bluecloud_dn.jpg";
+    paths[4] = "skybox\\bluecloud_ft.jpg";
+    paths[5] = "skybox\\bluecloud_bk.jpg";
+
+    auto cubeMap = std::make_unique<DX12Texture>(paths);
+
+    m_shaders.emplace_back(shader.release());
+    m_models.emplace_back(model.release());
+    m_textures.emplace_back(cubeMap.release());
+  }
+
   void DX12Mesh::UpdateMesh()
   {
     /*m_angle += 100 * WindowsApplication::deltaTime;

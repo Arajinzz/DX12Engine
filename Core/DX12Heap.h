@@ -12,7 +12,8 @@ namespace Core
     TEXTURE,
     CONSTANTBUFFER,
     DEPTH,
-    RENDERTARGET
+    RENDERTARGET,
+    CUBEMAP
   };
 
   class DX12Heap

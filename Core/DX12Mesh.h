@@ -17,6 +17,8 @@ namespace Core
     void SetupMesh(ID3D12GraphicsCommandList* commandList);
     void DrawMesh(unsigned frameIndex, ID3D12GraphicsCommandList* commandList);
     void LoadMesh(const char* path);
+    // Workaround!!!
+    void LoadMeshSkyboxSpecific(const char* path);
     void UpdateMesh();
     // workaround????
     DX12Heap* GetHeapDesc() { return m_descHeap.get(); }
