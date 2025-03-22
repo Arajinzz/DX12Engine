@@ -11,15 +11,11 @@
 namespace Core
 {
   DX12Texture::DX12Texture(const char* path)
-    : m_textureData()
-    , m_path(path)
+    : m_path(path)
   {
     // load texture
-    unsigned char* img = stbi_load(path, &m_width, &m_height, &m_channels, 4);
-    m_channels = 4;
-    m_textureData.reserve(m_width * m_height * m_channels);
-    memcpy(m_textureData.data(), img, m_width * m_height * m_channels * sizeof(uint8_t));
-    stbi_image_free(img);
+    m_imgPtr = stbi_load(path, &m_width, &m_height, &m_channels, 4);
+    m_channels = 4; // force to 4
 
     D3D12_RESOURCE_DESC textureDesc = {};
     textureDesc.MipLevels = 1;
@@ -64,7 +60,7 @@ namespace Core
     // Copy data to the intermediate upload heap and then schedule 
     // a copy from the upload heap to the diffuse texture.
     D3D12_SUBRESOURCE_DATA textureData = {};
-    textureData.pData = m_textureData.data();
+    textureData.pData = m_imgPtr;
     textureData.RowPitch = m_width * m_channels; // width * pixelSize
     textureData.SlicePitch = textureData.RowPitch * m_height; // rowpitch * height
 
@@ -73,5 +69,7 @@ namespace Core
     auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_texture.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
     UpdateSubresources(commandList, m_texture.Get(), m_texUploadHeap.Get(), 0, 0, subresourceCount, &textureData);
     commandList->ResourceBarrier(1, &barrier);
+
+    stbi_image_free(m_imgPtr);
   }
 }

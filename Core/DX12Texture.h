@@ -20,7 +20,7 @@ namespace Core
     std::string m_path;
     ComPtr<ID3D12Resource> m_texture;
     ComPtr<ID3D12Resource> m_texUploadHeap;
-    std::vector<uint8_t> m_textureData;
+    unsigned char* m_imgPtr;
 
     // metadata
     int m_width;
