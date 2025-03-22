@@ -15,7 +15,7 @@ namespace Core
     , m_path(path)
   {
     // load texture
-    unsigned char* img = stbi_load(path, &m_width, &m_height, &m_channels, 0);
+    unsigned char* img = stbi_load(path, &m_width, &m_height, &m_channels, 4);
     m_textureData.reserve(m_width * m_height * m_channels);
     memcpy(m_textureData.data(), img, m_width * m_height * m_channels * sizeof(uint8_t));
     stbi_image_free(img);
