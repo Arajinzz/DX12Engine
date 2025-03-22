@@ -64,8 +64,9 @@ float4 PSMain(PSInput input) : SV_TARGET
     
     lighting = ambient * 0.5 + hemi * 0.5 + diffuse * 0.5;
     
-    // gamma corrected
-    float3 color = pow(baseColor * lighting, float3(1.0f / 2.2f, 1.0f / 2.2f, 1.0f / 2.2f));
+    float2 uv = frac(input.uv); // Ensure UVs stay in [0,1] range
     
-    return float4(color, 1.0);
+    float4 color = g_texture.Sample(g_sampler, uv) * float4(lighting, 1.0);
+  
+    return color;
 }
