@@ -10,22 +10,25 @@ namespace Core
   class DX12Texture
   {
   public:
-    DX12Texture(const char* path);
+    DX12Texture(std::vector<std::string> paths);
     ~DX12Texture();
 
     ID3D12Resource* GetResource() { return m_texture.Get(); }
     void CopyToGPU(ID3D12GraphicsCommandList* commandList);
 
   private:
-    std::string m_path;
+    struct MetaData
+    {
+      int width;
+      int height;
+      int channels;
+    };
+
     ComPtr<ID3D12Resource> m_texture;
     ComPtr<ID3D12Resource> m_texUploadHeap;
-    unsigned char* m_imgPtr;
-
-    // metadata
-    int m_width;
-    int m_height;
-    int m_channels;
+    
+    std::vector<unsigned char*> m_imgPtrs;
+    std::vector<MetaData> m_metaData;
 
   private:
     DX12Texture(const DX12Texture&) = delete;

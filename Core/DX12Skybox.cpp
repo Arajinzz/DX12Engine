@@ -4,6 +4,7 @@
 namespace Core
 {
   DX12Skybox::DX12Skybox()
+    : m_cubeMap(nullptr)
   {
   }
 

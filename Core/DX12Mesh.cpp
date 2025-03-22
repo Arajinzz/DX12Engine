@@ -96,14 +96,17 @@ namespace Core
 
       const auto material = pModel->mMaterials[pMesh->mMaterialIndex];
       aiString texturePath;
+      std::vector<std::string> paths(1);
       if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS)
       {
-        auto texture = std::make_unique<DX12Texture>(texturePath.C_Str());
+        paths[0] = texturePath.C_Str();
+        auto texture = std::make_unique<DX12Texture>(paths);
         m_textures.emplace_back(texture.release());
       } else
       {
         // default texture
-        auto texture = std::make_unique<DX12Texture>("textures\\brick.png");
+        paths[0] = "textures\\brick.png";
+        auto texture = std::make_unique<DX12Texture>(paths);
         m_textures.emplace_back(texture.release());
       }
 

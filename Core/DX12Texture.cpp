@@ -10,20 +10,25 @@
 
 namespace Core
 {
-  DX12Texture::DX12Texture(const char* path)
-    : m_path(path)
+  DX12Texture::DX12Texture(std::vector<std::string> paths)
+    : m_imgPtrs()
+    , m_metaData()
   {
-    // load texture
-    m_imgPtr = stbi_load(path, &m_width, &m_height, &m_channels, 4);
-    m_channels = 4; // force to 4
+    for (const auto& path : paths)
+    {
+      MetaData metadata;
+      m_imgPtrs.emplace_back(stbi_load(path.c_str(), &metadata.width, &metadata.height, &metadata.channels, 4));
+      metadata.channels = 4; // force to 4
+      m_metaData.push_back(metadata);
+    }
 
     D3D12_RESOURCE_DESC textureDesc = {};
     textureDesc.MipLevels = 1;
     textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    textureDesc.Width = m_width;
-    textureDesc.Height = m_height;
+    textureDesc.Width = m_metaData[0].width;
+    textureDesc.Height = m_metaData[0].height;
     textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-    textureDesc.DepthOrArraySize = 1;
+    textureDesc.DepthOrArraySize = m_imgPtrs.size();
     textureDesc.SampleDesc.Count = 1;
     textureDesc.SampleDesc.Quality = 0;
     textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -59,17 +64,25 @@ namespace Core
   {
     // Copy data to the intermediate upload heap and then schedule 
     // a copy from the upload heap to the diffuse texture.
-    D3D12_SUBRESOURCE_DATA textureData = {};
-    textureData.pData = m_imgPtr;
-    textureData.RowPitch = m_width * m_channels; // width * pixelSize
-    textureData.SlicePitch = textureData.RowPitch * m_height; // rowpitch * height
+    std::vector<D3D12_SUBRESOURCE_DATA> textureData(m_imgPtrs.size());
 
-    const UINT subresourceCount = 1 * 1;
-    const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_texture.Get(), 0, subresourceCount);
+    for (unsigned i = 0; i < m_imgPtrs.size(); ++i)
+    {
+      textureData[i].pData = m_imgPtrs[i];
+      textureData[i].RowPitch = m_metaData[i].width * m_metaData[i].channels; // width * pixelSize
+      textureData[i].SlicePitch = textureData[i].RowPitch * m_metaData[i].height; // rowpitch * height
+    }
+
+    const UINT subResourceCount = 1 * m_metaData.size();
+    const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_texture.Get(), 0, subResourceCount);
     auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_texture.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-    UpdateSubresources(commandList, m_texture.Get(), m_texUploadHeap.Get(), 0, 0, subresourceCount, &textureData);
+    UpdateSubresources(commandList, m_texture.Get(), m_texUploadHeap.Get(), 0, 0, subResourceCount, textureData.data());
     commandList->ResourceBarrier(1, &barrier);
 
-    stbi_image_free(m_imgPtr);
+    // free
+    for (auto ptr : m_imgPtrs)
+    {
+      stbi_image_free(ptr);
+    }
   }
 }
