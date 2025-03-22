@@ -27,9 +27,8 @@ namespace Core
     std::vector<std::unique_ptr<DX12Model>> m_models;
     std::vector<std::unique_ptr<DX12Shader>> m_shaders; // for each model
     std::vector<std::unique_ptr<DX12Texture>> m_textures; // for each model
-    
-    // descriptor heap
     std::unique_ptr<DX12Heap> m_descHeap;
+    
     // constant buffer
     std::unique_ptr<DX12ConstantBuffer> m_constantBuffer;
     // for testing

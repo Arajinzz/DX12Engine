@@ -59,7 +59,7 @@ namespace Core
   {
     for (int i = 0; i < m_models.size(); ++i)
     {
-      m_models[i]->Draw(frameIndex, m_descHeap.get(), m_shaders[i].get());
+      m_models[i]->Draw(frameIndex, m_descHeap.get(), m_shaders[i].get(), i);
       commandList->ExecuteBundle(m_models[i]->GetBundle());
     }
   }

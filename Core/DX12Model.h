@@ -23,7 +23,7 @@ namespace Core
 
     ID3D12GraphicsCommandList* GetBundle() { return m_bundle->Get(); }
     virtual void Setup(ID3D12GraphicsCommandList* commandList, DX12Shader* shader);
-    virtual void Draw(unsigned frameIndex, DX12Heap* heapDesc, DX12Shader* shader);
+    virtual void Draw(unsigned frameIndex, DX12Heap* heapDesc, DX12Shader* shader, unsigned texturePos);
     virtual void LoadModel(const aiMesh* pMesh);
     unsigned GetTriangleCount() { return m_indices.size() / 3; }
 

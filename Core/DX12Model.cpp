@@ -64,7 +64,7 @@ namespace Core
     SetupIndexBuffer(commandList);
   }
 
-  void DX12Model::Draw(unsigned frameIndex, DX12Heap* heapDesc, DX12Shader* shader)
+  void DX12Model::Draw(unsigned frameIndex, DX12Heap* heapDesc, DX12Shader* shader, unsigned texturePos)
   {
     // 1 allocator
     m_bundle->Reset(frameIndex, m_pipelineState.Get());
@@ -78,7 +78,10 @@ namespace Core
     handle.ptr += Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     m_bundle->Get()->SetGraphicsRootDescriptorTable(1, handle);
 
-    handle.ptr += Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    // get correct texture in the heap
+    for (unsigned i = 0; i < texturePos + 1; ++i)
+      handle.ptr += Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
     m_bundle->Get()->SetGraphicsRootDescriptorTable(2, handle);
 
     m_bundle->Get()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
