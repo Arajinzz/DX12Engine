@@ -68,11 +68,15 @@ namespace Core
       const auto pMesh = pModel->mMeshes[i];
       auto model = std::make_unique<DX12Model>();
       model->LoadModel(pMesh);
-      m_models.emplace_back(model.release());
 
-      // testing
       const auto material = pModel->mMaterials[pMesh->mMaterialIndex];
-      auto name = material->GetName();
+      aiString texturePath;
+      if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS)
+      {
+        //model->LoadTexture(&texturePath);
+      }
+
+      m_models.emplace_back(model.release());
     }
   }
 

@@ -17,6 +17,7 @@ namespace Core
     void CopyToGPU(ID3D12GraphicsCommandList* commandList);
 
   private:
+    std::string m_path;
     ComPtr<ID3D12Resource> m_texture;
     ComPtr<ID3D12Resource> m_texUploadHeap;
     std::vector<uint8_t> m_textureData;

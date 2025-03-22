@@ -12,6 +12,7 @@ namespace Core
 {
   DX12Texture::DX12Texture(const char* path)
     : m_textureData()
+    , m_path(path)
   {
     // load texture
     unsigned char* img = stbi_load(path, &m_width, &m_height, &m_channels, 0);
