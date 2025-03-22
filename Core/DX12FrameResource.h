@@ -14,6 +14,7 @@ namespace Core
 {
   class DX12Texture;
   class DX12ConstantBuffer;
+  class DX12Skybox;
 
   class DX12FrameResource
   {
@@ -34,6 +35,7 @@ namespace Core
   private:
     std::unique_ptr<DX12ConstantBuffer> m_constantBuffer;
     std::unique_ptr<DX12Camera> m_camera;
+    std::unique_ptr<DX12Skybox> m_skybox;
 
   private:
     DX12FrameResource();

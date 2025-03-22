@@ -6,6 +6,7 @@
 #include "Core/DX12SwapChain.h"
 #include "Core/DX12Texture.h"
 #include "Core/DX12ConstantBuffer.h"
+#include "Core/DX12Skybox.h"
 
 namespace Core
 {
@@ -20,11 +21,13 @@ namespace Core
     // create camera
     m_camera = std::make_unique<DX12Camera>(45.0, 0.1f, 100000.0f);
     m_constantBuffer = std::make_unique<DX12ConstantBuffer>();
+    m_skybox = std::make_unique<DX12Skybox>();
   }
 
   void DX12FrameResource::Update()
   {
     m_camera->Update();
+    m_skybox->Update();
     m_constantBuffer->SetView(m_camera->GetView());
     m_constantBuffer->SetProjection(m_camera->GetProjection());
   }
