@@ -5,6 +5,9 @@
 #include "Core/DXApplicationHelper.h"
 #include "Core/DX12FrameResource.h"
 #include "Core/WindowsApplication.h"
+#include "Core/DX12ConstantBuffer.h"
+#include "Core/DX12Texture.h"
+#include "Core/DX12Shader.h"
 
 #include <fstream>
 
@@ -26,7 +29,7 @@ namespace Core
     m_bundle.reset();
   }
 
-  void DX12Model::Setup(ID3D12GraphicsCommandList* commandList)
+  void DX12Model::Setup(ID3D12GraphicsCommandList* commandList, DX12Shader* shader)
   {
     // Define the vertex input layout.
     D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
@@ -39,9 +42,9 @@ namespace Core
     // Describe and create the graphics pipeline state object (PSO).
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
     psoDesc.InputLayout = { inputElementDescs, _countof(inputElementDescs) };
-    psoDesc.pRootSignature = FrameResource().GetShader()->GetRootSignature();
-    psoDesc.VS = CD3DX12_SHADER_BYTECODE(FrameResource().GetShader()->GetVertexShader());
-    psoDesc.PS = CD3DX12_SHADER_BYTECODE(FrameResource().GetShader()->GetPixelShader());
+    psoDesc.pRootSignature = shader->GetRootSignature();
+    psoDesc.VS = CD3DX12_SHADER_BYTECODE(shader->GetVertexShader());
+    psoDesc.PS = CD3DX12_SHADER_BYTECODE(shader->GetPixelShader());
     psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
     psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
     psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
@@ -61,12 +64,12 @@ namespace Core
     SetupIndexBuffer(commandList);
   }
 
-  void DX12Model::Draw(unsigned frameIndex, DX12Heap* heapDesc)
+  void DX12Model::Draw(unsigned frameIndex, DX12Heap* heapDesc, DX12Shader* shader)
   {
     // 1 allocator
     m_bundle->Reset(frameIndex, m_pipelineState.Get());
     // Set necessary state.
-    m_bundle->SetRootSignature(FrameResource().GetShader()->GetRootSignature());
+    m_bundle->SetRootSignature(shader->GetRootSignature());
     m_bundle->SetDescriptorHeap(heapDesc);
     
     auto handle = heapDesc->Get()->GetGPUDescriptorHandleForHeapStart();

@@ -5,6 +5,7 @@
 #include "Core/WindowsApplication.h"
 #include "Core/DX12Texture.h"
 #include "Core/DX12ConstantBuffer.h"
+#include "Core/DX12Shader.h"
 
 #include <assimp\Importer.hpp>
 #include <assimp\scene.h>
@@ -18,6 +19,8 @@ namespace Core
     , m_constantBuffer(nullptr)
     , m_translation(0.0f, 0.0f, 0.0f)
     , m_angle(0.0f)
+    , m_shaders()
+    , m_textures()
   {
     // create heap
     m_descHeap = std::make_unique<DX12Heap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -34,19 +37,30 @@ namespace Core
   void DX12Mesh::SetupMesh(ID3D12GraphicsCommandList* commandList)
   {
     std::vector<DX12ConstantBuffer*> constantBuffers = { m_constantBuffer.get() };
-    std::vector<DX12Texture*> textures = {};
-    FrameResource().InitHeapDesc(m_descHeap.get(), constantBuffers, textures);
+    
+    // always Globals first
+    m_descHeap->AddResource(FrameResource().GetConstantBuffer()->GetResource(), CONSTANTBUFFER);
+    for (auto constantBuffer : constantBuffers)
+      m_descHeap->AddResource(constantBuffer->GetResource(), CONSTANTBUFFER);
 
-    for (const auto& model : m_models)
-      model->Setup(commandList);
+    for (auto& texture : m_textures)
+      m_descHeap->AddResource(texture->GetResource(), TEXTURE);
+
+    for (const auto& texture : m_textures)
+      texture->CopyToGPU(commandList);
+
+    for (int i = 0 ; i < m_models.size(); ++i)
+    {
+      m_models[i]->Setup(commandList, m_shaders[i].get());
+    }
   }
 
   void DX12Mesh::DrawMesh(unsigned frameIndex, ID3D12GraphicsCommandList* commandList)
   {
-    for (const auto& model : m_models)
+    for (int i = 0; i < m_models.size(); ++i)
     {
-      model->Draw(frameIndex, m_descHeap.get());
-      commandList->ExecuteBundle(model->GetBundle());
+      m_models[i]->Draw(frameIndex, m_descHeap.get(), m_shaders[i].get());
+      commandList->ExecuteBundle(m_models[i]->GetBundle());
     }
   }
 
@@ -69,11 +83,28 @@ namespace Core
       auto model = std::make_unique<DX12Model>();
       model->LoadModel(pMesh);
 
+      auto shader = std::make_unique<DX12Shader>(L"shaders.hlsl"); // for each model
+      // add slots
+      shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
+      shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
+      shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL);
+      
+      // create rootsignature
+      shader->CreateRootSignature();
+
+      m_shaders.emplace_back(shader.release());
+
       const auto material = pModel->mMaterials[pMesh->mMaterialIndex];
       aiString texturePath;
       if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS)
       {
-        //model->LoadTexture(&texturePath);
+        auto texture = std::make_unique<DX12Texture>(texturePath.C_Str());
+        m_textures.emplace_back(texture.release());
+      } else
+      {
+        // default texture
+        auto texture = std::make_unique<DX12Texture>("textures\\brick.png");
+        m_textures.emplace_back(texture.release());
       }
 
       m_models.emplace_back(model.release());

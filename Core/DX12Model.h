@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Core/DX12CommandList.h"
-#include "Core/DX12ConstantBuffer.h"
 
 #include <assimp\Importer.hpp>
 #include <assimp\scene.h>
@@ -12,6 +11,10 @@ using Microsoft::WRL::ComPtr;
 
 namespace Core
 {
+  class DX12Shader;
+  class DX12Texture;
+  class DX12ConstantBuffer;
+
   class DX12Model
   {
   public:
@@ -19,8 +22,8 @@ namespace Core
     ~DX12Model();
 
     ID3D12GraphicsCommandList* GetBundle() { return m_bundle->Get(); }
-    virtual void Setup(ID3D12GraphicsCommandList* commandList);
-    virtual void Draw(unsigned frameIndex, DX12Heap* heapDesc);
+    virtual void Setup(ID3D12GraphicsCommandList* commandList, DX12Shader* shader);
+    virtual void Draw(unsigned frameIndex, DX12Heap* heapDesc, DX12Shader* shader);
     virtual void LoadModel(const aiMesh* pMesh);
     unsigned GetTriangleCount() { return m_indices.size() / 3; }
 

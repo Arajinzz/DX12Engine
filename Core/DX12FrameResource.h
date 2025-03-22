@@ -26,18 +26,13 @@ namespace Core
     
     void CreateResources(DX12CommandList* commandList);
     void Update();
-    void AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE type, D3D12_SHADER_VISIBILITY visibility);
-    void InitHeapDesc(DX12Heap* heapDesc, std::vector<DX12ConstantBuffer*> constantBuffers, std::vector<DX12Texture*> textures);
-    // !!??
-    DX12Shader* GetShader() { return m_shader.get(); }
     DX12Camera* GetCamera() { return m_camera.get(); }
-    
+    DX12ConstantBuffer* GetConstantBuffer() { return m_constantBuffer.get(); }
+
     ~DX12FrameResource();
 
   private:
-    std::unique_ptr<DX12Texture> m_texture;
     std::unique_ptr<DX12ConstantBuffer> m_constantBuffer;
-    std::unique_ptr<DX12Shader> m_shader;
     std::unique_ptr<DX12Camera> m_camera;
 
   private:
