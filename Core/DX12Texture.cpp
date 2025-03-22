@@ -5,10 +5,8 @@
 #include "Core/DXApplicationHelper.h"
 #include "Core/DX12FrameResource.h"
 
-#include <DirectXTex/DirectXTex.h>
-
-#include <filesystem>
-
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 namespace Core
 {
@@ -16,15 +14,6 @@ namespace Core
     : m_textureData()
     , m_path(path)
   {
-    std::filesystem::path filePath(m_path);
-    if (!std::filesystem::exists(filePath))
-    {
-      throw std::exception("File not found.");
-    }
-
-    TexMetadata metadata;
-    ScratchImage scratchImage;
-
     // load texture
     unsigned char* img = stbi_load(path, &m_width, &m_height, &m_channels, 4);
     m_textureData.reserve(m_width * m_height * m_channels);
