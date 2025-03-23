@@ -156,6 +156,8 @@ namespace Core
     // Create SwapChain, swap chain creates depth buffer and render targets
     m_context = std::make_unique<DX12Context>();
 
+    m_mipsGen = std::make_unique<DX12MipsGenerator>();
+
     // full screen transitions not supported.
     ThrowIfFailed(Factory()->MakeWindowAssociation(WindowsApplication::GetHwnd(), DXGI_MWA_NO_ALT_ENTER));
   }
