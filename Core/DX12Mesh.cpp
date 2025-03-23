@@ -141,13 +141,13 @@ namespace Core
     // create rootSignature
     shader->CreateRootSignature();
 
-    std::vector<std::string> paths(6);
-    paths[0] = "skybox\\bluecloud_rt.jpg";
-    paths[1] = "skybox\\bluecloud_lf.jpg";
-    paths[2] = "skybox\\bluecloud_up.jpg";
-    paths[3] = "skybox\\bluecloud_dn.jpg";
-    paths[4] = "skybox\\bluecloud_ft.jpg";
-    paths[5] = "skybox\\bluecloud_bk.jpg";
+    std::vector<std::string> paths;
+    paths.push_back("skybox\\bluecloud_ft.jpg");
+    paths.push_back("skybox\\bluecloud_bk.jpg");
+    paths.push_back("skybox\\bluecloud_up.jpg");
+    paths.push_back("skybox\\bluecloud_dn.jpg");
+    paths.push_back("skybox\\bluecloud_rt.jpg");
+    paths.push_back("skybox\\bluecloud_lf.jpg");
 
     auto cubeMap = std::make_unique<DX12Texture>(paths);
 
