@@ -19,7 +19,7 @@ namespace Core
   void DX12FrameResource::CreateResources(DX12CommandList* commandList)
   {
     // create camera
-    m_camera = std::make_unique<DX12Camera>(45.0, 0.1f, 100000.0f);
+    m_camera = std::make_unique<DX12Camera>(45.0, 0.5f, 10000.0f);
     m_constantBuffer = std::make_unique<DX12ConstantBuffer>();
     m_skybox = std::make_unique<DX12Skybox>();
 
