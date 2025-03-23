@@ -22,6 +22,7 @@ namespace Core
     , m_angle(0.0f)
     , m_shaders()
     , m_textures()
+    , m_isCubeMap(false)
   {
     // create heap
     m_descHeap = std::make_unique<DX12Heap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -45,7 +46,7 @@ namespace Core
       m_descHeap->AddResource(constantBuffer->GetResource(), CONSTANTBUFFER);
 
     for (auto& texture : m_textures)
-      m_descHeap->AddResource(texture->GetResource(), TEXTURE);
+      m_descHeap->AddResource(texture->GetResource(), m_isCubeMap ? CUBEMAP : TEXTURE);
 
     for (const auto& texture : m_textures)
       texture->CopyToGPU(commandList);
@@ -117,6 +118,8 @@ namespace Core
 
   void DX12Mesh::LoadMeshSkyboxSpecific(const char* path)
   {
+    m_isCubeMap = true;
+
     Assimp::Importer importer;
 
     const aiScene* pModel = importer.ReadFile(path,

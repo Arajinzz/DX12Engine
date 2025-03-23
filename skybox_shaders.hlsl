@@ -14,38 +14,35 @@ cbuffer ModelConstantBuffer : register(b1)
     float4 m_padding[4];
 };
 
-Texture2D g_texture : register(t0);
+TextureCube g_texture : register(t0);
 SamplerState g_sampler : register(s0);
 
 struct PSInput
 {
     float4 position : SV_POSITION;
-    float3 normal : NORMAL;
-    float2 uv : TEXCOORD;
+    float4 texCoord : TEXCOORD;
 };
-
-float remap(float value, float inMin, float inMax, float outMin, float outMax)
-{
-    return outMin + (value - inMin) * (outMax - outMin) / (inMax - inMin);
-}
 
 PSInput VSMain(float4 position : POSITION, float3 normal : NORMAL, float2 uv : TEXCOORD)
 {
     PSInput result;
     
+    float4x4 viewNoTranslation = s_view;
+    viewNoTranslation._41 = 0;
+    viewNoTranslation._42 = 0;
+    viewNoTranslation._43 = 0;
+    
     float4 pos = float4(position.xyz, 1.0);
-    float4 worldPos = mul(pos, m_model);
-    float4 viewPos = mul(worldPos, s_view);
+    float4 viewPos = mul(pos, viewNoTranslation);
     float4 clipPos = mul(viewPos, s_projection);
     
     result.position = clipPos;
-    result.normal = mul(float4(normal, 0.0), m_model).xyz;
-    result.uv = uv;
+    result.texCoord = pos;
 
     return result;
 }
 
 float4 PSMain(PSInput input) : SV_TARGET
-{ 
-    return float4(0.5, 0.5f, 0.5f, 1.0f);
+{
+    return g_texture.Sample(g_sampler, normalize(input.texCoord));
 }

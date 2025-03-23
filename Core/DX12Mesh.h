@@ -39,6 +39,8 @@ namespace Core
     XMFLOAT3 m_scale;
     float m_angle;
     aiMatrix4x4 m_transformation;
+    // workaround
+    bool m_isCubeMap;
 
   private:
     DX12Mesh(const DX12Mesh&) = delete;
