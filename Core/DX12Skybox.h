@@ -13,8 +13,9 @@ namespace Core
     ~DX12Skybox();
     
     void Setup(DX12CommandList* commandList);
-    void Draw();
     void Update();
+    
+    DX12Mesh* GetMesh() { return m_cube.get(); }
 
   private:
     std::unique_ptr<DX12Mesh> m_cube;

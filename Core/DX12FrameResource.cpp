@@ -22,6 +22,8 @@ namespace Core
     m_camera = std::make_unique<DX12Camera>(45.0, 0.1f, 100000.0f);
     m_constantBuffer = std::make_unique<DX12ConstantBuffer>();
     m_skybox = std::make_unique<DX12Skybox>();
+
+    m_skybox->GetMesh()->SetScale(XMFLOAT3(300.0f, 300.0f, 300.0f));
   }
 
   void DX12FrameResource::Update()

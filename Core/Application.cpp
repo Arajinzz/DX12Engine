@@ -68,6 +68,9 @@ namespace Core
     // Reset and transition to Rendering state
     m_context->PrepareForRendering(); // set heaps, rects ...etc
 
+    // draw skybox first
+    m_context->Draw(FrameResource().GetSkybox()->GetMesh());
+
     // draw meshes
     for (auto mesh : m_meshes)
       m_context->Draw(mesh);

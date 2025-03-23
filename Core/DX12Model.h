@@ -18,7 +18,7 @@ namespace Core
   class DX12Model
   {
   public:
-    DX12Model();
+    DX12Model(D3D12_CULL_MODE cullMode = D3D12_CULL_MODE_BACK, bool depthEnabled = true);
     ~DX12Model();
 
     ID3D12GraphicsCommandList* GetBundle() { return m_bundle->Get(); }
@@ -42,6 +42,9 @@ namespace Core
     // data
     std::vector<Vertex> m_vertices;
     std::vector<uint16_t> m_indices;
+
+    D3D12_CULL_MODE m_cullMode;
+    bool m_depthEnabled;
 
     // bundle
     std::unique_ptr<DX12CommandList> m_bundle;

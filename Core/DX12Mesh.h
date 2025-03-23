@@ -23,6 +23,7 @@ namespace Core
     // workaround????
     DX12Heap* GetHeapDesc() { return m_descHeap.get(); }
     void SetTranslation(XMFLOAT3 translate) { m_translation = translate; };
+    void SetScale(XMFLOAT3 scale) { m_scale = scale; }
     unsigned GetTriangleCount();
 
   private:
@@ -35,6 +36,7 @@ namespace Core
     std::unique_ptr<DX12ConstantBuffer> m_constantBuffer;
     // for testing
     XMFLOAT3 m_translation;
+    XMFLOAT3 m_scale;
     float m_angle;
     aiMatrix4x4 m_transformation;
 

@@ -18,6 +18,7 @@ namespace Core
     , m_descHeap(nullptr)
     , m_constantBuffer(nullptr)
     , m_translation(0.0f, 0.0f, 0.0f)
+    , m_scale(1.0f, 1.0f, 1.0f)
     , m_angle(0.0f)
     , m_shaders()
     , m_textures()
@@ -126,7 +127,7 @@ namespace Core
       aiProcess_CalcTangentSpace);
 
     const auto pMesh = pModel->mMeshes[0];
-    auto model = std::make_unique<DX12Model>();
+    auto model = std::make_unique<DX12Model>(D3D12_CULL_MODE_FRONT, false);
     model->LoadModel(pMesh);
 
     auto shader = std::make_unique<DX12Shader>(L"skybox_shaders.hlsl");
@@ -160,7 +161,7 @@ namespace Core
 
     XMMATRIX T = XMMatrixTranslation(m_translation.x, m_translation.y, m_translation.z);
     XMMATRIX R = XMMatrixRotationY(XMConvertToRadians(m_angle));
-    XMMATRIX S = XMMatrixScaling(1, 1, 1);
+    XMMATRIX S = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
 
     m_constantBuffer->SetModel(XMMatrixTranspose(S * R * T));
   }

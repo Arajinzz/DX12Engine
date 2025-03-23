@@ -19,11 +19,8 @@ namespace Core
     m_cube->SetupMesh(commandList->Get());
   }
 
-  void DX12Skybox::Draw()
-  {
-  }
-
   void DX12Skybox::Update()
   {
+    m_cube->UpdateMesh();
   }
 }

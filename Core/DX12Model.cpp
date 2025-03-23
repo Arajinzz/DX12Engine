@@ -13,10 +13,12 @@
 
 namespace Core
 {
-  DX12Model::DX12Model()
+  DX12Model::DX12Model(D3D12_CULL_MODE cullMode, bool depthEnabled)
     : m_vertices()
     , m_indices()
     , m_bundle(nullptr)
+    , m_cullMode(cullMode)
+    , m_depthEnabled(depthEnabled)
   {
     // Create the command list.
     // the class should add command list automatically to CommandQueue
@@ -46,9 +48,9 @@ namespace Core
     psoDesc.VS = CD3DX12_SHADER_BYTECODE(shader->GetVertexShader());
     psoDesc.PS = CD3DX12_SHADER_BYTECODE(shader->GetPixelShader());
     psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-    psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
+    psoDesc.RasterizerState.CullMode = m_cullMode;
     psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-    psoDesc.DepthStencilState.DepthEnable = TRUE;
+    psoDesc.DepthStencilState.DepthEnable = m_depthEnabled;
     psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
     psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
     psoDesc.DepthStencilState.StencilEnable = FALSE;
