@@ -4,6 +4,7 @@
 #include "Core/DX12Device.h"
 #include "Core/DX12CommandQueue.h"
 #include "Core/DX12FrameResource.h"
+#include "Core/DX12Skybox.h"
 
 #include <random>
 
@@ -43,6 +44,8 @@ namespace Core
       //mesh->SetTranslation(translation);
       m_triangleCount += mesh->GetTriangleCount();
     }
+
+    FrameResource().GetSkybox()->Setup(m_context->GetCommandList());
 
     // Execute command lists
     m_context->Execute();

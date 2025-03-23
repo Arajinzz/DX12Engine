@@ -29,6 +29,7 @@ namespace Core
     void Update();
     DX12Camera* GetCamera() { return m_camera.get(); }
     DX12ConstantBuffer* GetConstantBuffer() { return m_constantBuffer.get(); }
+    DX12Skybox* GetSkybox() { return m_skybox.get(); }
 
     ~DX12FrameResource();
 

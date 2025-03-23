@@ -14,6 +14,11 @@ namespace Core
   {
   }
 
+  void DX12Skybox::Setup(DX12CommandList* commandList)
+  {
+    m_cube->SetupMesh(commandList->Get());
+  }
+
   void DX12Skybox::Draw()
   {
   }

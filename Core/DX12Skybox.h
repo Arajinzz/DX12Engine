@@ -12,6 +12,7 @@ namespace Core
     DX12Skybox();
     ~DX12Skybox();
     
+    void Setup(DX12CommandList* commandList);
     void Draw();
     void Update();
 
