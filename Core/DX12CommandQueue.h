@@ -10,7 +10,7 @@ namespace Core
   class DX12CommandQueue
   {
   public:
-    DX12CommandQueue(bool isDirect = true);
+    DX12CommandQueue();
     ~DX12CommandQueue();
     
     ID3D12CommandQueue* Get() { return m_commandQueue.Get(); }

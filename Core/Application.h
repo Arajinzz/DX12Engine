@@ -4,7 +4,6 @@
 #include "Core/DX12Model.h"
 #include "Core/DX12Context.h"
 #include "Core/DX12Mesh.h"
-#include "Core/DX12MipsGenerator.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -36,8 +35,6 @@ namespace Core
   private:
     // main context
     std::unique_ptr<DX12Context> m_context;
-    // mips generator
-    std::unique_ptr<DX12MipsGenerator> m_mipsGen;
 
     // meshes
     std::vector<DX12Mesh*> m_meshes;
