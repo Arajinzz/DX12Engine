@@ -5,6 +5,7 @@
 #include "Core/Application.h"
 #include "Core/DX12FrameResource.h"
 #include "Core/DX12Device.h"
+#include "Core/DX12Texture.h"
 
 namespace Core
 {
@@ -26,7 +27,7 @@ namespace Core
     CD3DX12_DESCRIPTOR_RANGE1 srcMip(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
     CD3DX12_DESCRIPTOR_RANGE1 outMip(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 4, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
     CD3DX12_ROOT_PARAMETER1 rootParameters[Core::NumRootParameters];
-    rootParameters[Core::GenerateMipsCB].InitAsConstants(sizeof(GenerateMipsCB) / 4, 0);
+    rootParameters[Core::GenerateMipsCB].InitAsConstants(sizeof(SGenerateMipsCB) / 4, 0);
     rootParameters[Core::SrcMip].InitAsDescriptorTable(1, &srcMip);
     rootParameters[Core::OutMip].InitAsDescriptorTable(1, &outMip);
     CD3DX12_STATIC_SAMPLER_DESC linearClampSampler(
@@ -122,10 +123,46 @@ namespace Core
 
   void DX12Context::CreateMips(DX12Mesh* mesh)
   {
+    m_mipsHeap->ResetResources();
+    m_mipsHeap->ResetHeap();
+
+    //Set root signature, pso and descriptor heap
+    m_commandList->Get()->SetComputeRootSignature(m_rootSignature.Get());
+    m_commandList->Get()->SetPipelineState(m_pipelineState.Get());
+
     for (unsigned i = 0; i < mesh->GetTexturesCount(); ++i)
     {
       auto texture = mesh->GetTexture(i);
-      // fill command list with stuff maybe
+      for (unsigned mip = 0; mip < texture->GetMipsLevels(); ++mip)
+      {
+        m_mipsHeap->AddResource(texture->GetResource(), UAV);
+      }
+    }
+
+    // heap created
+    m_commandList->SetDescriptorHeap(m_mipsHeap.get());
+    for (unsigned i = 0; i < mesh->GetTexturesCount(); ++i)
+    {
+      auto texture = mesh->GetTexture(i);
+      //Transition from pixel shader resource to unordered access
+      auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
+        texture->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+      m_commandList->Get()->ResourceBarrier(1, &barrier1);
+
+      for (unsigned mip = 0; mip < texture->GetMipsLevels(); ++mip)
+      {
+        SGenerateMipsCB generateMipsCB;
+        generateMipsCB.SrcMipLevel = mip;
+        generateMipsCB.NumMipLevels = texture->GetMipsLevels();
+        generateMipsCB.TexelSize.x = 1.0f / (float)texture->GetResource()->GetDesc().Width;
+        generateMipsCB.TexelSize.y = 1.0f / (float)texture->GetResource()->GetDesc().Height;
+
+        m_commandList->Get()->SetComputeRoot32BitConstants(0, sizeof(SGenerateMipsCB) / 4, &generateMipsCB, 0);
+      }
+
+      barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
+        texture->GetResource(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+      m_commandList->Get()->ResourceBarrier(1, &barrier1);
     }
   }
 

@@ -13,7 +13,8 @@ namespace Core
     CONSTANTBUFFER,
     DEPTH,
     RENDERTARGET,
-    CUBEMAP
+    CUBEMAP,
+    UAV
   };
 
   class DX12Heap

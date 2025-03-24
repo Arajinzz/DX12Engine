@@ -28,7 +28,7 @@ namespace Core
     textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     textureDesc.Width = m_metaData[0].width;
     textureDesc.Height = m_metaData[0].height;
-    textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+    textureDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
     textureDesc.DepthOrArraySize = m_imgPtrs.size();
     textureDesc.SampleDesc.Count = 1;
     textureDesc.SampleDesc.Quality = 0;

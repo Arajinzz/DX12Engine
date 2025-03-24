@@ -40,7 +40,8 @@ namespace Core
       m_resources[n].Reset();
     // clear resources but keep heap
     m_resources.clear();
-    m_handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_heap->GetCPUDescriptorHandleForHeapStart());
+    if (m_heap)
+      m_handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_heap->GetCPUDescriptorHandleForHeapStart());
   }
 
   void DX12Heap::ResetHeap()
@@ -84,6 +85,15 @@ namespace Core
         srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
         srvDesc.Texture2D.MipLevels = m_resources[i]->GetDesc().MipLevels;
         Device()->CreateShaderResourceView(m_resources[i].Get(), &srvDesc, m_handle);
+      }
+      else if (type == UAV)
+      {
+        D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+        uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+        uavDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        uavDesc.Texture2D.MipSlice = i;
+        uavDesc.Texture2D.PlaneSlice = 0;
+        Device()->CreateUnorderedAccessView(nullptr, nullptr, &uavDesc, m_handle);
       }
       else if (type == CUBEMAP)
       {

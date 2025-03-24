@@ -18,7 +18,7 @@ namespace Core
     NumRootParameters
   };
 
-  struct alignas(16) GenerateMipsCB
+  struct alignas(16) SGenerateMipsCB
   {
     uint32_t SrcMipLevel;           // Texture level of source mip
     uint32_t NumMipLevels;          // Number of OutMips to write: [1-4]
