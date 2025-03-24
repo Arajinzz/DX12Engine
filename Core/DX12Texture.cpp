@@ -10,10 +10,10 @@
 
 namespace Core
 {
-  DX12Texture::DX12Texture(std::vector<std::string> paths)
+  DX12Texture::DX12Texture(std::vector<std::string> paths, unsigned mips)
     : m_imgPtrs()
     , m_metaData()
-    , m_mipsLevels(4)
+    , m_mipsLevels(mips)
   {
     for (const auto& path : paths)
     {

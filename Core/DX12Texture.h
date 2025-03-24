@@ -10,7 +10,7 @@ namespace Core
   class DX12Texture
   {
   public:
-    DX12Texture(std::vector<std::string> paths);
+    DX12Texture(std::vector<std::string> paths, unsigned mips = 4);
     ~DX12Texture();
 
     unsigned GetMipsLevels() { return m_mipsLevels; }

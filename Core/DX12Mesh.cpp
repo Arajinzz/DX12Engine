@@ -149,7 +149,7 @@ namespace Core
     paths.push_back("skybox\\bluecloud_rt.jpg");
     paths.push_back("skybox\\bluecloud_lf.jpg");
 
-    auto cubeMap = std::make_unique<DX12Texture>(paths);
+    auto cubeMap = std::make_unique<DX12Texture>(paths, 1);
 
     m_shaders.emplace_back(shader.release());
     m_models.emplace_back(model.release());
