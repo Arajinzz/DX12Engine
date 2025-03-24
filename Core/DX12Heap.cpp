@@ -62,6 +62,9 @@ namespace Core
 
   void DX12Heap::CreateViews()
   {
+    // workaround
+    const unsigned mipLevels = 4;
+    unsigned currentMipLevel = 0;
     for (unsigned i = 0; i < m_resources.size(); ++i)
     {
       auto type = m_resourceTypes[i];
@@ -91,9 +94,12 @@ namespace Core
         D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
         uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
         uavDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-        uavDesc.Texture2D.MipSlice = i;
-        uavDesc.Texture2D.PlaneSlice = 0;
-        Device()->CreateUnorderedAccessView(nullptr, nullptr, &uavDesc, m_handle);
+        uavDesc.Texture2D.MipSlice = currentMipLevel;
+        Device()->CreateUnorderedAccessView(m_resources[i].Get(), nullptr, &uavDesc, m_handle);
+        // Workaround
+        currentMipLevel++;
+        if (currentMipLevel >= mipLevels)
+          currentMipLevel = 0;
       }
       else if (type == CUBEMAP)
       {
@@ -125,5 +131,10 @@ namespace Core
   CD3DX12_CPU_DESCRIPTOR_HANDLE DX12Heap::GetOffsetHandle(unsigned int Offset)
   {
     return CD3DX12_CPU_DESCRIPTOR_HANDLE(m_heap->GetCPUDescriptorHandleForHeapStart(), Offset, m_descriptorSize);
+  }
+
+  CD3DX12_GPU_DESCRIPTOR_HANDLE DX12Heap::GetOffsetGPUHandle(unsigned int Offset)
+  {
+    return CD3DX12_GPU_DESCRIPTOR_HANDLE(m_heap->GetGPUDescriptorHandleForHeapStart(), Offset, m_descriptorSize);
   }
 }
