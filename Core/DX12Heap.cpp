@@ -82,7 +82,7 @@ namespace Core
         srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
         srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-        srvDesc.Texture2D.MipLevels = 1;
+        srvDesc.Texture2D.MipLevels = m_resources[i]->GetDesc().MipLevels;
         Device()->CreateShaderResourceView(m_resources[i].Get(), &srvDesc, m_handle);
       }
       else if (type == CUBEMAP)

@@ -13,6 +13,7 @@ namespace Core
   DX12Texture::DX12Texture(std::vector<std::string> paths)
     : m_imgPtrs()
     , m_metaData()
+    , m_mipsLevels(4)
   {
     for (const auto& path : paths)
     {
@@ -23,7 +24,7 @@ namespace Core
     }
 
     D3D12_RESOURCE_DESC textureDesc = {};
-    textureDesc.MipLevels = 1;
+    textureDesc.MipLevels = m_mipsLevels;
     textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     textureDesc.Width = m_metaData[0].width;
     textureDesc.Height = m_metaData[0].height;

@@ -43,6 +43,8 @@ namespace Core
       mesh->SetupMesh(m_context->GetCommandList()->Get());
       //mesh->SetTranslation(translation);
       m_triangleCount += mesh->GetTriangleCount();
+      // create mip maps
+      m_context->CreateMips(mesh);
     }
 
     FrameResource().GetSkybox()->Setup(m_context->GetCommandList());

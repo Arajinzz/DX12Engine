@@ -26,6 +26,9 @@ namespace Core
     void SetScale(XMFLOAT3 scale) { m_scale = scale; }
     unsigned GetTriangleCount();
 
+    DX12Texture* GetTexture(unsigned index) { return m_textures[index].get(); }
+    unsigned GetTexturesCount() { return m_textures.size(); }
+
   private:
     std::vector<std::unique_ptr<DX12Model>> m_models;
     std::vector<std::unique_ptr<DX12Shader>> m_shaders; // for each model

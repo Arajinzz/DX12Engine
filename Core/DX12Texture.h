@@ -13,6 +13,7 @@ namespace Core
     DX12Texture(std::vector<std::string> paths);
     ~DX12Texture();
 
+    unsigned GetMipsLevels() { return m_mipsLevels; }
     ID3D12Resource* GetResource() { return m_texture.Get(); }
     void CopyToGPU(ID3D12GraphicsCommandList* commandList);
 
@@ -29,6 +30,7 @@ namespace Core
     
     std::vector<unsigned char*> m_imgPtrs;
     std::vector<MetaData> m_metaData;
+    unsigned m_mipsLevels;
 
   private:
     DX12Texture(const DX12Texture&) = delete;

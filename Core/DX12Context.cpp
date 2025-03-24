@@ -83,6 +83,15 @@ namespace Core
     m_commandQueue->SetFenceValue(m_frameIndex, currentFenceValue + 1);
   }
 
+  void DX12Context::CreateMips(DX12Mesh* mesh)
+  {
+    for (unsigned i = 0; i < mesh->GetTexturesCount(); ++i)
+    {
+      auto texture = mesh->GetTexture(i);
+      // fill command list with stuff maybe
+    }
+  }
+
   void DX12Context::Resize(unsigned width, unsigned height)
   {
     m_swapChain->Resize(width, height);
