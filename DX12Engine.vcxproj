@@ -239,7 +239,6 @@
     <ClCompile Include="Core\DX12Mesh.cpp" />
     <ClCompile Include="Core\DX12Camera.cpp" />
     <ClCompile Include="Core\DX12Skybox.cpp" />
-    <ClCompile Include="Core\DX12MipsGenerator.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -383,7 +382,6 @@
     <ClInclude Include="Core\DX12Mesh.h" />
     <ClInclude Include="Core\DX12Camera.h" />
     <ClInclude Include="Core\DX12Skybox.h" />
-    <ClInclude Include="Core\DX12MipsGenerator.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Core\WindowsApplication.h" />
   </ItemGroup>
