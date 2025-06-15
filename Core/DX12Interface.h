@@ -29,6 +29,9 @@ namespace Core
 
     ~DX12Interface();
 
+  public:
+    ComPtr<ID3D12Resource> CreateBuffer(size_t size, D3D12_HEAP_TYPE type);
+
   protected:
     void Initialize();
 

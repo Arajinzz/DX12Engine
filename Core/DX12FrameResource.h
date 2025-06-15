@@ -28,13 +28,28 @@ namespace Core
     void CreateResources(DX12CommandList* commandList);
     void Update();
     DX12Camera* GetCamera() { return m_camera.get(); }
-    DX12ConstantBuffer* GetConstantBuffer() { return m_constantBuffer.get(); }
+    ID3D12Resource* GetConstantBuffer() { return m_constantBuffer.Get(); }
     DX12Skybox* GetSkybox() { return m_skybox.get(); }
 
     ~DX12FrameResource();
 
   private:
-    std::unique_ptr<DX12ConstantBuffer> m_constantBuffer;
+
+    // temporary
+    struct ConstantBufferData
+    {
+      XMMATRIX model;
+      XMMATRIX view;
+      XMMATRIX projection;
+      float padding[16]; // Padding so the constant buffer is 256-byte aligned.
+    };
+    // data
+    ConstantBufferData m_constantBufferData;
+    UINT8* m_pCbvDataBegin;
+    // CB resource
+    ComPtr<ID3D12Resource> m_constantBuffer;
+
+    // camera and skybox
     std::unique_ptr<DX12Camera> m_camera;
     std::unique_ptr<DX12Skybox> m_skybox;
 

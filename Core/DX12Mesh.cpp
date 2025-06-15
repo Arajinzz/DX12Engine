@@ -41,7 +41,7 @@ namespace Core
     std::vector<DX12ConstantBuffer*> constantBuffers = { m_constantBuffer.get() };
     
     // always Globals first
-    m_descHeap->AddResource(FrameResource().GetConstantBuffer()->GetResource(), CONSTANTBUFFER);
+    m_descHeap->AddResource(FrameResource().GetConstantBuffer(), CONSTANTBUFFER);
     for (auto constantBuffer : constantBuffers)
       m_descHeap->AddResource(constantBuffer->GetResource(), CONSTANTBUFFER);
 

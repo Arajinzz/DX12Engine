@@ -19,6 +19,24 @@ namespace Core
     m_factory.Reset();
   }
 
+  ComPtr<ID3D12Resource> DX12Interface::CreateBuffer(size_t size, D3D12_HEAP_TYPE type)
+  {
+    auto heapProperties = CD3DX12_HEAP_PROPERTIES(type);
+    auto resourceDescription = CD3DX12_RESOURCE_DESC::Buffer(size);
+
+    ComPtr<ID3D12Resource> buffer;
+
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+      &heapProperties,
+      D3D12_HEAP_FLAG_NONE,
+      &resourceDescription,
+      D3D12_RESOURCE_STATE_GENERIC_READ,
+      nullptr,
+      IID_PPV_ARGS(&buffer)));
+
+    return buffer;
+  }
+
   void DX12Interface::Initialize()
   {
     unsigned int dxgiFactoryFlags = 0;
