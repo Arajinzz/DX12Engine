@@ -13,7 +13,6 @@ using Microsoft::WRL::ComPtr;
 namespace Core
 {
   class DX12Texture;
-  class DX12ConstantBuffer;
   class DX12Skybox;
 
   class DX12FrameResource

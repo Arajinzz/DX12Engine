@@ -4,7 +4,7 @@
 #include "Core/DX12FrameResource.h"
 #include "Core/WindowsApplication.h"
 #include "Core/DX12Texture.h"
-#include "Core/DX12ConstantBuffer.h"
+#include "Core/DX12Interface.h"
 #include "Core/DX12Shader.h"
 
 #include <assimp\Importer.hpp>
@@ -16,6 +16,8 @@ namespace Core
   DX12Mesh::DX12Mesh()
     : m_models()
     , m_descHeap(nullptr)
+    , m_pCbvDataBegin(nullptr)
+    , m_constantBufferData()
     , m_constantBuffer(nullptr)
     , m_translation(0.0f, 0.0f, 0.0f)
     , m_scale(1.0f, 1.0f, 1.0f)
@@ -27,23 +29,25 @@ namespace Core
     // create heap
     m_descHeap = std::make_unique<DX12Heap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     // create constant buffer
-    m_constantBuffer = std::make_unique<DX12ConstantBuffer>();
+    m_constantBuffer = DX12Interface::Get().CreateBuffer(sizeof(ConstantBufferData), D3D12_HEAP_TYPE_UPLOAD);
+    // Map and initialize the constant buffer. We don't unmap this until the
+    // app closes. Keeping things mapped for the lifetime of the resource is okay.
+    CD3DX12_RANGE readRange(0, 0); // We do not intend to read from this resource on the CPU.
+    ThrowIfFailed(m_constantBuffer->Map(0, &readRange, reinterpret_cast<void**>(&m_pCbvDataBegin)));
+    memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
   }
 
   DX12Mesh::~DX12Mesh()
   {
     m_descHeap.reset();
-    m_constantBuffer.reset();
+    m_constantBuffer.Reset();
   }
 
   void DX12Mesh::SetupMesh(ID3D12GraphicsCommandList* commandList)
   {
-    std::vector<DX12ConstantBuffer*> constantBuffers = { m_constantBuffer.get() };
-    
     // always Globals first
     m_descHeap->AddResource(FrameResource().GetConstantBuffer(), CONSTANTBUFFER);
-    for (auto constantBuffer : constantBuffers)
-      m_descHeap->AddResource(constantBuffer->GetResource(), CONSTANTBUFFER);
+    m_descHeap->AddResource(m_constantBuffer, CONSTANTBUFFER);
 
     for (auto& texture : m_textures)
       m_descHeap->AddResource(texture->GetResource(), m_isCubeMap ? CUBEMAP : TEXTURE);
@@ -166,7 +170,8 @@ namespace Core
     XMMATRIX R = XMMatrixRotationY(XMConvertToRadians(m_angle));
     XMMATRIX S = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
 
-    m_constantBuffer->SetModel(XMMatrixTranspose(S * R * T));
+    m_constantBufferData.model = XMMatrixTranspose(S * R * T);
+    memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
   }
 
   unsigned DX12Mesh::GetTriangleCount()

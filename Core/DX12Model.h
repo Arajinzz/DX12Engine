@@ -13,7 +13,6 @@ namespace Core
 {
   class DX12Shader;
   class DX12Texture;
-  class DX12ConstantBuffer;
 
   class DX12Model
   {

@@ -5,7 +5,6 @@
 #include "Core/DXApplicationHelper.h"
 #include "Core/DX12FrameResource.h"
 #include "Core/WindowsApplication.h"
-#include "Core/DX12ConstantBuffer.h"
 #include "Core/DX12Texture.h"
 #include "Core/DX12Shader.h"
 

@@ -231,7 +231,6 @@
     <ClCompile Include="Core\DX12CommandList.cpp" />
     <ClCompile Include="Core\DX12FrameResource.cpp" />
     <ClCompile Include="Core\DX12Texture.cpp" />
-    <ClCompile Include="Core\DX12ConstantBuffer.cpp" />
     <ClCompile Include="Core\DX12Context.cpp" />
     <ClCompile Include="Core\DX12Model.cpp" />
     <ClCompile Include="Core\DX12Shader.cpp" />
@@ -354,7 +353,6 @@
     <ClInclude Include="Core\DX12CommandList.h" />
     <ClInclude Include="Core\DX12FrameResource.h" />
     <ClInclude Include="Core\DX12Texture.h" />
-    <ClInclude Include="Core\DX12ConstantBuffer.h" />
     <ClInclude Include="Core\DX12Context.h" />
     <ClInclude Include="Core\DX12Model.h" />
     <ClInclude Include="dep\stb\stb_connected_components.h" />

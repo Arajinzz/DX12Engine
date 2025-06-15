@@ -35,8 +35,20 @@ namespace Core
     std::vector<std::unique_ptr<DX12Texture>> m_textures; // for each model
     std::unique_ptr<DX12Heap> m_descHeap;
     
+    // temporary
+    struct ConstantBufferData
+    {
+      XMMATRIX model;
+      XMMATRIX view;
+      XMMATRIX projection;
+      float padding[16]; // Padding so the constant buffer is 256-byte aligned.
+    };
+    // data
+    ConstantBufferData m_constantBufferData;
+    UINT8* m_pCbvDataBegin;
     // constant buffer
-    std::unique_ptr<DX12ConstantBuffer> m_constantBuffer;
+    ComPtr<ID3D12Resource> m_constantBuffer;
+
     // for testing
     XMFLOAT3 m_translation;
     XMFLOAT3 m_scale;
