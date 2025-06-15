@@ -166,12 +166,16 @@ namespace Core
     if (m_angle > 360.0)
       m_angle = 0.0;*/
 
-    XMMATRIX T = XMMatrixTranslation(m_translation.x, m_translation.y, m_translation.z);
-    XMMATRIX R = XMMatrixRotationY(XMConvertToRadians(m_angle));
-    XMMATRIX S = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
+    // quick hack to test performance
+    if (staticMesh && !isModelSet)
+    {
+      XMMATRIX T = XMMatrixTranslation(m_translation.x, m_translation.y, m_translation.z);
+      XMMATRIX R = XMMatrixRotationY(XMConvertToRadians(m_angle));
+      XMMATRIX S = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
 
-    m_constantBufferData.model = XMMatrixTranspose(S * R * T);
-    memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
+      m_constantBufferData.model = XMMatrixTranspose(S * R * T);
+      memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
+    }
   }
 
   unsigned DX12Mesh::GetTriangleCount()

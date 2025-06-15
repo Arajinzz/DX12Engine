@@ -34,6 +34,8 @@ namespace Core
     std::vector<std::unique_ptr<DX12Shader>> m_shaders; // for each model
     std::vector<std::unique_ptr<DX12Texture>> m_textures; // for each model
     std::unique_ptr<DX12Heap> m_descHeap;
+    bool staticMesh = true;
+    bool isModelSet = false;
     
     // temporary
     struct ConstantBufferData
