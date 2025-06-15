@@ -225,7 +225,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Core\DX12Device.cpp" />
     <ClCompile Include="Core\DX12SwapChain.cpp" />
     <ClCompile Include="Core\DX12CommandQueue.cpp" />
     <ClCompile Include="Core\DX12Heap.cpp" />
@@ -239,7 +238,7 @@
     <ClCompile Include="Core\DX12Mesh.cpp" />
     <ClCompile Include="Core\DX12Camera.cpp" />
     <ClCompile Include="Core\DX12Skybox.cpp" />
-    <ClCompile Include="DX12Interface.cpp" />
+    <ClCompile Include="Core\DX12Interface.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -349,7 +348,6 @@
     <ClInclude Include="dep\imgui\misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="dep\imgui\misc\freetype\imgui_freetype.h" />
     <ClInclude Include="dep\imgui\misc\single_file\imgui_single_file.h" />
-    <ClInclude Include="Core\DX12Device.h" />
     <ClInclude Include="Core\DX12SwapChain.h" />
     <ClInclude Include="Core\DX12CommandQueue.h" />
     <ClInclude Include="Core\DX12Heap.h" />
@@ -383,7 +381,7 @@
     <ClInclude Include="Core\DX12Mesh.h" />
     <ClInclude Include="Core\DX12Camera.h" />
     <ClInclude Include="Core\DX12Skybox.h" />
-    <ClInclude Include="DX12Interface.h" />
+    <ClInclude Include="Core\DX12Interface.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Core\WindowsApplication.h" />
   </ItemGroup>

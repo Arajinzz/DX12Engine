@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "DX12Model.h"
 
-#include "Core/DX12Device.h"
+#include "Core/DX12Interface.h"
 #include "Core/DXApplicationHelper.h"
 #include "Core/DX12FrameResource.h"
 #include "Core/WindowsApplication.h"
@@ -60,7 +60,7 @@ namespace Core
     psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
     psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
     psoDesc.SampleDesc.Count = 1;
-    ThrowIfFailed(Device()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
 
     SetupVertexBuffer(commandList);
     SetupIndexBuffer(commandList);
@@ -77,12 +77,12 @@ namespace Core
     auto handle = heapDesc->Get()->GetGPUDescriptorHandleForHeapStart();
     m_bundle->Get()->SetGraphicsRootDescriptorTable(0, handle);
 
-    handle.ptr += Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    handle.ptr += DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     m_bundle->Get()->SetGraphicsRootDescriptorTable(1, handle);
 
     // get correct texture in the heap
     for (unsigned i = 0; i < texturePos + 1; ++i)
-      handle.ptr += Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+      handle.ptr += DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
     m_bundle->Get()->SetGraphicsRootDescriptorTable(2, handle);
 
@@ -127,7 +127,7 @@ namespace Core
     auto uploadHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
     auto defaultHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
     auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
-    ThrowIfFailed(Device()->CreateCommittedResource(
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &defaultHeapProps,
       D3D12_HEAP_FLAG_NONE,
       &resDesc,
@@ -135,7 +135,7 @@ namespace Core
       nullptr,
       IID_PPV_ARGS(&m_vertexBuffer)));
 
-    ThrowIfFailed(Device()->CreateCommittedResource(
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &uploadHeapProps,
       D3D12_HEAP_FLAG_NONE,
       &resDesc,
@@ -167,7 +167,7 @@ namespace Core
     auto uploadHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
     auto defaultHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
     auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize);
-    ThrowIfFailed(Device()->CreateCommittedResource(
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &defaultHeapProps,
       D3D12_HEAP_FLAG_NONE,
       &resDesc,
@@ -175,7 +175,7 @@ namespace Core
       nullptr,
       IID_PPV_ARGS(&m_indexBuffer)));
 
-    ThrowIfFailed(Device()->CreateCommittedResource(
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &uploadHeapProps,
       D3D12_HEAP_FLAG_NONE,
       &resDesc,

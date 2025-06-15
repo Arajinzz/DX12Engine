@@ -151,14 +151,14 @@ namespace Core
 
   void Application::LoadPipeline()
   {
-    // Create Device
-    CreateDevice(); // Singleton
+    // Create DX12Interface, It will create Device and factory
+    DX12Interface::Get();
 
     // Create Context
     // Create SwapChain, swap chain creates depth buffer and render targets
     m_context = std::make_unique<DX12Context>();
 
     // full screen transitions not supported.
-    ThrowIfFailed(Factory()->MakeWindowAssociation(WindowsApplication::GetHwnd(), DXGI_MWA_NO_ALT_ENTER));
+    ThrowIfFailed(DX12Interface::Get().GetFactory()->MakeWindowAssociation(WindowsApplication::GetHwnd(), DXGI_MWA_NO_ALT_ENTER));
   }
 }

@@ -4,7 +4,7 @@
 #include "Core/WindowsApplication.h"
 #include "Core/Application.h"
 #include "Core/DX12FrameResource.h"
-#include "Core/DX12Device.h"
+#include "Core/DX12Interface.h"
 #include "Core/DX12Texture.h"
 
 namespace Core
@@ -44,7 +44,7 @@ namespace Core
     ComPtr<ID3DBlob> signature;
     ComPtr<ID3DBlob> error;
     ThrowIfFailed(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_1, &signature, &error));
-    ThrowIfFailed(Device()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature)));
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature)));
     Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob;
     Microsoft::WRL::ComPtr<ID3DBlob> errorBlob;
     ThrowIfFailed(D3DCompileFromFile(L"GenerateMips_CS.hlsl", nullptr, nullptr, "main", "cs_5_1",
@@ -56,7 +56,7 @@ namespace Core
     computePsoDesc.CS.BytecodeLength = shaderBlob->GetBufferSize();
     computePsoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE; // Default flag
     // Create the compute PSO
-    Device()->CreateComputePipelineState(&computePsoDesc, IID_PPV_ARGS(&m_pipelineState));
+    DX12Interface::Get().GetDevice()->CreateComputePipelineState(&computePsoDesc, IID_PPV_ARGS(&m_pipelineState));
 
     // create command queue
     m_commandQueue = std::make_unique<DX12CommandQueue>();

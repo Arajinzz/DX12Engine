@@ -2,7 +2,7 @@
 #include "DX12ConstantBuffer.h"
 
 #include "Core/DXApplicationHelper.h"
-#include "Core/DX12Device.h"
+#include "Core/DX12Interface.h"
 #include "Core/DX12FrameResource.h"
 
 namespace Core
@@ -13,7 +13,7 @@ namespace Core
   {
     auto heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
     auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(256);
-    ThrowIfFailed(Device()->CreateCommittedResource(
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &heapProp,
       D3D12_HEAP_FLAG_NONE,
       &resDesc,

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "DX12Texture.h"
 
-#include "Core/DX12Device.h"
+#include "Core/DX12Interface.h"
 #include "Core/DXApplicationHelper.h"
 #include "Core/DX12FrameResource.h"
 
@@ -36,7 +36,7 @@ namespace Core
     
     auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 
-    ThrowIfFailed(Device()->CreateCommittedResource(
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &heapProperties,
       D3D12_HEAP_FLAG_NONE,
       &textureDesc,
@@ -48,7 +48,7 @@ namespace Core
     const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_texture.Get(), 0, subresourceCount);
     auto bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
     heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-    ThrowIfFailed(Device()->CreateCommittedResource(
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &heapProperties,
       D3D12_HEAP_FLAG_NONE,
       &bufferDesc,

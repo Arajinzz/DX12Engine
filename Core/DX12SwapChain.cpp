@@ -3,7 +3,7 @@
 
 #include "Core/WindowsApplication.h"
 #include "Core/DXApplicationHelper.h"
-#include "Core/DX12Device.h"
+#include "Core/DX12Interface.h"
 #include "Core/Application.h"
 
 namespace Core
@@ -32,7 +32,7 @@ namespace Core
     swapChainDesc.SampleDesc.Count = 1;
 
     ComPtr<IDXGISwapChain1> swapChain;
-    ThrowIfFailed(Factory()->CreateSwapChainForHwnd(
+    ThrowIfFailed(DX12Interface::Get().GetFactory()->CreateSwapChainForHwnd(
       queue->Get(), // Swap chain needs the queue so that it can force a flush on it.
       WindowsApplication::GetHwnd(),
       &swapChainDesc,
@@ -123,7 +123,7 @@ namespace Core
     clearValue.DepthStencil.Stencil = 0;
 
     auto heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-    ThrowIfFailed(Device()->CreateCommittedResource(
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &heapProp,
       D3D12_HEAP_FLAG_NONE,
       &depthStencilDesc,

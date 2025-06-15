@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "DX12Shader.h"
 
-#include "Core/DX12Device.h"
+#include "Core/DX12Interface.h"
 #include "Core/DXApplicationHelper.h"
 
 namespace Core
@@ -67,7 +67,7 @@ namespace Core
     ComPtr<ID3DBlob> signature;
     ComPtr<ID3DBlob> error;
     ThrowIfFailed(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_1, &signature, &error));
-    ThrowIfFailed(Device()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature)));
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature)));
   }
 
   void DX12Shader::ResetRootSignature()

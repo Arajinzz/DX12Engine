@@ -2,7 +2,7 @@
 #include "DX12CommandQueue.h"
 
 #include "Core/DXApplicationHelper.h"
-#include "Core/DX12Device.h"
+#include "Core/DX12Interface.h"
 
 #include "Core/Application.h"
 
@@ -17,7 +17,7 @@ namespace Core
     D3D12_COMMAND_QUEUE_DESC queueDesc = {};
     queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
     queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-    ThrowIfFailed(Device()->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_commandQueue)));
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_commandQueue)));
 
     m_commandList = std::make_unique<DX12CommandList>();
   }
@@ -26,7 +26,7 @@ namespace Core
   void DX12CommandQueue::InitFence()
   {
     // Create Fence
-    ThrowIfFailed(Device()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
 
     for (unsigned n = 0; n < Application::FrameCount; ++n)
       m_fenceValues.push_back(0);

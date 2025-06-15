@@ -2,7 +2,7 @@
 #include "DX12CommandList.h"
 
 #include "Core/DXApplicationHelper.h"
-#include "Core/DX12Device.h"
+#include "Core/DX12Interface.h"
 #include "Core/DX12CommandQueue.h"
 #include "Core/Application.h"
 
@@ -14,9 +14,9 @@ namespace Core
   {
     for (int n = 0; n < Application::FrameCount; ++n)
     {
-      ThrowIfFailed(Device()->CreateCommandAllocator(m_type, IID_PPV_ARGS(&m_commandAllocators[n])));
+      ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommandAllocator(m_type, IID_PPV_ARGS(&m_commandAllocators[n])));
       // maybe bind this to the pso!!!!!!!!!!!
-      ThrowIfFailed(Device()->CreateCommandList(0, m_type, m_commandAllocators[n].Get(), nullptr, IID_PPV_ARGS(&m_commandList)));
+      ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommandList(0, m_type, m_commandAllocators[n].Get(), nullptr, IID_PPV_ARGS(&m_commandList)));
     }
   }
 

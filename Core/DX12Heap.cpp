@@ -2,7 +2,7 @@
 #include "DX12Heap.h"
 
 #include "Core/DXApplicationHelper.h"
-#include "Core/DX12Device.h"
+#include "Core/DX12Interface.h"
 #include "Core/DX12SwapChain.h"
 
 namespace Core
@@ -29,8 +29,8 @@ namespace Core
     heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
     if (m_type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)
       heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-    ThrowIfFailed(Device()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&m_heap)));
-    m_descriptorSize = Device()->GetDescriptorHandleIncrementSize(m_type);
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&m_heap)));
+    m_descriptorSize = DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(m_type);
     m_handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_heap->GetCPUDescriptorHandleForHeapStart());
   }
 
@@ -70,7 +70,7 @@ namespace Core
       auto type = m_resourceTypes[i];
 
       if (type == RENDERTARGET)
-        Device()->CreateRenderTargetView(m_resources[i].Get(), nullptr, m_handle);
+        DX12Interface::Get().GetDevice()->CreateRenderTargetView(m_resources[i].Get(), nullptr, m_handle);
       else if (type == DEPTH)
       {
         D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
@@ -78,7 +78,7 @@ namespace Core
         dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
         dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
 
-        Device()->CreateDepthStencilView(m_resources[i].Get(), &dsvDesc, m_heap->GetCPUDescriptorHandleForHeapStart());
+        DX12Interface::Get().GetDevice()->CreateDepthStencilView(m_resources[i].Get(), &dsvDesc, m_heap->GetCPUDescriptorHandleForHeapStart());
       }
       else if (type == TEXTURE)
       {
@@ -87,7 +87,7 @@ namespace Core
         srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
         srvDesc.Texture2D.MipLevels = m_resources[i]->GetDesc().MipLevels;
-        Device()->CreateShaderResourceView(m_resources[i].Get(), &srvDesc, m_handle);
+        DX12Interface::Get().GetDevice()->CreateShaderResourceView(m_resources[i].Get(), &srvDesc, m_handle);
       }
       else if (type == UAV)
       {
@@ -95,7 +95,7 @@ namespace Core
         uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
         uavDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         uavDesc.Texture2D.MipSlice = currentMipLevel;
-        Device()->CreateUnorderedAccessView(m_resources[i].Get(), nullptr, &uavDesc, m_handle);
+        DX12Interface::Get().GetDevice()->CreateUnorderedAccessView(m_resources[i].Get(), nullptr, &uavDesc, m_handle);
         // Workaround
         currentMipLevel++;
         if (currentMipLevel >= mipLevels)
@@ -108,14 +108,14 @@ namespace Core
         srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
         srvDesc.Texture2D.MipLevels = 1;
-        Device()->CreateShaderResourceView(m_resources[i].Get(), &srvDesc, m_handle);
+        DX12Interface::Get().GetDevice()->CreateShaderResourceView(m_resources[i].Get(), &srvDesc, m_handle);
       } else if (type == CONSTANTBUFFER)
       {
         // Describe and create a constant buffer view
         D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
         cbvDesc.BufferLocation = m_resources[i]->GetGPUVirtualAddress();
         cbvDesc.SizeInBytes = 256;
-        Device()->CreateConstantBufferView(&cbvDesc, m_handle);
+        DX12Interface::Get().GetDevice()->CreateConstantBufferView(&cbvDesc, m_handle);
       }
 
       Offset(1);
