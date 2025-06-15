@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Application.h"
 
-#include "Core/DX12Device.h"
+#include "Core/DX12Interface.h"
 #include "Core/DX12CommandQueue.h"
 #include "Core/DX12FrameResource.h"
 #include "Core/DX12Skybox.h"
