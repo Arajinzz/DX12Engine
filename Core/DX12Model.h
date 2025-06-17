@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/DX12CommandList.h"
+#include "Core\DX12Heap.h"
 
 #include <assimp\Importer.hpp>
 #include <assimp\scene.h>
@@ -20,9 +20,8 @@ namespace Core
     DX12Model(D3D12_CULL_MODE cullMode = D3D12_CULL_MODE_BACK, bool depthEnabled = true);
     ~DX12Model();
 
-    ID3D12GraphicsCommandList* GetBundle() { return m_bundle->Get(); }
     virtual void Setup(ID3D12GraphicsCommandList* commandList, DX12Shader* shader);
-    virtual void Draw(unsigned frameIndex, DX12Heap* heapDesc, DX12Shader* shader, unsigned texturePos);
+    virtual void Draw(unsigned frameIndex, DX12Heap* heapDesc, DX12Shader* shader, unsigned texturePos, ID3D12GraphicsCommandList* commandList);
     virtual void LoadModel(const aiMesh* pMesh);
     unsigned GetTriangleCount() { return m_indices.size() / 3; }
 
@@ -44,9 +43,6 @@ namespace Core
 
     D3D12_CULL_MODE m_cullMode;
     bool m_depthEnabled;
-
-    // bundle
-    std::unique_ptr<DX12CommandList> m_bundle;
     // pso
     ComPtr<ID3D12PipelineState> m_pipelineState;
 

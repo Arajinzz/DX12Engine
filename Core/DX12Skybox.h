@@ -12,7 +12,7 @@ namespace Core
     DX12Skybox();
     ~DX12Skybox();
     
-    void Setup(DX12CommandList* commandList);
+    void Setup(ID3D12GraphicsCommandList* commandList);
     void Update();
     
     DX12Mesh* GetMesh() { return m_cube.get(); }

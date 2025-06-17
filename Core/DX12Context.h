@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Core/DX12CommandQueue.h"
-#include "Core/DX12CommandList.h"
+#include "Core/DX12Heap.h"
 #include "Core/DX12Mesh.h"
 #include "Core/DX12SwapChain.h"
 
@@ -46,16 +45,28 @@ namespace Core
     void Draw(DX12Mesh* mesh);
     void PrepareForPresenting();
 
-    DX12CommandQueue* GetCommandQueue() { return m_commandQueue.get(); }
-    DX12CommandList* GetCommandList() { return m_commandList; }
+    ID3D12CommandQueue* GetCommandQueue() { return m_commandQueue.Get(); }
+    ID3D12GraphicsCommandList* GetCommandList() { return m_commandList.Get(); }
+
+  private:
+    void InitFence();
+    void SignalFence();
+    void WaitFence();
 
   private:
     // the swapchain
     std::unique_ptr<DX12SwapChain> m_swapChain;
+    
     // command queue
-    std::unique_ptr<DX12CommandQueue> m_commandQueue;
-    // command list associated to command queue
-    DX12CommandList* m_commandList; // owned by command queue
+    ComPtr<ID3D12CommandQueue> m_commandQueue;
+    // command list
+    std::vector<ComPtr<ID3D12CommandAllocator>> m_commandAllocators;
+    ComPtr<ID3D12GraphicsCommandList> m_commandList;
+    // synchronization
+    HANDLE m_fenceEvent;
+    ComPtr<ID3D12Fence> m_fence;
+    std::vector<uint64_t> m_fenceValues;
+
     // used for mipmaps
     std::unique_ptr<DX12Heap> m_mipsHeap;
     // pso used for mipmaps

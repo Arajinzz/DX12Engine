@@ -14,9 +14,9 @@ namespace Core
   {
   }
 
-  void DX12Skybox::Setup(DX12CommandList* commandList)
+  void DX12Skybox::Setup(ID3D12GraphicsCommandList* commandList)
   {
-    m_cube->SetupMesh(commandList->Get());
+    m_cube->SetupMesh(commandList);
   }
 
   void DX12Skybox::Update()

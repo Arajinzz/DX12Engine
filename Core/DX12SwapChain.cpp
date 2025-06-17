@@ -17,7 +17,7 @@ namespace Core
     m_swapChain.Reset();
   }
 
-  void DX12SwapChain::Init(DX12CommandQueue* queue)
+  void DX12SwapChain::Init(ID3D12CommandQueue* queue)
   {
     RECT rect;
     GetClientRect(WindowsApplication::GetHwnd(), &rect);
@@ -33,7 +33,7 @@ namespace Core
 
     ComPtr<IDXGISwapChain1> swapChain;
     ThrowIfFailed(DX12Interface::Get().GetFactory()->CreateSwapChainForHwnd(
-      queue->Get(), // Swap chain needs the queue so that it can force a flush on it.
+      queue, // Swap chain needs the queue so that it can force a flush on it.
       WindowsApplication::GetHwnd(),
       &swapChainDesc,
       nullptr,

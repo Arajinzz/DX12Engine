@@ -13,6 +13,10 @@ namespace Core
     : m_frameIndex(0)
     , m_commandQueue(nullptr)
     , m_commandList(nullptr)
+    , m_commandAllocators()
+    , m_fence(nullptr)
+    , m_fenceEvent()
+    , m_fenceValues()
     , m_swapChain(nullptr)
   {
     RECT rect;
@@ -59,21 +63,28 @@ namespace Core
     DX12Interface::Get().GetDevice()->CreateComputePipelineState(&computePsoDesc, IID_PPV_ARGS(&m_pipelineState));
 
     // create command queue
-    m_commandQueue = std::make_unique<DX12CommandQueue>();
-    m_commandList = m_commandQueue->GetCommandList();
+    m_commandQueue = DX12Interface::Get().CreateCommandQueue();
+
+    // create command list and allocators for it
+    for (unsigned n = 0; n < Application::FrameCount; ++n)
+      m_commandAllocators.push_back(DX12Interface::Get().CreateCommandAllocator());
+    m_commandList = DX12Interface::Get().CreateCommandList(m_commandAllocators);
 
     // create the swap chain
     m_swapChain = std::make_unique<DX12SwapChain>();
-    m_swapChain->Init(m_commandQueue.get());
+    m_swapChain->Init(m_commandQueue.Get());
 
     // Create synchronization objects.
-    m_commandQueue->InitFence();
-
-    m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+    InitFence();
   }
 
   DX12Context::~DX12Context()
   {
+    m_commandList.Reset();
+    m_fence.Reset();
+    m_fenceValues.clear();
+    m_commandQueue.Reset();
+    m_commandAllocators.clear(); // could be a bug
   }
 
   void DX12Context::Present()
@@ -85,28 +96,35 @@ namespace Core
   {
     // close command List
     m_commandList->Close();
+
     // execute commands to finish setup
-    m_commandQueue->ExecuteCommandList();
+    ID3D12CommandList* commandLists[] = { m_commandList.Get() };
+    m_commandQueue->ExecuteCommandLists(1, commandLists);
   }
 
   void DX12Context::WaitForGpu()
   {
-    m_commandQueue->WaitForGpu(m_frameIndex);
+    // Wait for the command list to execute; we are reusing the same command
+    // list in our main loop but for now, we just want to wait for setup to
+    // complete before continuing.
+    // Schedule a Signal command in the queue.
+    SignalFence();
+    WaitFence();
   }
 
   void DX12Context::MoveToNextFrame()
   {
     // Signal and increment the fence value.
-    m_commandQueue->SignalFence(m_frameIndex);
+    ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), m_fenceValues[m_frameIndex]));
 
     // current frame Fence
-    const UINT64 currentFenceValue = m_commandQueue->GetFenceValue(m_frameIndex);
+    const UINT64 currentFenceValue = m_fenceValues[m_frameIndex];
 
     // next frame
     m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
     // If the next frame is not ready to be rendered yet, wait until
-    m_commandQueue->WaitFence(m_frameIndex);
+    WaitFence();
 
     // How I understand it is, the current frame will always a fenceValue bigger than next frame
     // Why is that? because we begin with fence values 0 for both frames, but the current frame
@@ -118,7 +136,7 @@ namespace Core
     // which will be
     // currentFrame fenceValue = 1
     // nextFrame fenceValue = 2
-    m_commandQueue->SetFenceValue(m_frameIndex, currentFenceValue + 1);
+    m_fenceValues[m_frameIndex] = currentFenceValue + 1;
   }
 
   void DX12Context::CreateMips(DX12Mesh* mesh)
@@ -127,8 +145,8 @@ namespace Core
     m_mipsHeap->ResetHeap();
 
     //Set root signature, pso and descriptor heap
-    m_commandList->Get()->SetComputeRootSignature(m_rootSignature.Get());
-    m_commandList->Get()->SetPipelineState(m_pipelineState.Get());
+    m_commandList->SetComputeRootSignature(m_rootSignature.Get());
+    m_commandList->SetPipelineState(m_pipelineState.Get());
 
     for (unsigned i = 0; i < mesh->GetTexturesCount(); ++i)
     {
@@ -141,14 +159,15 @@ namespace Core
     }
 
     // heap created
-    m_commandList->SetDescriptorHeap(m_mipsHeap.get());
+    ID3D12DescriptorHeap* ppHeaps[] = { m_mipsHeap->Get() };
+    m_commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
     for (unsigned i = 0; i < mesh->GetTexturesCount(); ++i)
     {
       auto texture = mesh->GetTexture(i);
       //Transition from pixel shader resource to unordered access
       auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
         texture->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-      m_commandList->Get()->ResourceBarrier(1, &barrier1);
+      m_commandList->ResourceBarrier(1, &barrier1);
 
       SGenerateMipsCB generateMipsCB;
       generateMipsCB.SrcDimension = (texture->GetResource()->GetDesc().Height & 1) << 1 | (texture->GetResource()->GetDesc().Width & 1);
@@ -156,21 +175,21 @@ namespace Core
       generateMipsCB.NumMipLevels = texture->GetMipsLevels();
       generateMipsCB.TexelSize.x = 1.0f / (float)texture->GetResource()->GetDesc().Width;
       generateMipsCB.TexelSize.y = 1.0f / (float)texture->GetResource()->GetDesc().Height;
-      m_commandList->Get()->SetComputeRoot32BitConstants(0, sizeof(SGenerateMipsCB) / 4, &generateMipsCB, 0);
+      m_commandList->SetComputeRoot32BitConstants(0, sizeof(SGenerateMipsCB) / 4, &generateMipsCB, 0);
       auto padding = texture->GetMipsLevels() + 1;
-      m_commandList->Get()->SetComputeRootDescriptorTable(1, m_mipsHeap->GetOffsetGPUHandle(i * padding));
-      m_commandList->Get()->SetComputeRootDescriptorTable(2, m_mipsHeap->GetOffsetGPUHandle(i * padding + 1));
+      m_commandList->SetComputeRootDescriptorTable(1, m_mipsHeap->GetOffsetGPUHandle(i * padding));
+      m_commandList->SetComputeRootDescriptorTable(2, m_mipsHeap->GetOffsetGPUHandle(i * padding + 1));
 
       //Dispatch the compute shader with one thread per 8x8 pixels
-      m_commandList->Get()->Dispatch(max(texture->GetResource()->GetDesc().Width / 8, 1u), max(texture->GetResource()->GetDesc().Height / 8, 1u), 1);
+      m_commandList->Dispatch(max(texture->GetResource()->GetDesc().Width / 8, 1u), max(texture->GetResource()->GetDesc().Height / 8, 1u), 1);
 
       barrier1 = CD3DX12_RESOURCE_BARRIER::UAV(texture->GetResource());
       //Wait for all accesses to the destination texture UAV to be finished before generating the next mipmap, as it will be the source texture for the next mipmap
-      m_commandList->Get()->ResourceBarrier(1, &barrier1);
+      m_commandList->ResourceBarrier(1, &barrier1);
 
       barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
         texture->GetResource(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-      m_commandList->Get()->ResourceBarrier(1, &barrier1);
+      m_commandList->ResourceBarrier(1, &barrier1);
     }
   }
 
@@ -183,7 +202,10 @@ namespace Core
 
     m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
     
-    m_commandQueue->ResetFence();
+    // reset fence
+    m_fence.Reset();
+    m_fenceValues.clear();
+    InitFence();
   }
 
   void DX12Context::PrepareForRendering()
@@ -194,37 +216,84 @@ namespace Core
     // However, when ExecuteCommandList() is called on a particular command 
     // list, that command list can then be reset at any time and must be before 
     // re-recording.
-    m_commandList->Reset(m_frameIndex, nullptr);
+    ThrowIfFailed(m_commandAllocators[m_frameIndex]->Reset());
+    ThrowIfFailed(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr));
 
     // Indicate that the back buffer will be used as a render target.
-    m_commandList->Transition(m_swapChain->GetRenderHeap()->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+    auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(m_swapChain->GetRenderHeap()->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+    m_commandList->ResourceBarrier(1, &barrier1);
 
     // these must be done in the same commandlist as drawing
     // because they set a state for rendering
     // and states they reset between command lists
     // since we are using bundles for drawing this should be fine
-    m_commandList->Get()->RSSetViewports(1, &m_viewport);
-    m_commandList->Get()->RSSetScissorRects(1, &m_scissorRect);
+    m_commandList->RSSetViewports(1, &m_viewport);
+    m_commandList->RSSetScissorRects(1, &m_scissorRect);
     auto rtvHandle = m_swapChain->GetRenderHeap()->GetOffsetHandle(m_frameIndex);
     auto dsvHandle = m_swapChain->GetDepthHeap()->GetOffsetHandle(0);
-    m_commandList->Get()->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
+    m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 
     // Record commands.
     const float clearColor[] = { 0.25f, 0.55f, 0.45f, 1.0f };
-    m_commandList->ClearDepthStencilView(dsvHandle);
-    m_commandList->ClearRenderTargetView(rtvHandle, clearColor);
+    m_commandList->ClearDepthStencilView(
+      dsvHandle,
+      D3D12_CLEAR_FLAG_DEPTH,
+      1.0f,    // Clear depth to maximum (far plane)
+      0,       // Clear stencil to 0
+      0, nullptr
+    );
+    m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
   }
 
   void DX12Context::Draw(DX12Mesh* mesh)
   {
+    // RECHECK THIS!!!!!!!!!!!!!!!
     // set heaps, this has to be the same as bundles
-    m_commandQueue->GetCommandList()->SetDescriptorHeap(mesh->GetHeapDesc());
-    mesh->DrawMesh(m_frameIndex, m_commandList->Get()); // executes bundles
+    ID3D12DescriptorHeap* ppHeaps[] = { mesh->GetHeapDesc()->Get()};
+    m_commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+    mesh->DrawMesh(m_frameIndex, m_commandList.Get()); // executes bundles
   }
 
   void DX12Context::PrepareForPresenting()
   {
     // Indicate that the back buffer will now be used to present.
-    m_commandList->Transition(m_swapChain->GetRenderHeap()->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+    auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(m_swapChain->GetRenderHeap()->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+    m_commandList->ResourceBarrier(1, &barrier1);
   }
+
+  void DX12Context::InitFence()
+  {
+    m_fence = DX12Interface::Get().CreateFence();
+    for (unsigned n = 0; n < Application::FrameCount; ++n)
+      m_fenceValues.push_back(0);
+    m_fenceValues[0]++; // start from buffer number 0
+
+    m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+    if (m_fenceEvent == nullptr)
+      ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
+
+    m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+  }
+
+  void DX12Context::SignalFence()
+  {
+    ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), m_fenceValues[m_frameIndex]));
+  }
+
+  void DX12Context::WaitFence()
+  {
+    // gpu didn't finish yet
+    auto completedValue = m_fence->GetCompletedValue();
+
+    if (completedValue < m_fenceValues[m_frameIndex])
+    {
+      // Wait until the fence has been processed.
+      ThrowIfFailed(m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent));
+      WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
+    }
+
+    // Increment the fence value for the current frame.
+    m_fenceValues[m_frameIndex]++;
+  }
+
 }

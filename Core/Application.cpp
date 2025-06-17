@@ -2,7 +2,6 @@
 #include "Application.h"
 
 #include "Core/DX12Interface.h"
-#include "Core/DX12CommandQueue.h"
 #include "Core/DX12FrameResource.h"
 #include "Core/DX12Skybox.h"
 
@@ -40,7 +39,7 @@ namespace Core
     {
       //XMFLOAT3 translation = {5 * dist(gen), 5 * dist(gen), 5 * dist(gen) };
       mesh->LoadMesh("models\\sponza.obj");
-      mesh->SetupMesh(m_context->GetCommandList()->Get());
+      mesh->SetupMesh(m_context->GetCommandList());
       //mesh->SetTranslation(translation);
       m_triangleCount += mesh->GetTriangleCount();
       // create mip maps

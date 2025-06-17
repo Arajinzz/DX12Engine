@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/DX12CommandQueue.h"
+#include "Core/DX12Heap.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -16,7 +16,7 @@ namespace Core
 
     DX12Heap* GetRenderHeap() { return m_rtvHeap.get(); }
     DX12Heap* GetDepthHeap() { return m_dsvHeap.get(); }
-    void Init(DX12CommandQueue* queue);
+    void Init(ID3D12CommandQueue* queue);
     unsigned int GetCurrentBackBufferIndex();
     void GetBuffer(unsigned int n, Microsoft::WRL::Details::ComPtrRef<Microsoft::WRL::ComPtr<ID3D12Resource>> renderTarget);
     void Present();

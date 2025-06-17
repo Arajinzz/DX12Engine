@@ -64,10 +64,7 @@ namespace Core
   void DX12Mesh::DrawMesh(unsigned frameIndex, ID3D12GraphicsCommandList* commandList)
   {
     for (int i = 0; i < m_models.size(); ++i)
-    {
-      m_models[i]->Draw(frameIndex, m_descHeap.get(), m_shaders[i].get(), i);
-      commandList->ExecuteBundle(m_models[i]->GetBundle());
-    }
+      m_models[i]->Draw(frameIndex, m_descHeap.get(), m_shaders[i].get(), i, commandList);
   }
 
   void DX12Mesh::LoadMesh(const char* path)

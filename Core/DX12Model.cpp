@@ -15,19 +15,13 @@ namespace Core
   DX12Model::DX12Model(D3D12_CULL_MODE cullMode, bool depthEnabled)
     : m_vertices()
     , m_indices()
-    , m_bundle(nullptr)
     , m_cullMode(cullMode)
     , m_depthEnabled(depthEnabled)
   {
-    // Create the command list.
-    // the class should add command list automatically to CommandQueue
-    m_bundle = std::make_unique<DX12CommandList>(D3D12_COMMAND_LIST_TYPE_BUNDLE);
-    m_bundle->Close();
   }
 
   DX12Model::~DX12Model()
   {
-    m_bundle.reset();
   }
 
   void DX12Model::Setup(ID3D12GraphicsCommandList* commandList, DX12Shader* shader)
@@ -65,32 +59,31 @@ namespace Core
     SetupIndexBuffer(commandList);
   }
 
-  void DX12Model::Draw(unsigned frameIndex, DX12Heap* heapDesc, DX12Shader* shader, unsigned texturePos)
+  void DX12Model::Draw(unsigned frameIndex, DX12Heap* heapDesc, DX12Shader* shader, unsigned texturePos, ID3D12GraphicsCommandList* commandList)
   {
     // 1 allocator
-    m_bundle->Reset(frameIndex, m_pipelineState.Get());
+    commandList->SetPipelineState(m_pipelineState.Get());
     // Set necessary state.
-    m_bundle->SetRootSignature(shader->GetRootSignature());
-    m_bundle->SetDescriptorHeap(heapDesc);
+    commandList->SetGraphicsRootSignature(shader->GetRootSignature());
+    ID3D12DescriptorHeap* ppHeaps[] = { heapDesc->Get() };
+    commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
     
     auto handle = heapDesc->Get()->GetGPUDescriptorHandleForHeapStart();
-    m_bundle->Get()->SetGraphicsRootDescriptorTable(0, handle);
+    commandList->SetGraphicsRootDescriptorTable(0, handle);
 
     handle.ptr += DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    m_bundle->Get()->SetGraphicsRootDescriptorTable(1, handle);
+    commandList->SetGraphicsRootDescriptorTable(1, handle);
 
     // get correct texture in the heap
     for (unsigned i = 0; i < texturePos + 1; ++i)
       handle.ptr += DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-    m_bundle->Get()->SetGraphicsRootDescriptorTable(2, handle);
+    commandList->SetGraphicsRootDescriptorTable(2, handle);
 
-    m_bundle->Get()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    m_bundle->Get()->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-    m_bundle->Get()->IASetIndexBuffer(&m_indexBufferView);
-    m_bundle->Get()->DrawIndexedInstanced(m_indices.size(), 1, 0, 0, 0);
-
-    m_bundle->Close();
+    commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
+    commandList->IASetIndexBuffer(&m_indexBufferView);
+    commandList->DrawIndexedInstanced(m_indices.size(), 1, 0, 0, 0);
   }
 
   void DX12Model::LoadModel(const aiMesh* pMesh)

@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Core/DX12CommandList.h"
-#include "Core/DX12Shader.h"
-#include "Core/DX12Camera.h"
+#include "Core\DX12Shader.h"
+#include "Core\DX12Camera.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -24,7 +23,7 @@ namespace Core
       return instance;
     }
     
-    void CreateResources(DX12CommandList* commandList);
+    void CreateResources(ID3D12GraphicsCommandList* commandList);
     void Update();
     DX12Camera* GetCamera() { return m_camera.get(); }
     ID3D12Resource* GetConstantBuffer() { return m_constantBuffer.Get(); }
