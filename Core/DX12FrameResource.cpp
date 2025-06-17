@@ -24,7 +24,7 @@ namespace Core
     m_camera = std::make_unique<DX12Camera>(45.0, 0.5f, 10000.0f);
     
     // create the buffer
-    m_constantBuffer = DX12Interface::Get().CreateBuffer(sizeof(ConstantBufferData), D3D12_HEAP_TYPE_UPLOAD);
+    m_constantBuffer = DX12Interface::Get().CreateConstantBuffer(sizeof(ConstantBufferData), D3D12_HEAP_TYPE_UPLOAD);
     // Map and initialize the constant buffer. We don't unmap this until the
     // app closes. Keeping things mapped for the lifetime of the resource is okay.
     CD3DX12_RANGE readRange(0, 0); // We do not intend to read from this resource on the CPU.

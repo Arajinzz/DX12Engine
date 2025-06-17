@@ -19,24 +19,6 @@ namespace Core
     m_factory.Reset();
   }
 
-  ComPtr<ID3D12Resource> DX12Interface::CreateBuffer(size_t size, D3D12_HEAP_TYPE type)
-  {
-    auto heapProperties = CD3DX12_HEAP_PROPERTIES(type);
-    auto resourceDescription = CD3DX12_RESOURCE_DESC::Buffer(size);
-
-    ComPtr<ID3D12Resource> buffer;
-
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
-      &heapProperties,
-      D3D12_HEAP_FLAG_NONE,
-      &resourceDescription,
-      D3D12_RESOURCE_STATE_GENERIC_READ,
-      nullptr,
-      IID_PPV_ARGS(&buffer)));
-
-    return buffer;
-  }
-
   void DX12Interface::Initialize()
   {
     unsigned int dxgiFactoryFlags = 0;
@@ -170,4 +152,79 @@ namespace Core
 
     *ppAdapter = adapter.Detach();
   }
+
+  ComPtr<ID3D12Resource> DX12Interface::CreateConstantBuffer(size_t size, D3D12_HEAP_TYPE type)
+  {
+    auto heapProperties = CD3DX12_HEAP_PROPERTIES(type);
+    auto resourceDescription = CD3DX12_RESOURCE_DESC::Buffer(size);
+
+    ComPtr<ID3D12Resource> buffer;
+
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+      &heapProperties,
+      D3D12_HEAP_FLAG_NONE,
+      &resourceDescription,
+      D3D12_RESOURCE_STATE_GENERIC_READ,
+      nullptr,
+      IID_PPV_ARGS(&buffer)));
+
+    return buffer;
+  }
+
+  void DX12Interface::CreateRenderTargetView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset)
+  {
+    auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+      heap->GetCPUDescriptorHandleForHeapStart(), offset, m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
+    m_device->CreateRenderTargetView(resource, nullptr, handle);
+  }
+
+  void DX12Interface::CreateDepthStencilView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset)
+  {
+    auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+      heap->GetCPUDescriptorHandleForHeapStart(), offset, m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV));
+
+    D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+    dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+    dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+    dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+    m_device->CreateDepthStencilView(resource, &dsvDesc, handle);
+  }
+
+  void DX12Interface::CreateShaderResourceView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset, bool isCubeMap)
+  {
+    auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+      heap->GetCPUDescriptorHandleForHeapStart(), offset, m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+
+    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    srvDesc.ViewDimension = isCubeMap ? D3D12_SRV_DIMENSION_TEXTURECUBE : D3D12_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = isCubeMap ? 1 : resource->GetDesc().MipLevels; // cubemap does not support mipmaps
+    m_device->CreateShaderResourceView(resource, &srvDesc, handle);
+  }
+
+  void DX12Interface::CreateUnorderedAccessView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset, unsigned currentMipLevel)
+  {
+    auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+      heap->GetCPUDescriptorHandleForHeapStart(), offset, m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+
+    D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+    uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+    uavDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    uavDesc.Texture2D.MipSlice = currentMipLevel;
+    m_device->CreateUnorderedAccessView(resource, nullptr, &uavDesc, handle);
+  }
+
+  void DX12Interface::CreateConstantBufferView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset)
+  {
+    auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+      heap->GetCPUDescriptorHandleForHeapStart(), offset, m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+
+    // Describe and create a constant buffer view
+    D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
+    cbvDesc.BufferLocation = resource->GetGPUVirtualAddress();
+    cbvDesc.SizeInBytes = resource->GetDesc().Width;
+    m_device->CreateConstantBufferView(&cbvDesc, handle);
+  }
+
 }

@@ -68,64 +68,26 @@ namespace Core
     for (unsigned i = 0; i < m_resources.size(); ++i)
     {
       auto type = m_resourceTypes[i];
+      auto resource = m_resources[i].Get();
 
       if (type == RENDERTARGET)
-        DX12Interface::Get().GetDevice()->CreateRenderTargetView(m_resources[i].Get(), nullptr, m_handle);
+        DX12Interface::Get().CreateRenderTargetView(resource, m_heap.Get(), i);
       else if (type == DEPTH)
-      {
-        D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
-        dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
-        dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-        dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
-
-        DX12Interface::Get().GetDevice()->CreateDepthStencilView(m_resources[i].Get(), &dsvDesc, m_heap->GetCPUDescriptorHandleForHeapStart());
-      }
-      else if (type == TEXTURE)
-      {
-        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-        srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-        srvDesc.Texture2D.MipLevels = m_resources[i]->GetDesc().MipLevels;
-        DX12Interface::Get().GetDevice()->CreateShaderResourceView(m_resources[i].Get(), &srvDesc, m_handle);
-      }
+        DX12Interface::Get().CreateDepthStencilView(resource, m_heap.Get(), i);
+      else if (type == TEXTURE || type == CUBEMAP)
+        DX12Interface::Get().CreateShaderResourceView(resource, m_heap.Get(), i, type == CUBEMAP);
       else if (type == UAV)
       {
-        D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
-        uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-        uavDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-        uavDesc.Texture2D.MipSlice = currentMipLevel;
-        DX12Interface::Get().GetDevice()->CreateUnorderedAccessView(m_resources[i].Get(), nullptr, &uavDesc, m_handle);
+        DX12Interface::Get().CreateUnorderedAccessView(resource, m_heap.Get(), i, currentMipLevel);
         // Workaround
         currentMipLevel++;
         if (currentMipLevel >= mipLevels)
           currentMipLevel = 0;
       }
-      else if (type == CUBEMAP)
-      {
-        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-        srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
-        srvDesc.Texture2D.MipLevels = 1;
-        DX12Interface::Get().GetDevice()->CreateShaderResourceView(m_resources[i].Get(), &srvDesc, m_handle);
-      } else if (type == CONSTANTBUFFER)
-      {
-        // Describe and create a constant buffer view
-        D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
-        cbvDesc.BufferLocation = m_resources[i]->GetGPUVirtualAddress();
-        cbvDesc.SizeInBytes = 256;
-        DX12Interface::Get().GetDevice()->CreateConstantBufferView(&cbvDesc, m_handle);
-      }
-
-      Offset(1);
+      else if (type == CONSTANTBUFFER)
+        DX12Interface::Get().CreateConstantBufferView(resource, m_heap.Get(), i);
     }
 
-  }
-
-  void DX12Heap::Offset(unsigned int padding)
-  {
-    m_handle.Offset(padding, m_descriptorSize);
   }
 
   CD3DX12_CPU_DESCRIPTOR_HANDLE DX12Heap::GetOffsetHandle(unsigned int Offset)

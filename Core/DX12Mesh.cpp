@@ -29,7 +29,7 @@ namespace Core
     // create heap
     m_descHeap = std::make_unique<DX12Heap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     // create constant buffer
-    m_constantBuffer = DX12Interface::Get().CreateBuffer(sizeof(ConstantBufferData), D3D12_HEAP_TYPE_UPLOAD);
+    m_constantBuffer = DX12Interface::Get().CreateConstantBuffer(sizeof(ConstantBufferData), D3D12_HEAP_TYPE_UPLOAD);
     // Map and initialize the constant buffer. We don't unmap this until the
     // app closes. Keeping things mapped for the lifetime of the resource is okay.
     CD3DX12_RANGE readRange(0, 0); // We do not intend to read from this resource on the CPU.

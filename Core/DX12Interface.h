@@ -29,11 +29,16 @@ namespace Core
 
     ~DX12Interface();
 
-  public:
-    ComPtr<ID3D12Resource> CreateBuffer(size_t size, D3D12_HEAP_TYPE type);
-
   protected:
     void Initialize();
+  
+  public:
+    ComPtr<ID3D12Resource> CreateConstantBuffer(size_t size, D3D12_HEAP_TYPE type);
+    void CreateRenderTargetView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset);
+    void CreateDepthStencilView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset);
+    void CreateShaderResourceView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset, bool isCubeMap = false);
+    void CreateUnorderedAccessView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset, unsigned currentMipLevel = 0);
+    void CreateConstantBufferView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset);
 
   private:
     void GetHardwareAdapter(
