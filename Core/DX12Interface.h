@@ -35,10 +35,10 @@ namespace Core
   public:
     ComPtr<ID3D12Resource> CreateConstantBuffer(size_t size, D3D12_HEAP_TYPE type);
     // only direct CommandQueue
-    ComPtr<ID3D12CommandQueue> CreateCommandQueue();
+    ComPtr<ID3D12CommandQueue> CreateCommandQueue(D3D12_COMMAND_LIST_TYPE type);
     ComPtr<ID3D12Fence> CreateFence();
-    ComPtr<ID3D12CommandAllocator> CreateCommandAllocator();
-    ComPtr<ID3D12GraphicsCommandList> CreateCommandList(std::vector<ComPtr<ID3D12CommandAllocator>> allocators);
+    ComPtr<ID3D12CommandAllocator> CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE type);
+    ComPtr<ID3D12GraphicsCommandList> CreateCommandList(std::vector<ComPtr<ID3D12CommandAllocator>> allocators, D3D12_COMMAND_LIST_TYPE type);
 
     void CreateRenderTargetView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset);
     void CreateDepthStencilView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset);

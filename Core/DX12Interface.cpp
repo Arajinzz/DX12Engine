@@ -171,13 +171,13 @@ namespace Core
     return buffer;
   }
 
-  ComPtr<ID3D12CommandQueue> DX12Interface::CreateCommandQueue()
+  ComPtr<ID3D12CommandQueue> DX12Interface::CreateCommandQueue(D3D12_COMMAND_LIST_TYPE type)
   {
     // Describe and create the command queue.
     ComPtr<ID3D12CommandQueue> commandQueue;
     D3D12_COMMAND_QUEUE_DESC queueDesc = {};
     queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-    queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+    queueDesc.Type = type;
     ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue)));
     return commandQueue;
   }
@@ -190,18 +190,18 @@ namespace Core
     return fence;
   }
 
-  ComPtr<ID3D12CommandAllocator> DX12Interface::CreateCommandAllocator()
+  ComPtr<ID3D12CommandAllocator> DX12Interface::CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE type)
   { // supports only direct for now
     ComPtr<ID3D12CommandAllocator> commandAllocator;
-    ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator)));
+    ThrowIfFailed(m_device->CreateCommandAllocator(type, IID_PPV_ARGS(&commandAllocator)));
     return commandAllocator;
   }
 
-  ComPtr<ID3D12GraphicsCommandList> DX12Interface::CreateCommandList(std::vector<ComPtr<ID3D12CommandAllocator>> allocators)
+  ComPtr<ID3D12GraphicsCommandList> DX12Interface::CreateCommandList(std::vector<ComPtr<ID3D12CommandAllocator>> allocators, D3D12_COMMAND_LIST_TYPE type)
   { // supports only direct for now
     ComPtr<ID3D12GraphicsCommandList> commandList;
     for (auto allocator : allocators)
-      ThrowIfFailed(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, allocator.Get(), nullptr, IID_PPV_ARGS(&commandList)));
+      ThrowIfFailed(m_device->CreateCommandList(0, type, allocator.Get(), nullptr, IID_PPV_ARGS(&commandList)));
     return commandList;
   }
 
