@@ -72,7 +72,7 @@
     <ClCompile Include="Core\DX12Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\DX12GraphicsContext.cpp">
+    <ClCompile Include="Core\DX12Context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Core\DX12Model.cpp">
@@ -91,12 +91,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Core\DX12Interface.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\DX12ContextInterface.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\DX12ComputeContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -164,7 +158,7 @@
     <ClInclude Include="Core\DX12Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Core\DX12GraphicsContext.h">
+    <ClInclude Include="Core\DX12Context.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\DX12Model.h">
@@ -495,12 +489,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\DX12Interface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\DX12ContextInterface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\DX12ComputeContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

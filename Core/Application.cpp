@@ -11,8 +11,7 @@ namespace Core
 {
   Application::Application(UINT width, UINT height, std::wstring name)
     : DirectXApplication(width, height, name)
-    , m_graphicsContext(nullptr)
-    , m_computeContext(nullptr)
+    , m_context(nullptr)
     , m_triangleCount(0)
     , m_meshes()
   {
@@ -22,11 +21,10 @@ namespace Core
   {
     LoadPipeline();
 
-    // Create SwapChain, swap chain creates depth buffer and render targets
     CreateFrameResource();
     
     // create resources before doing anything
-    FrameResource().CreateResources(m_graphicsContext->GetCommandList());
+    FrameResource().CreateResources(m_context->GetCommandList());
 
     // Create Cube, will also create pso and root signature and constant buffer for transformation
     auto modelNumber = 1;
@@ -41,32 +39,20 @@ namespace Core
     {
       //XMFLOAT3 translation = {5 * dist(gen), 5 * dist(gen), 5 * dist(gen) };
       mesh->LoadMesh("models\\sponza.obj");
-      mesh->SetupMesh(m_graphicsContext->GetCommandList());
+      mesh->SetupMesh(m_context->GetCommandList());
       //mesh->SetTranslation(translation);
       m_triangleCount += mesh->GetTriangleCount();
       // create mip maps
-      m_computeContext->CreateMips(mesh);
+      m_context->CreateMips(mesh);
     }
 
-    FrameResource().GetSkybox()->Setup(m_graphicsContext->GetCommandList());
+    FrameResource().GetSkybox()->Setup(m_context->GetCommandList());
 
     // Execute command lists
-    m_graphicsContext->Execute();
-    m_computeContext->Execute();
-    // Wait for GPU to finish Execution
-    m_graphicsContext->WaitForGpu();
-    // in this place texture should be already transitioned to STATE_UNORDERED_ACCESS
-    m_computeContext->WaitForGpu();
+    m_context->Execute();
 
-    //// here compute context should have generated mips
-    //m_graphicsContext->Reset();
-    //for (auto mesh : m_meshes)
-    //{
-    //  m_graphicsContext->TransitionTextures(mesh);
-    //}
-    //// transition texture to shader resource for rendering
-    //m_graphicsContext->Execute();
-    //m_graphicsContext->WaitForGpu();
+    // Wait for GPU to finish Execution
+    m_context->WaitForGpu();
   }
 
   void Application::OnUpdate()
@@ -81,29 +67,25 @@ namespace Core
   {
     // Populate Command list
     // Reset and transition to Rendering state
-    m_graphicsContext->Reset();
-    m_graphicsContext->PrepareForRendering(); // set heaps, rects ...etc
+    m_context->PrepareForRendering(); // set heaps, rects ...etc
 
     // draw skybox first
-    m_graphicsContext->Draw(FrameResource().GetSkybox()->GetMesh());
+    m_context->Draw(FrameResource().GetSkybox()->GetMesh());
 
     // draw meshes
     for (auto mesh : m_meshes)
-    {
-      m_graphicsContext->TransitionTextures(mesh);
-      m_graphicsContext->Draw(mesh);
-    }
+      m_context->Draw(mesh);
 
     // transition to present state
-    m_graphicsContext->PrepareForPresenting();
+    m_context->PrepareForPresenting();
 
     // execute command list
-    m_graphicsContext->Execute();
+    m_context->Execute();
 
     // Present the frame, swap chain will do that
-    m_graphicsContext->Present();
+    m_context->Present();
 
-    m_graphicsContext->MoveToNextFrame(); // try to render next frame
+    m_context->MoveToNextFrame(); // try to render next frame
   }
 
   void Application::OnDestroy()
@@ -114,7 +96,7 @@ namespace Core
     // list in our main loop but for now, we just want to wait for setup to 
     // complete before continuing.
     // Schedule a Signal command in the queue.
-    m_graphicsContext->WaitForGpu();
+    m_context->WaitForGpu();
   }
 
   void Application::OnResize(unsigned width, unsigned height)
@@ -122,13 +104,13 @@ namespace Core
     if (WindowsApplication::Resizable())
     {
       // make sure that GPU is not doing anything
-      m_graphicsContext->WaitForGpu();
+      m_context->WaitForGpu();
 
       m_width = width;
       m_height = height;
 
       // adapt viewport and rect in context
-      m_graphicsContext->Resize(width, height);
+      m_context->Resize(width, height);
     }
   }
 
@@ -172,8 +154,8 @@ namespace Core
     DX12Interface::Get();
 
     // Create Context
-    m_graphicsContext = std::make_unique<DX12GraphicsContext>();
-    m_computeContext = std::make_unique<DX12ComputeContext>();
+    // Create SwapChain, swap chain creates depth buffer and render targets
+    m_context = std::make_unique<DX12Context>();
 
     // full screen transitions not supported.
     ThrowIfFailed(DX12Interface::Get().GetFactory()->MakeWindowAssociation(WindowsApplication::GetHwnd(), DXGI_MWA_NO_ALT_ENTER));

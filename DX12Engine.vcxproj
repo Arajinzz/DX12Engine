@@ -229,15 +229,13 @@
     <ClCompile Include="Core\DX12Heap.cpp" />
     <ClCompile Include="Core\DX12FrameResource.cpp" />
     <ClCompile Include="Core\DX12Texture.cpp" />
-    <ClCompile Include="Core\DX12GraphicsContext.cpp" />
+    <ClCompile Include="Core\DX12Context.cpp" />
     <ClCompile Include="Core\DX12Model.cpp" />
     <ClCompile Include="Core\DX12Shader.cpp" />
     <ClCompile Include="Core\DX12Mesh.cpp" />
     <ClCompile Include="Core\DX12Camera.cpp" />
     <ClCompile Include="Core\DX12Skybox.cpp" />
     <ClCompile Include="Core\DX12Interface.cpp" />
-    <ClCompile Include="Core\DX12ContextInterface.cpp" />
-    <ClCompile Include="Core\DX12ComputeContext.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -351,7 +349,7 @@
     <ClInclude Include="Core\DX12Heap.h" />
     <ClInclude Include="Core\DX12FrameResource.h" />
     <ClInclude Include="Core\DX12Texture.h" />
-    <ClInclude Include="Core\DX12GraphicsContext.h" />
+    <ClInclude Include="Core\DX12Context.h" />
     <ClInclude Include="Core\DX12Model.h" />
     <ClInclude Include="dep\stb\stb_connected_components.h" />
     <ClInclude Include="dep\stb\stb_c_lexer.h" />
@@ -378,8 +376,6 @@
     <ClInclude Include="Core\DX12Camera.h" />
     <ClInclude Include="Core\DX12Skybox.h" />
     <ClInclude Include="Core\DX12Interface.h" />
-    <ClInclude Include="Core\DX12ContextInterface.h" />
-    <ClInclude Include="Core\DX12ComputeContext.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Core\WindowsApplication.h" />
   </ItemGroup>

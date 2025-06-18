@@ -2,9 +2,8 @@
 
 #include "Core/DirectXApplication.h"
 #include "Core/DX12Model.h"
-#include "Core/DX12GraphicsContext.h"
+#include "Core/DX12Context.h"
 #include "Core/DX12Mesh.h"
-#include "Core/DX12ComputeContext.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -34,10 +33,8 @@ namespace Core
     unsigned m_triangleCount;
 
   private:
-    // main rendering context
-    std::unique_ptr<DX12GraphicsContext> m_graphicsContext;
-    // compute context
-    std::unique_ptr<DX12ComputeContext> m_computeContext;
+    // main context
+    std::unique_ptr<DX12Context> m_context;
 
     // meshes
     std::vector<DX12Mesh*> m_meshes;

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Core/DX12Camera.h"
+#include "Core\DX12Shader.h"
+#include "Core\DX12Camera.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -12,8 +13,6 @@ namespace Core
 {
   class DX12Texture;
   class DX12Skybox;
-  class DX12SwapChain;
-  class DX12Shader;
 
   class DX12FrameResource
   {
@@ -26,11 +25,9 @@ namespace Core
     
     void CreateResources(ID3D12GraphicsCommandList* commandList);
     void Update();
-
-    DX12Camera* GetCamera();
-    ID3D12Resource* GetConstantBuffer();
-    DX12Skybox* GetSkybox();
-    DX12SwapChain* GetSwapChain();
+    DX12Camera* GetCamera() { return m_camera.get(); }
+    ID3D12Resource* GetConstantBuffer() { return m_constantBuffer.Get(); }
+    DX12Skybox* GetSkybox() { return m_skybox.get(); }
 
     ~DX12FrameResource();
 
@@ -53,9 +50,6 @@ namespace Core
     // camera and skybox
     std::unique_ptr<DX12Camera> m_camera;
     std::unique_ptr<DX12Skybox> m_skybox;
-
-    // the swapchain
-    std::unique_ptr<DX12SwapChain> m_swapChain;
 
   private:
     DX12FrameResource();

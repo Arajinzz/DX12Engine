@@ -7,7 +7,6 @@
 #include "Core/DX12Texture.h"
 #include "Core/DX12Skybox.h"
 #include "Core/DX12Interface.h"
-#include "Core/DX12Shader.h"
 
 namespace Core
 {
@@ -16,10 +15,7 @@ namespace Core
     , m_camera(nullptr)
     , m_pCbvDataBegin(nullptr)
     , m_constantBufferData()
-    , m_swapChain(nullptr)
   {
-    // create the swap chain, the swap chain will be bound to commandQueue inside DX12GraphicsContext
-    m_swapChain = std::make_unique<DX12SwapChain>();
   }
 
   void DX12FrameResource::CreateResources(ID3D12GraphicsCommandList* commandList)
@@ -53,10 +49,4 @@ namespace Core
   {
     m_constantBuffer.Reset();
   }
-
-  DX12Camera* DX12FrameResource::GetCamera() { return m_camera.get(); }
-  ID3D12Resource* DX12FrameResource::GetConstantBuffer() { return m_constantBuffer.Get(); }
-  DX12Skybox* DX12FrameResource::GetSkybox() { return m_skybox.get(); }
-  DX12SwapChain* DX12FrameResource::GetSwapChain() { return m_swapChain.get(); }
-
 }
