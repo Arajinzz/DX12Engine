@@ -22,14 +22,7 @@ namespace Core
 
   void DX12Heap::CreateHeap()
   {
-    // Describe and create a render target view (RTV) descriptor heap.
-    D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
-    heapDesc.NumDescriptors = m_resources.size();
-    heapDesc.Type = m_type;
-    heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-    if (m_type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)
-      heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&m_heap)));
+    m_heap = DX12Interface::Get().CreateHeapDescriptor(m_type, m_resources.size());
     m_descriptorSize = DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(m_type);
     m_handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_heap->GetCPUDescriptorHandleForHeapStart());
   }

@@ -29,7 +29,7 @@ namespace Core
     textureDesc.Width = m_metaData[0].width;
     textureDesc.Height = m_metaData[0].height;
     textureDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-    textureDesc.DepthOrArraySize = m_imgPtrs.size();
+    textureDesc.DepthOrArraySize = static_cast<unsigned>(m_imgPtrs.size());
     textureDesc.SampleDesc.Count = 1;
     textureDesc.SampleDesc.Quality = 0;
     textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -111,7 +111,7 @@ namespace Core
       textureData[i].SlicePitch = textureData[i].RowPitch * m_metaData[i].height; // rowpitch * height
     }
 
-    const UINT subResourceCount = 1 * m_metaData.size();
+    const UINT subResourceCount = static_cast<unsigned>(1 * m_metaData.size());
     auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_texture.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
     UpdateSubresources(commandList, m_texture.Get(), m_texUploadHeap.Get(), 0, 0, subResourceCount, textureData.data());
     commandList->ResourceBarrier(1, &barrier);
@@ -157,7 +157,8 @@ namespace Core
     commandList->SetComputeRootDescriptorTable(2, m_mipsHeap->GetOffsetGPUHandle(1));
 
     //Dispatch the compute shader with one thread per 8x8 pixels
-    commandList->Dispatch(max(m_texture->GetDesc().Width / 8, 1u), max(m_texture->GetDesc().Height / 8, 1u), 1);
+    commandList->Dispatch(
+      max(static_cast<unsigned>(m_texture->GetDesc().Width / 8u), 1u), max(static_cast<unsigned>(m_texture->GetDesc().Height / 8u), 1u), 1);
 
     barrier1 = CD3DX12_RESOURCE_BARRIER::UAV(m_texture.Get());
     //Wait for all accesses to the destination texture UAV to be finished before generating the next mipmap, as it will be the source texture for the next mipmap

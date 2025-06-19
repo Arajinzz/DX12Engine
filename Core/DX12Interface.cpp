@@ -205,6 +205,20 @@ namespace Core
     return commandList;
   }
 
+  ComPtr<ID3D12DescriptorHeap> DX12Interface::CreateHeapDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE type, unsigned size)
+  {
+    ComPtr<ID3D12DescriptorHeap> heap;
+    D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
+    heapDesc.NumDescriptors = size;
+    heapDesc.Type = type;
+    heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+    if (type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)
+      heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&heap)));
+
+    return heap;
+  }
+
   void DX12Interface::CreateRenderTargetView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset)
   {
     auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(

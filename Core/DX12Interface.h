@@ -39,6 +39,7 @@ namespace Core
     ComPtr<ID3D12Fence> CreateFence();
     ComPtr<ID3D12CommandAllocator> CreateCommandAllocator();
     ComPtr<ID3D12GraphicsCommandList> CreateCommandList(std::vector<ComPtr<ID3D12CommandAllocator>> allocators);
+    ComPtr<ID3D12DescriptorHeap> CreateHeapDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE type, unsigned size);
 
     void CreateRenderTargetView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset);
     void CreateDepthStencilView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset);
