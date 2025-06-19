@@ -50,13 +50,6 @@ namespace Core
     ComPtr<ID3D12Fence> m_fence;
     std::vector<uint64_t> m_fenceValues;
 
-    // used for mipmaps
-    std::unique_ptr<DX12Heap> m_mipsHeap;
-    // pso used for mipmaps
-    ComPtr<ID3D12PipelineState> m_pipelineState;
-    // root sig used for mipmaps
-    ComPtr<ID3D12RootSignature> m_rootSignature;
-
     // Synchronization objects.
     uint32_t m_frameIndex;
 

@@ -55,6 +55,43 @@ namespace Core
       D3D12_RESOURCE_STATE_GENERIC_READ,
       nullptr,
       IID_PPV_ARGS(&m_texUploadHeap)));
+
+    // create heap
+    m_mipsHeap = std::make_unique<DX12Heap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    CD3DX12_DESCRIPTOR_RANGE1 srcMip(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
+    CD3DX12_DESCRIPTOR_RANGE1 outMip(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 4, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
+    CD3DX12_ROOT_PARAMETER1 rootParameters[Core::NumRootParameters];
+    rootParameters[Core::GenerateMipsCB].InitAsConstants(sizeof(SGenerateMipsCB) / 4, 0);
+    rootParameters[Core::SrcMip].InitAsDescriptorTable(1, &srcMip);
+    rootParameters[Core::OutMip].InitAsDescriptorTable(1, &outMip);
+    CD3DX12_STATIC_SAMPLER_DESC linearClampSampler(
+      0,
+      D3D12_FILTER_MIN_MAG_MIP_LINEAR,
+      D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+      D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+      D3D12_TEXTURE_ADDRESS_MODE_CLAMP
+    );
+    CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc(
+      Core::NumRootParameters,
+      rootParameters, 1, &linearClampSampler
+    );
+    ComPtr<ID3DBlob> signature;
+    ComPtr<ID3DBlob> error;
+    ThrowIfFailed(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_1, &signature, &error));
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature)));
+    Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob;
+    Microsoft::WRL::ComPtr<ID3DBlob> errorBlob;
+    ThrowIfFailed(D3DCompileFromFile(L"GenerateMips_CS.hlsl", nullptr, nullptr, "main", "cs_5_1",
+      D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0, &shaderBlob, &errorBlob));
+    // Pipeline state descriptor
+    D3D12_COMPUTE_PIPELINE_STATE_DESC computePsoDesc = {};
+    computePsoDesc.pRootSignature = m_rootSignature.Get();  // Root signature
+    computePsoDesc.CS.pShaderBytecode = shaderBlob->GetBufferPointer();
+    computePsoDesc.CS.BytecodeLength = shaderBlob->GetBufferSize();
+    computePsoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE; // Default flag
+    // Create the compute PSO
+    DX12Interface::Get().GetDevice()->CreateComputePipelineState(&computePsoDesc, IID_PPV_ARGS(&m_pipelineState));
+
   }
 
   DX12Texture::~DX12Texture()
@@ -86,8 +123,24 @@ namespace Core
     }
   }
 
-  void DX12Texture::GenerateMips(ID3D12GraphicsCommandList* commandList, CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandleSrc, CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandleOut)
+  void DX12Texture::GenerateMips(ID3D12GraphicsCommandList* commandList)
   {
+    m_mipsHeap->ResetResources();
+    m_mipsHeap->ResetHeap();
+
+    //Set root signature, pso and descriptor heap
+    commandList->SetComputeRootSignature(m_rootSignature.Get());
+    commandList->SetPipelineState(m_pipelineState.Get());
+    
+    // add resources to heap for view creation
+    m_mipsHeap->AddResource(m_texture, TEXTURE);
+    for (unsigned mip = 0; mip < m_mipsLevels; ++mip)
+      m_mipsHeap->AddResource(m_texture, UAV);
+
+    // heap created
+    ID3D12DescriptorHeap* ppHeaps[] = { m_mipsHeap->Get() };
+    commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+
     //Transition from pixel shader resource to unordered access
     auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
       m_texture.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
@@ -100,8 +153,8 @@ namespace Core
     generateMipsCB.TexelSize.x = 1.0f / (float)m_texture->GetDesc().Width;
     generateMipsCB.TexelSize.y = 1.0f / (float)m_texture->GetDesc().Height;
     commandList->SetComputeRoot32BitConstants(0, sizeof(SGenerateMipsCB) / 4, &generateMipsCB, 0);
-    commandList->SetComputeRootDescriptorTable(1, gpuHandleSrc);
-    commandList->SetComputeRootDescriptorTable(2, gpuHandleOut);
+    commandList->SetComputeRootDescriptorTable(1, m_mipsHeap->GetOffsetGPUHandle(0));
+    commandList->SetComputeRootDescriptorTable(2, m_mipsHeap->GetOffsetGPUHandle(1));
 
     //Dispatch the compute shader with one thread per 8x8 pixels
     commandList->Dispatch(max(m_texture->GetDesc().Width / 8, 1u), max(m_texture->GetDesc().Height / 8, 1u), 1);

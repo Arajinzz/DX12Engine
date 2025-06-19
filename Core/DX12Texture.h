@@ -33,7 +33,7 @@ namespace Core
     unsigned GetMipsLevels() { return m_mipsLevels; }
     ID3D12Resource* GetResource() { return m_texture.Get(); }
     void CopyToGPU(ID3D12GraphicsCommandList* commandList);
-    void GenerateMips(ID3D12GraphicsCommandList* commandList, CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandleSrc, CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandleOut);
+    void GenerateMips(ID3D12GraphicsCommandList* commandList);
 
   private:
     struct MetaData
@@ -45,6 +45,13 @@ namespace Core
 
     ComPtr<ID3D12Resource> m_texture;
     ComPtr<ID3D12Resource> m_texUploadHeap;
+
+    // used for mipmaps
+    std::unique_ptr<DX12Heap> m_mipsHeap;
+    // pso used for mipmaps
+    ComPtr<ID3D12PipelineState> m_pipelineState;
+    // root sig used for mipmaps
+    ComPtr<ID3D12RootSignature> m_rootSignature;
     
     std::vector<unsigned char*> m_imgPtrs;
     std::vector<MetaData> m_metaData;
