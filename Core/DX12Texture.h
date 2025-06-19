@@ -47,7 +47,7 @@ namespace Core
     ComPtr<ID3D12Resource> m_texUploadHeap;
 
     // used for mipmaps
-    std::unique_ptr<DX12Heap> m_mipsHeap;
+    ComPtr<ID3D12DescriptorHeap> m_mipsHeap;
     // pso used for mipmaps
     ComPtr<ID3D12PipelineState> m_pipelineState;
     // root sig used for mipmaps

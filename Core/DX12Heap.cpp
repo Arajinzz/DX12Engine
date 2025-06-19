@@ -22,7 +22,7 @@ namespace Core
 
   void DX12Heap::CreateHeap()
   {
-    m_heap = DX12Interface::Get().CreateHeapDescriptor(m_type, m_resources.size());
+    m_heap = DX12Interface::Get().CreateHeapDescriptor(m_type, static_cast<unsigned>(m_resources.size()));
     m_descriptorSize = DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(m_type);
     m_handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_heap->GetCPUDescriptorHandleForHeapStart());
   }
@@ -55,9 +55,6 @@ namespace Core
 
   void DX12Heap::CreateViews()
   {
-    // workaround
-    const unsigned mipLevels = 4;
-    unsigned currentMipLevel = 0;
     for (unsigned i = 0; i < m_resources.size(); ++i)
     {
       auto type = m_resourceTypes[i];
@@ -69,14 +66,6 @@ namespace Core
         DX12Interface::Get().CreateDepthStencilView(resource, m_heap.Get(), i);
       else if (type == TEXTURE || type == CUBEMAP)
         DX12Interface::Get().CreateShaderResourceView(resource, m_heap.Get(), i, type == CUBEMAP);
-      else if (type == UAV)
-      {
-        DX12Interface::Get().CreateUnorderedAccessView(resource, m_heap.Get(), i, currentMipLevel);
-        // Workaround
-        currentMipLevel++;
-        if (currentMipLevel >= mipLevels)
-          currentMipLevel = 0;
-      }
       else if (type == CONSTANTBUFFER)
         DX12Interface::Get().CreateConstantBufferView(resource, m_heap.Get(), i);
     }

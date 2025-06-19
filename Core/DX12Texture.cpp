@@ -14,6 +14,7 @@ namespace Core
     : m_imgPtrs()
     , m_metaData()
     , m_mipsLevels(mips)
+    , m_mipsHeap(nullptr)
   {
     for (const auto& path : paths)
     {
@@ -57,7 +58,7 @@ namespace Core
       IID_PPV_ARGS(&m_texUploadHeap)));
 
     // create heap
-    m_mipsHeap = std::make_unique<DX12Heap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    m_mipsHeap = DX12Interface::Get().CreateHeapDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, mips + 1); // 1 texture + 4 mips
     CD3DX12_DESCRIPTOR_RANGE1 srcMip(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
     CD3DX12_DESCRIPTOR_RANGE1 outMip(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 4, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
     CD3DX12_ROOT_PARAMETER1 rootParameters[Core::NumRootParameters];
@@ -96,6 +97,7 @@ namespace Core
 
   DX12Texture::~DX12Texture()
   {
+    m_mipsHeap.Reset();
   }
 
   void DX12Texture::CopyToGPU(ID3D12GraphicsCommandList* commandList)
@@ -125,20 +127,17 @@ namespace Core
 
   void DX12Texture::GenerateMips(ID3D12GraphicsCommandList* commandList)
   {
-    m_mipsHeap->ResetResources();
-    m_mipsHeap->ResetHeap();
-
     //Set root signature, pso and descriptor heap
     commandList->SetComputeRootSignature(m_rootSignature.Get());
     commandList->SetPipelineState(m_pipelineState.Get());
     
-    // add resources to heap for view creation
-    m_mipsHeap->AddResource(m_texture, TEXTURE);
+    // create views
+    DX12Interface::Get().CreateShaderResourceView(m_texture.Get(), m_mipsHeap.Get(), 0, false);
     for (unsigned mip = 0; mip < m_mipsLevels; ++mip)
-      m_mipsHeap->AddResource(m_texture, UAV);
+      DX12Interface::Get().CreateUnorderedAccessView(m_texture.Get(), m_mipsHeap.Get(), mip + 1, mip);
 
     // heap created
-    ID3D12DescriptorHeap* ppHeaps[] = { m_mipsHeap->Get() };
+    ID3D12DescriptorHeap* ppHeaps[] = { m_mipsHeap.Get() };
     commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
     //Transition from pixel shader resource to unordered access
@@ -153,8 +152,10 @@ namespace Core
     generateMipsCB.TexelSize.x = 1.0f / (float)m_texture->GetDesc().Width;
     generateMipsCB.TexelSize.y = 1.0f / (float)m_texture->GetDesc().Height;
     commandList->SetComputeRoot32BitConstants(0, sizeof(SGenerateMipsCB) / 4, &generateMipsCB, 0);
-    commandList->SetComputeRootDescriptorTable(1, m_mipsHeap->GetOffsetGPUHandle(0));
-    commandList->SetComputeRootDescriptorTable(2, m_mipsHeap->GetOffsetGPUHandle(1));
+    commandList->SetComputeRootDescriptorTable(
+      1, CD3DX12_GPU_DESCRIPTOR_HANDLE(m_mipsHeap->GetGPUDescriptorHandleForHeapStart(), 0, DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)));
+    commandList->SetComputeRootDescriptorTable(
+      2, CD3DX12_GPU_DESCRIPTOR_HANDLE(m_mipsHeap->GetGPUDescriptorHandleForHeapStart(), 1, DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)));
 
     //Dispatch the compute shader with one thread per 8x8 pixels
     commandList->Dispatch(
