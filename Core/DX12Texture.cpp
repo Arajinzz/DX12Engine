@@ -85,4 +85,33 @@ namespace Core
       stbi_image_free(ptr);
     }
   }
+
+  void DX12Texture::GenerateMips(ID3D12GraphicsCommandList* commandList, CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandleSrc, CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandleOut)
+  {
+    //Transition from pixel shader resource to unordered access
+    auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
+      m_texture.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+    commandList->ResourceBarrier(1, &barrier1);
+
+    SGenerateMipsCB generateMipsCB;
+    generateMipsCB.SrcDimension = (m_texture->GetDesc().Height & 1) << 1 | (m_texture->GetDesc().Width & 1);
+    generateMipsCB.SrcMipLevel = 0;
+    generateMipsCB.NumMipLevels = m_mipsLevels;
+    generateMipsCB.TexelSize.x = 1.0f / (float)m_texture->GetDesc().Width;
+    generateMipsCB.TexelSize.y = 1.0f / (float)m_texture->GetDesc().Height;
+    commandList->SetComputeRoot32BitConstants(0, sizeof(SGenerateMipsCB) / 4, &generateMipsCB, 0);
+    commandList->SetComputeRootDescriptorTable(1, gpuHandleSrc);
+    commandList->SetComputeRootDescriptorTable(2, gpuHandleOut);
+
+    //Dispatch the compute shader with one thread per 8x8 pixels
+    commandList->Dispatch(max(m_texture->GetDesc().Width / 8, 1u), max(m_texture->GetDesc().Height / 8, 1u), 1);
+
+    barrier1 = CD3DX12_RESOURCE_BARRIER::UAV(m_texture.Get());
+    //Wait for all accesses to the destination texture UAV to be finished before generating the next mipmap, as it will be the source texture for the next mipmap
+    commandList->ResourceBarrier(1, &barrier1);
+
+    barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
+      m_texture.Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+    commandList->ResourceBarrier(1, &barrier1);
+  }
 }

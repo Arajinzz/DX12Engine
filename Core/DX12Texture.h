@@ -1,10 +1,29 @@
 #pragma once
 
+#include "Core/DX12Heap.h"
+
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
 namespace Core
 {
+  enum
+  {
+    GenerateMipsCB,
+    SrcMip,
+    OutMip,
+    NumRootParameters
+  };
+
+  struct alignas(16) SGenerateMipsCB
+  {
+    uint32_t SrcMipLevel;           // Texture level of source mip
+    uint32_t NumMipLevels;          // Number of OutMips to write: [1-4]
+    uint32_t SrcDimension;          // Width and height of the source texture are even or odd.
+    uint32_t IsSRGB;                // Must apply gamma correction to sRGB textures.
+    DirectX::XMFLOAT2 TexelSize;    // 1.0 / OutMip1.Dimensions
+  };
+
   class DX12Texture
   {
   public:
@@ -14,6 +33,7 @@ namespace Core
     unsigned GetMipsLevels() { return m_mipsLevels; }
     ID3D12Resource* GetResource() { return m_texture.Get(); }
     void CopyToGPU(ID3D12GraphicsCommandList* commandList);
+    void GenerateMips(ID3D12GraphicsCommandList* commandList, CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandleSrc, CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandleOut);
 
   private:
     struct MetaData

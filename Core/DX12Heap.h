@@ -34,6 +34,7 @@ namespace Core
     CD3DX12_GPU_DESCRIPTOR_HANDLE GetOffsetGPUHandle(unsigned int Offset);
     ID3D12Resource* GetResource(unsigned int index) { return m_resources[index].Get(); }
     ID3D12DescriptorHeap* Get() { return m_heap.Get(); }
+    unsigned GetResourceCount() { return m_resources.size(); }
 
   private:
     DX12Heap(const DX12Heap&) = delete;
