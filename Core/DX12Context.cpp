@@ -139,7 +139,7 @@ namespace Core
     m_fenceValues[m_frameIndex] = currentFenceValue + 1;
   }
 
-  void DX12Context::CreateMips(DX12Mesh* mesh)
+  void DX12Context::CreateMips(DX12Model* model)
   {
     m_mipsHeap->ResetResources();
     m_mipsHeap->ResetHeap();
@@ -148,21 +148,21 @@ namespace Core
     m_commandList->SetComputeRootSignature(m_rootSignature.Get());
     m_commandList->SetPipelineState(m_pipelineState.Get());
 
-    for (unsigned i = 0; i < mesh->GetTexturesCount(); ++i)
+    for (unsigned i = 0; i < model->GetTexturesCount(); ++i)
     {
       // add resources to heap for view creation
-      m_mipsHeap->AddResource(mesh->GetTexture(i)->GetResource(), TEXTURE);
-      for (unsigned mip = 0; mip < mesh->GetTexture(i)->GetMipsLevels(); ++mip)
-        m_mipsHeap->AddResource(mesh->GetTexture(i)->GetResource(), UAV);
+      m_mipsHeap->AddResource(model->GetTexture(i)->GetResource(), TEXTURE);
+      for (unsigned mip = 0; mip < model->GetTexture(i)->GetMipsLevels(); ++mip)
+        m_mipsHeap->AddResource(model->GetTexture(i)->GetResource(), UAV);
     }
 
     // heap created
     ID3D12DescriptorHeap* ppHeaps[] = { m_mipsHeap->Get() };
     m_commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
-    for (unsigned i = 0; i < mesh->GetTexturesCount(); ++i)
+    for (unsigned i = 0; i < model->GetTexturesCount(); ++i)
     {
-      auto texture = mesh->GetTexture(i);
+      auto texture = model->GetTexture(i);
       texture->GenerateMips(
         m_commandList.Get(), m_mipsHeap->GetOffsetGPUHandle(i * (texture->GetMipsLevels() + 1)), m_mipsHeap->GetOffsetGPUHandle(i * (texture->GetMipsLevels() + 1) + 1));
     }
@@ -220,13 +220,13 @@ namespace Core
     m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
   }
 
-  void DX12Context::Draw(DX12Mesh* mesh)
+  void DX12Context::Draw(DX12Model* model)
   {
     // RECHECK THIS!!!!!!!!!!!!!!!
     // set heaps, this has to be the same as bundles
-    ID3D12DescriptorHeap* ppHeaps[] = { mesh->GetHeapDesc()->Get()};
+    ID3D12DescriptorHeap* ppHeaps[] = { model->GetHeapDesc()->Get()};
     m_commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
-    mesh->DrawMesh(m_frameIndex, m_commandList.Get()); // executes bundles
+    model->DrawModel(m_frameIndex, m_commandList.Get()); // executes bundles
   }
 
   void DX12Context::PrepareForPresenting()

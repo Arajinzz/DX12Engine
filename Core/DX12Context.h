@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/DX12Heap.h"
-#include "Core/DX12Mesh.h"
+#include "Core/DX12Model.h"
 #include "Core/DX12SwapChain.h"
 
 using namespace DirectX;
@@ -20,12 +20,12 @@ namespace Core
     void WaitForGpu();
     void MoveToNextFrame();
 
-    void CreateMips(DX12Mesh* mesh);
+    void CreateMips(DX12Model* model);
 
     void Resize(unsigned width, unsigned height);
 
     void PrepareForRendering();
-    void Draw(DX12Mesh* mesh);
+    void Draw(DX12Model* model);
     void PrepareForPresenting();
 
     ID3D12CommandQueue* GetCommandQueue() { return m_commandQueue.Get(); }

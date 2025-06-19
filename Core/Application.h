@@ -37,7 +37,7 @@ namespace Core
     std::unique_ptr<DX12Context> m_context;
 
     // meshes
-    std::vector<DX12Mesh*> m_meshes;
+    std::vector<DX12Model*> m_models;
 
   };
 }

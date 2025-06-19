@@ -1,64 +1,59 @@
 #pragma once
 
-#include "Core/DX12Model.h"
-#include "Core/DX12Heap.h"
+#include "Core\DX12Heap.h"
+
+#include <assimp\Importer.hpp>
+#include <assimp\scene.h>
+#include <assimp\postprocess.h>
+
+using namespace DirectX;
+using Microsoft::WRL::ComPtr;
 
 namespace Core
 {
   class DX12Shader;
   class DX12Texture;
 
-  // Mesh can have multiple models
   class DX12Mesh
   {
   public:
-    DX12Mesh();
+    DX12Mesh(D3D12_CULL_MODE cullMode = D3D12_CULL_MODE_BACK, bool depthEnabled = true);
     ~DX12Mesh();
 
-    void SetupMesh(ID3D12GraphicsCommandList* commandList);
-    void DrawMesh(unsigned frameIndex, ID3D12GraphicsCommandList* commandList);
-    void LoadMesh(const char* path);
-    // Workaround!!!
-    void LoadMeshSkyboxSpecific(const char* path);
-    void UpdateMesh();
-    // workaround????
-    DX12Heap* GetHeapDesc() { return m_descHeap.get(); }
-    void SetTranslation(XMFLOAT3 translate) { m_translation = translate; };
-    void SetScale(XMFLOAT3 scale) { m_scale = scale; }
-    unsigned GetTriangleCount();
-
-    DX12Texture* GetTexture(unsigned index) { return m_textures[index].get(); }
-    unsigned GetTexturesCount() { return m_textures.size(); }
+    virtual void Setup(ID3D12GraphicsCommandList* commandList, DX12Shader* shader);
+    virtual void Draw(unsigned frameIndex, DX12Heap* heapDesc, DX12Shader* shader, unsigned texturePos, ID3D12GraphicsCommandList* commandList);
+    virtual void LoadMesh(const aiMesh* pMesh);
+    unsigned GetTriangleCount() { return static_cast<unsigned>(m_indices.size() / 3); }
 
   private:
-    std::vector<std::unique_ptr<DX12Model>> m_models;
-    std::vector<std::unique_ptr<DX12Shader>> m_shaders; // for each model
-    std::vector<std::unique_ptr<DX12Texture>> m_textures; // for each model
-    std::unique_ptr<DX12Heap> m_descHeap;
-    bool staticMesh = true;
-    bool isModelSet = false;
-    
-    // temporary
-    struct ConstantBufferData
-    {
-      XMMATRIX model;
-      XMMATRIX view;
-      XMMATRIX projection;
-      float padding[16]; // Padding so the constant buffer is 256-byte aligned.
-    };
-    // data
-    ConstantBufferData m_constantBufferData;
-    UINT8* m_pCbvDataBegin;
-    // constant buffer
-    ComPtr<ID3D12Resource> m_constantBuffer;
+    void SetupVertexBuffer(ID3D12GraphicsCommandList* commandList);
+    void SetupIndexBuffer(ID3D12GraphicsCommandList* commandList);
 
-    // for testing
-    XMFLOAT3 m_translation;
-    XMFLOAT3 m_scale;
-    float m_angle;
-    aiMatrix4x4 m_transformation;
-    // workaround
-    bool m_isCubeMap;
+  private:
+    struct Vertex
+    {
+      XMFLOAT3 position;
+      XMFLOAT3 normal;
+      XMFLOAT2 uv;
+    };
+
+    // data
+    std::vector<Vertex> m_vertices;
+    std::vector<uint16_t> m_indices;
+
+    D3D12_CULL_MODE m_cullMode;
+    bool m_depthEnabled;
+    // pso
+    ComPtr<ID3D12PipelineState> m_pipelineState;
+
+    // buffers
+    ComPtr<ID3D12Resource> m_vertexBuffer;
+    ComPtr<ID3D12Resource> m_vertexBufferUploadHeap;
+    D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+
+    ComPtr<ID3D12Resource> m_indexBuffer;
+    ComPtr<ID3D12Resource> m_indexBufferUploadHeap;
+    D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
 
   private:
     DX12Mesh(const DX12Mesh&) = delete;
@@ -66,4 +61,3 @@ namespace Core
 
   };
 }
-

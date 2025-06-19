@@ -1,196 +1,186 @@
 #include "stdafx.h"
 #include "DX12Model.h"
 
-#include "Core/DX12Interface.h"
-#include "Core/DXApplicationHelper.h"
 #include "Core/DX12FrameResource.h"
 #include "Core/WindowsApplication.h"
 #include "Core/DX12Texture.h"
+#include "Core/DX12Interface.h"
 #include "Core/DX12Shader.h"
+#include "Core/DX12Mesh.h"
 
-#include <fstream>
+#include <assimp\Importer.hpp>
+#include <assimp\scene.h>
+#include <assimp\postprocess.h>
 
 namespace Core
 {
-  DX12Model::DX12Model(D3D12_CULL_MODE cullMode, bool depthEnabled)
-    : m_vertices()
-    , m_indices()
-    , m_cullMode(cullMode)
-    , m_depthEnabled(depthEnabled)
+  DX12Model::DX12Model()
+    : m_meshes()
+    , m_descHeap(nullptr)
+    , m_pCbvDataBegin(nullptr)
+    , m_constantBufferData()
+    , m_constantBuffer(nullptr)
+    , m_translation(0.0f, 0.0f, 0.0f)
+    , m_scale(1.0f, 1.0f, 1.0f)
+    , m_angle(0.0f)
+    , m_shaders()
+    , m_textures()
+    , m_isCubeMap(false)
   {
+    // create heap
+    m_descHeap = std::make_unique<DX12Heap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    // create constant buffer
+    m_constantBuffer = DX12Interface::Get().CreateConstantBuffer(sizeof(ConstantBufferData), D3D12_HEAP_TYPE_UPLOAD);
+    // Map and initialize the constant buffer. We don't unmap this until the
+    // app closes. Keeping things mapped for the lifetime of the resource is okay.
+    CD3DX12_RANGE readRange(0, 0); // We do not intend to read from this resource on the CPU.
+    ThrowIfFailed(m_constantBuffer->Map(0, &readRange, reinterpret_cast<void**>(&m_pCbvDataBegin)));
+    memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
   }
 
   DX12Model::~DX12Model()
   {
+    m_descHeap.reset();
+    m_constantBuffer.Reset();
   }
 
-  void DX12Model::Setup(ID3D12GraphicsCommandList* commandList, DX12Shader* shader)
+  void DX12Model::SetupModel(ID3D12GraphicsCommandList* commandList)
   {
-    // Define the vertex input layout.
-    D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
+    // always Globals first
+    m_descHeap->AddResource(FrameResource().GetConstantBuffer(), CONSTANTBUFFER);
+    m_descHeap->AddResource(m_constantBuffer, CONSTANTBUFFER);
+
+    for (auto& texture : m_textures)
+      m_descHeap->AddResource(texture->GetResource(), m_isCubeMap ? CUBEMAP : TEXTURE);
+
+    for (const auto& texture : m_textures)
+      texture->CopyToGPU(commandList);
+
+    for (int i = 0; i < m_meshes.size(); ++i)
     {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-    };
-
-    // Describe and create the graphics pipeline state object (PSO).
-    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
-    psoDesc.InputLayout = { inputElementDescs, _countof(inputElementDescs) };
-    psoDesc.pRootSignature = shader->GetRootSignature();
-    psoDesc.VS = CD3DX12_SHADER_BYTECODE(shader->GetVertexShader());
-    psoDesc.PS = CD3DX12_SHADER_BYTECODE(shader->GetPixelShader());
-    psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-    psoDesc.RasterizerState.CullMode = m_cullMode;
-    psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-    psoDesc.DepthStencilState.DepthEnable = m_depthEnabled;
-    psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-    psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
-    psoDesc.DepthStencilState.StencilEnable = FALSE;
-    psoDesc.SampleMask = UINT_MAX;
-    psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-    psoDesc.NumRenderTargets = 1;
-    psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-    psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
-    psoDesc.SampleDesc.Count = 1;
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
-
-    SetupVertexBuffer(commandList);
-    SetupIndexBuffer(commandList);
-  }
-
-  void DX12Model::Draw(unsigned frameIndex, DX12Heap* heapDesc, DX12Shader* shader, unsigned texturePos, ID3D12GraphicsCommandList* commandList)
-  {
-    // 1 allocator
-    commandList->SetPipelineState(m_pipelineState.Get());
-    // Set necessary state.
-    commandList->SetGraphicsRootSignature(shader->GetRootSignature());
-    ID3D12DescriptorHeap* ppHeaps[] = { heapDesc->Get() };
-    commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
-    
-    auto handle = heapDesc->Get()->GetGPUDescriptorHandleForHeapStart();
-    commandList->SetGraphicsRootDescriptorTable(0, handle);
-
-    handle.ptr += DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    commandList->SetGraphicsRootDescriptorTable(1, handle);
-
-    // get correct texture in the heap
-    for (unsigned i = 0; i < texturePos + 1; ++i)
-      handle.ptr += DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-    commandList->SetGraphicsRootDescriptorTable(2, handle);
-
-    commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-    commandList->IASetIndexBuffer(&m_indexBufferView);
-    commandList->DrawIndexedInstanced(m_indices.size(), 1, 0, 0, 0);
-  }
-
-  void DX12Model::LoadModel(const aiMesh* pMesh)
-  {
-    m_vertices.reserve(pMesh->mNumVertices);
-
-    for (unsigned i = 0; i < pMesh->mNumVertices; ++i)
-    {
-      Vertex vertex;
-      vertex.position = { pMesh->mVertices[i].x, pMesh->mVertices[i].y, pMesh->mVertices[i].z };
-      if (pMesh->HasNormals())
-        vertex.normal = { pMesh->mNormals[i].x, pMesh->mNormals[i].y, pMesh->mNormals[i].z };
-      if (pMesh->HasTextureCoords(0))
-        vertex.uv = { pMesh->mTextureCoords[0][i].x, pMesh->mTextureCoords[0][i].y };
-      m_vertices.push_back(vertex);
-    }
-    
-    m_indices.reserve(pMesh->mNumFaces * 3);
-
-    for (unsigned i = 0; i < pMesh->mNumFaces; ++i)
-    {
-      const auto& face = pMesh->mFaces[i];
-      assert(face.mNumIndices == 3);
-      m_indices.push_back(face.mIndices[0]);
-      m_indices.push_back(face.mIndices[1]);
-      m_indices.push_back(face.mIndices[2]);
+      m_meshes[i]->Setup(commandList, m_shaders[i].get());
     }
   }
 
-  void DX12Model::SetupVertexBuffer(ID3D12GraphicsCommandList* commandList)
+  void DX12Model::DrawModel(unsigned frameIndex, ID3D12GraphicsCommandList* commandList)
   {
-    const unsigned vertexBufferSize = m_vertices.size() * sizeof(Vertex);
-    auto uploadHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-    auto defaultHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-    auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
-      &defaultHeapProps,
-      D3D12_HEAP_FLAG_NONE,
-      &resDesc,
-      D3D12_RESOURCE_STATE_COMMON,
-      nullptr,
-      IID_PPV_ARGS(&m_vertexBuffer)));
-
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
-      &uploadHeapProps,
-      D3D12_HEAP_FLAG_NONE,
-      &resDesc,
-      D3D12_RESOURCE_STATE_GENERIC_READ,
-      nullptr,
-      IID_PPV_ARGS(&m_vertexBufferUploadHeap)));
-
-    // copy data to intermediate upload heap
-    D3D12_SUBRESOURCE_DATA vertexData = {};
-    vertexData.pData = m_vertices.data();
-    vertexData.RowPitch = vertexBufferSize;
-    vertexData.SlicePitch = vertexData.RowPitch;
-
-    auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(m_vertexBuffer.Get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
-    auto barrier2 = CD3DX12_RESOURCE_BARRIER::Transition(m_vertexBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
-    commandList->ResourceBarrier(1, &barrier1);
-    UpdateSubresources<1>(commandList, m_vertexBuffer.Get(), m_vertexBufferUploadHeap.Get(), 0, 0, 1, &vertexData);
-    commandList->ResourceBarrier(1, &barrier2);
-
-    // Initialize the vertex buffer view.
-    m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
-    m_vertexBufferView.StrideInBytes = sizeof(Vertex);
-    m_vertexBufferView.SizeInBytes = vertexBufferSize;
+    for (int i = 0; i < m_meshes.size(); ++i)
+      m_meshes[i]->Draw(frameIndex, m_descHeap.get(), m_shaders[i].get(), i, commandList);
   }
 
-  void DX12Model::SetupIndexBuffer(ID3D12GraphicsCommandList* commandList)
+  void DX12Model::LoadModel(const char* path)
   {
-    const unsigned indexBufferSize = m_indices.size() * sizeof(uint16_t);
-    auto uploadHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-    auto defaultHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-    auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize);
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
-      &defaultHeapProps,
-      D3D12_HEAP_FLAG_NONE,
-      &resDesc,
-      D3D12_RESOURCE_STATE_COMMON,
-      nullptr,
-      IID_PPV_ARGS(&m_indexBuffer)));
+    Assimp::Importer importer;
 
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
-      &uploadHeapProps,
-      D3D12_HEAP_FLAG_NONE,
-      &resDesc,
-      D3D12_RESOURCE_STATE_GENERIC_READ,
-      nullptr,
-      IID_PPV_ARGS(&m_indexBufferUploadHeap)));
+    const aiScene* pModel = importer.ReadFile(path,
+      aiProcess_Triangulate |
+      aiProcess_JoinIdenticalVertices |
+      aiProcess_ConvertToLeftHanded |
+      aiProcess_GenNormals |
+      aiProcess_CalcTangentSpace);
 
-    // Copy data to the intermediate upload heap and then schedule a copy 
-        // from the upload heap to the index buffer.
-    D3D12_SUBRESOURCE_DATA indexData = {};
-    indexData.pData = m_indices.data();
-    indexData.RowPitch = indexBufferSize;
-    indexData.SlicePitch = indexData.RowPitch;
+    m_transformation = pModel->mRootNode->mTransformation;
 
-    auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(m_indexBuffer.Get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
-    auto barrier2 = CD3DX12_RESOURCE_BARRIER::Transition(m_indexBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_INDEX_BUFFER);
-    commandList->ResourceBarrier(1, &barrier1);
-    UpdateSubresources<1>(commandList, m_indexBuffer.Get(), m_indexBufferUploadHeap.Get(), 0, 0, 1, &indexData);
-    commandList->ResourceBarrier(1, &barrier2);
+    for (unsigned i = 0; i < pModel->mNumMeshes; ++i)
+    {
+      const auto pMesh = pModel->mMeshes[i];
+      auto mesh = std::make_unique<DX12Mesh>();
+      mesh->LoadMesh(pMesh);
 
-    // Initialize the index buffer view.
-    m_indexBufferView.BufferLocation = m_indexBuffer->GetGPUVirtualAddress();
-    m_indexBufferView.SizeInBytes = indexBufferSize;
-    m_indexBufferView.Format = DXGI_FORMAT_R16_UINT;
+      auto shader = std::make_unique<DX12Shader>(L"shaders.hlsl"); // for each model
+      // add slots
+      shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
+      shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
+      shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL);
+
+      // create rootsignature
+      shader->CreateRootSignature();
+
+      m_shaders.emplace_back(shader.release());
+
+      const auto material = pModel->mMaterials[pMesh->mMaterialIndex];
+      aiString texturePath;
+      std::vector<std::string> paths(1);
+      if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS)
+      {
+        paths[0] = texturePath.C_Str();
+        auto texture = std::make_unique<DX12Texture>(paths);
+        m_textures.emplace_back(texture.release());
+      } else
+      {
+        // default texture
+        paths[0] = "textures\\brick.png";
+        auto texture = std::make_unique<DX12Texture>(paths);
+        m_textures.emplace_back(texture.release());
+      }
+
+      m_meshes.emplace_back(mesh.release());
+    }
+  }
+
+  void DX12Model::LoadModelSkyboxSpecific(const char* path)
+  {
+    m_isCubeMap = true;
+
+    Assimp::Importer importer;
+
+    const aiScene* pModel = importer.ReadFile(path,
+      aiProcess_Triangulate |
+      aiProcess_JoinIdenticalVertices |
+      aiProcess_ConvertToLeftHanded |
+      aiProcess_GenNormals |
+      aiProcess_CalcTangentSpace);
+
+    const auto pMesh = pModel->mMeshes[0];
+    auto mesh = std::make_unique<DX12Mesh>(D3D12_CULL_MODE_FRONT, false);
+    mesh->LoadMesh(pMesh);
+
+    auto shader = std::make_unique<DX12Shader>(L"skybox_shaders.hlsl");
+    // add slots
+    shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
+    shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
+    shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL);
+    // create rootSignature
+    shader->CreateRootSignature();
+
+    std::vector<std::string> paths;
+    paths.push_back("skybox\\bluecloud_ft.jpg");
+    paths.push_back("skybox\\bluecloud_bk.jpg");
+    paths.push_back("skybox\\bluecloud_up.jpg");
+    paths.push_back("skybox\\bluecloud_dn.jpg");
+    paths.push_back("skybox\\bluecloud_rt.jpg");
+    paths.push_back("skybox\\bluecloud_lf.jpg");
+
+    auto cubeMap = std::make_unique<DX12Texture>(paths, 1);
+
+    m_shaders.emplace_back(shader.release());
+    m_meshes.emplace_back(mesh.release());
+    m_textures.emplace_back(cubeMap.release());
+  }
+
+  void DX12Model::UpdateModel()
+  {
+    /*m_angle += 100 * WindowsApplication::deltaTime;
+    if (m_angle > 360.0)
+      m_angle = 0.0;*/
+
+      // quick hack to test performance
+    if (staticMesh && !isModelSet)
+    {
+      XMMATRIX T = XMMatrixTranslation(m_translation.x, m_translation.y, m_translation.z);
+      XMMATRIX R = XMMatrixRotationY(XMConvertToRadians(m_angle));
+      XMMATRIX S = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
+
+      m_constantBufferData.model = XMMatrixTranspose(S * R * T);
+      memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
+    }
+  }
+
+  unsigned DX12Model::GetTriangleCount()
+  {
+    unsigned count = 0;
+    for (const auto& mesh : m_meshes)
+      count += mesh->GetTriangleCount();
+    return count;
   }
 }

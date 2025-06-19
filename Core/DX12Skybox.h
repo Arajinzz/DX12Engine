@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/DX12Texture.h"
-#include "Core/DX12Mesh.h"
+#include "Core/DX12Model.h"
 #include "Core/DX12Shader.h"
 
 namespace Core
@@ -15,10 +15,10 @@ namespace Core
     void Setup(ID3D12GraphicsCommandList* commandList);
     void Update();
     
-    DX12Mesh* GetMesh() { return m_cube.get(); }
+    DX12Model* GetModel() { return m_cube.get(); }
 
   private:
-    std::unique_ptr<DX12Mesh> m_cube;
+    std::unique_ptr<DX12Model> m_cube;
 
   private:
     DX12Skybox(const DX12Skybox&) = delete;

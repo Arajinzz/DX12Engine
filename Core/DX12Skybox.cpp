@@ -6,8 +6,8 @@ namespace Core
   DX12Skybox::DX12Skybox()
     : m_cube(nullptr)
   {
-    m_cube = std::make_unique<DX12Mesh>();
-    m_cube->LoadMeshSkyboxSpecific("models\\cube.obj");
+    m_cube = std::make_unique<DX12Model>();
+    m_cube->LoadModelSkyboxSpecific("models\\cube.obj");
   }
 
   DX12Skybox::~DX12Skybox()
@@ -16,11 +16,11 @@ namespace Core
 
   void DX12Skybox::Setup(ID3D12GraphicsCommandList* commandList)
   {
-    m_cube->SetupMesh(commandList);
+    m_cube->SetupModel(commandList);
   }
 
   void DX12Skybox::Update()
   {
-    m_cube->UpdateMesh();
+    m_cube->UpdateModel();
   }
 }

@@ -13,7 +13,7 @@ namespace Core
     : DirectXApplication(width, height, name)
     , m_context(nullptr)
     , m_triangleCount(0)
-    , m_meshes()
+    , m_models()
   {
   }
 
@@ -29,21 +29,21 @@ namespace Core
     // Create Cube, will also create pso and root signature and constant buffer for transformation
     auto modelNumber = 1;
     for (int i = 0; i < modelNumber; ++i)
-      m_meshes.push_back(new DX12Mesh());
+      m_models.push_back(new DX12Model());
 
     std::random_device rd;  // Seed from hardware
     std::mt19937 gen(rd()); // Mersenne Twister PRNG
     std::uniform_real_distribution<float> dist(-1.0f, 1.0f); // Range [0,1]
 
-    for (auto mesh : m_meshes)
+    for (auto model : m_models)
     {
       //XMFLOAT3 translation = {5 * dist(gen), 5 * dist(gen), 5 * dist(gen) };
-      mesh->LoadMesh("models\\sponza.obj");
-      mesh->SetupMesh(m_context->GetCommandList());
+      model->LoadModel("models\\sponza.obj");
+      model->SetupModel(m_context->GetCommandList());
       //mesh->SetTranslation(translation);
-      m_triangleCount += mesh->GetTriangleCount();
+      m_triangleCount += model->GetTriangleCount();
       // create mip maps
-      m_context->CreateMips(mesh);
+      m_context->CreateMips(model);
     }
 
     FrameResource().GetSkybox()->Setup(m_context->GetCommandList());
@@ -59,8 +59,8 @@ namespace Core
   {
     FrameResource().Update();
 
-    for (auto mesh: m_meshes)
-      mesh->UpdateMesh();
+    for (auto model: m_models)
+      model->UpdateModel();
   }
 
   void Application::OnRender()
@@ -70,11 +70,11 @@ namespace Core
     m_context->PrepareForRendering(); // set heaps, rects ...etc
 
     // draw skybox first
-    m_context->Draw(FrameResource().GetSkybox()->GetMesh());
+    m_context->Draw(FrameResource().GetSkybox()->GetModel());
 
     // draw meshes
-    for (auto mesh : m_meshes)
-      m_context->Draw(mesh);
+    for (auto model : m_models)
+      m_context->Draw(model);
 
     // transition to present state
     m_context->PrepareForPresenting();

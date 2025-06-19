@@ -1,59 +1,64 @@
 #pragma once
 
-#include "Core\DX12Heap.h"
-
-#include <assimp\Importer.hpp>
-#include <assimp\scene.h>
-#include <assimp\postprocess.h>
-
-using namespace DirectX;
-using Microsoft::WRL::ComPtr;
+#include "Core/DX12Mesh.h"
+#include "Core/DX12Heap.h"
 
 namespace Core
 {
   class DX12Shader;
   class DX12Texture;
 
+  // Mesh can have multiple models
   class DX12Model
   {
   public:
-    DX12Model(D3D12_CULL_MODE cullMode = D3D12_CULL_MODE_BACK, bool depthEnabled = true);
+    DX12Model();
     ~DX12Model();
 
-    virtual void Setup(ID3D12GraphicsCommandList* commandList, DX12Shader* shader);
-    virtual void Draw(unsigned frameIndex, DX12Heap* heapDesc, DX12Shader* shader, unsigned texturePos, ID3D12GraphicsCommandList* commandList);
-    virtual void LoadModel(const aiMesh* pMesh);
-    unsigned GetTriangleCount() { return m_indices.size() / 3; }
+    void SetupModel(ID3D12GraphicsCommandList* commandList);
+    void DrawModel(unsigned frameIndex, ID3D12GraphicsCommandList* commandList);
+    void LoadModel(const char* path);
+    // Workaround!!!
+    void LoadModelSkyboxSpecific(const char* path);
+    void UpdateModel();
+    // workaround????
+    DX12Heap* GetHeapDesc() { return m_descHeap.get(); }
+    void SetTranslation(XMFLOAT3 translate) { m_translation = translate; };
+    void SetScale(XMFLOAT3 scale) { m_scale = scale; }
+    unsigned GetTriangleCount();
+
+    DX12Texture* GetTexture(unsigned index) { return m_textures[index].get(); }
+    unsigned GetTexturesCount() { return static_cast<unsigned>(m_textures.size()); }
 
   private:
-    void SetupVertexBuffer(ID3D12GraphicsCommandList* commandList);
-    void SetupIndexBuffer(ID3D12GraphicsCommandList* commandList);
+    std::vector<std::unique_ptr<DX12Mesh>> m_meshes;
+    std::vector<std::unique_ptr<DX12Shader>> m_shaders; // for each model
+    std::vector<std::unique_ptr<DX12Texture>> m_textures; // for each model
+    std::unique_ptr<DX12Heap> m_descHeap;
+    bool staticMesh = true;
+    bool isModelSet = false;
 
-  private:
-    struct Vertex
+    // temporary
+    struct ConstantBufferData
     {
-      XMFLOAT3 position;
-      XMFLOAT3 normal;
-      XMFLOAT2 uv;
+      XMMATRIX model;
+      XMMATRIX view;
+      XMMATRIX projection;
+      float padding[16]; // Padding so the constant buffer is 256-byte aligned.
     };
-
     // data
-    std::vector<Vertex> m_vertices;
-    std::vector<uint16_t> m_indices;
+    ConstantBufferData m_constantBufferData;
+    UINT8* m_pCbvDataBegin;
+    // constant buffer
+    ComPtr<ID3D12Resource> m_constantBuffer;
 
-    D3D12_CULL_MODE m_cullMode;
-    bool m_depthEnabled;
-    // pso
-    ComPtr<ID3D12PipelineState> m_pipelineState;
-
-    // buffers
-    ComPtr<ID3D12Resource> m_vertexBuffer;
-    ComPtr<ID3D12Resource> m_vertexBufferUploadHeap;
-    D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
-
-    ComPtr<ID3D12Resource> m_indexBuffer;
-    ComPtr<ID3D12Resource> m_indexBufferUploadHeap;
-    D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
+    // for testing
+    XMFLOAT3 m_translation;
+    XMFLOAT3 m_scale;
+    float m_angle;
+    aiMatrix4x4 m_transformation;
+    // workaround
+    bool m_isCubeMap;
 
   private:
     DX12Model(const DX12Model&) = delete;
