@@ -102,6 +102,8 @@ namespace Core
 
   void DX12Texture::CopyToGPU(ID3D12GraphicsCommandList* commandList)
   {
+    DX12Interface::Get().CreateShaderResourceView(m_texture.Get(), m_mipsHeap.Get(), 0, m_imgPtrs.size() > 1 /* cube map */);
+
     // Copy data to the intermediate upload heap and then schedule 
     // a copy from the upload heap to the diffuse texture.
     std::vector<D3D12_SUBRESOURCE_DATA> textureData(m_imgPtrs.size());
@@ -132,7 +134,6 @@ namespace Core
     commandList->SetPipelineState(m_pipelineState.Get());
     
     // create views
-    DX12Interface::Get().CreateShaderResourceView(m_texture.Get(), m_mipsHeap.Get(), 0, false);
     for (unsigned mip = 0; mip < m_mipsLevels; ++mip)
       DX12Interface::Get().CreateUnorderedAccessView(m_texture.Get(), m_mipsHeap.Get(), mip + 1, mip);
 

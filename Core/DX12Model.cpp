@@ -51,15 +51,15 @@ namespace Core
     m_descHeap->AddResource(m_constantBuffer, CONSTANTBUFFER);
 
     for (auto& texture : m_textures)
-      m_descHeap->AddResource(texture->GetResource(), m_isCubeMap ? CUBEMAP : TEXTURE);
-
-    for (const auto& texture : m_textures)
+    {
       texture->CopyToGPU(commandList);
+      texture->GenerateMips(commandList);
+      
+      m_descHeap->AddResource(texture->GetResource(), m_isCubeMap ? CUBEMAP : TEXTURE);
+    }
 
     for (int i = 0; i < m_meshes.size(); ++i)
-    {
       m_meshes[i]->Setup(commandList, m_shaders[i].get());
-    }
   }
 
   void DX12Model::DrawModel(unsigned frameIndex, ID3D12GraphicsCommandList* commandList)

@@ -20,8 +20,6 @@ namespace Core
     void WaitForGpu();
     void MoveToNextFrame();
 
-    void CreateMips(DX12Model* model);
-
     void Resize(unsigned width, unsigned height);
 
     void PrepareForRendering();

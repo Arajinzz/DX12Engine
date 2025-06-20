@@ -103,15 +103,6 @@ namespace Core
     m_fenceValues[m_frameIndex] = currentFenceValue + 1;
   }
 
-  void DX12Context::CreateMips(DX12Model* model)
-  {
-    for (unsigned i = 0; i < model->GetTexturesCount(); ++i)
-    {
-      auto texture = model->GetTexture(i);
-      texture->GenerateMips(m_commandList.Get());
-    }
-  }
-
   void DX12Context::Resize(unsigned width, unsigned height)
   {
     m_swapChain->Resize(width, height);
