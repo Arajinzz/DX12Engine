@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/DX12Heap.h"
+#include "Core/ResourceManager.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -31,7 +32,7 @@ namespace Core
     ~DX12Texture();
 
     unsigned GetMipsLevels() { return m_mipsLevels; }
-    ID3D12Resource* GetResource() { return m_texture.Get(); }
+    ID3D12Resource* GetResource() { return m_texture.resource.Get(); }
     void CopyToGPU(ID3D12GraphicsCommandList* commandList);
     void GenerateMips(ID3D12GraphicsCommandList* commandList);
 
@@ -43,11 +44,11 @@ namespace Core
       int channels;
     };
 
-    ComPtr<ID3D12Resource> m_texture;
-    ComPtr<ID3D12Resource> m_texUploadHeap;
+    // descriptor to the heap
+    ResourceDescriptor m_texture;
+    ResourceDescriptor m_upload;
+    ResourceDescriptor m_mips;
 
-    // used for mipmaps
-    ComPtr<ID3D12DescriptorHeap> m_mipsHeap;
     // pso used for mipmaps
     ComPtr<ID3D12PipelineState> m_pipelineState;
     // root sig used for mipmaps

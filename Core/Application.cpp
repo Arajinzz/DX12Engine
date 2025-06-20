@@ -4,6 +4,7 @@
 #include "Core/DX12Interface.h"
 #include "Core/DX12FrameResource.h"
 #include "Core/DX12Skybox.h"
+#include "Core/ResourceManager.h"
 
 #include <random>
 
@@ -20,6 +21,9 @@ namespace Core
   void Application::OnInit()
   {
     LoadPipeline();
+
+    // create resource manager
+    ResourceManager::Instance();
 
     CreateFrameResource();
     
