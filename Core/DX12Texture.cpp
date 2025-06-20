@@ -122,7 +122,7 @@ namespace Core
     m_mips = ResourceManager::Instance().CreateMipsForTexture(m_texture);
 
     // heap created
-    ID3D12DescriptorHeap* ppHeaps[] = { ResourceManager::Instance().GetTexHeap(), ResourceManager::Instance().GetMipsHeap() };
+    ID3D12DescriptorHeap* ppHeaps[] = { ResourceManager::Instance().GetTexHeap() };
     commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
     //Transition from pixel shader resource to unordered access

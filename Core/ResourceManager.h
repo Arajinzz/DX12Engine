@@ -24,7 +24,6 @@ namespace Core
 
     // Getters
     ID3D12DescriptorHeap* GetTexHeap() { return m_texHeap.Get(); }
-    ID3D12DescriptorHeap* GetMipsHeap() { return m_mipsHeap.Get(); }
 
     ResourceDescriptor CreateTextureResource(
       D3D12_RESOURCE_DESC& desc, CD3DX12_HEAP_PROPERTIES& props, D3D12_RESOURCE_STATES state, bool createView);
@@ -33,9 +32,6 @@ namespace Core
   private:
     std::vector<ResourceDescriptor> m_texResources;
     ComPtr<ID3D12DescriptorHeap> m_texHeap;
-
-    std::vector<ResourceDescriptor> m_mipsResources;
-    ComPtr<ID3D12DescriptorHeap> m_mipsHeap;
 
   private:
     ResourceManager();

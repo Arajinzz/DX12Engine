@@ -9,11 +9,8 @@ namespace Core
   ResourceManager::ResourceManager()
     : m_texResources()
     , m_texHeap(nullptr)
-    , m_mipsResources()
-    , m_mipsHeap()
   {
     m_texHeap = DX12Interface::Get().CreateHeapDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 65535);
-    m_mipsHeap = DX12Interface::Get().CreateHeapDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 65535);
   }
 
   ResourceManager::~ResourceManager()
@@ -63,18 +60,20 @@ namespace Core
 
     // create views
     for (unsigned mip = 0; mip < texture.resource->GetDesc().MipLevels; ++mip)
-      DX12Interface::Get().CreateUnorderedAccessView(texture.resource.Get(), m_mipsHeap.Get(), mip, mip);
+      DX12Interface::Get().CreateUnorderedAccessView(texture.resource.Get(), m_texHeap.Get(), mip + m_texResources.size(), mip);
 
     output.cpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-      m_mipsHeap->GetCPUDescriptorHandleForHeapStart(),
-      m_mipsResources.size(),
+      m_texHeap->GetCPUDescriptorHandleForHeapStart(),
+      m_texResources.size(),
       DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
     output.gpuHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
-      m_mipsHeap->GetGPUDescriptorHandleForHeapStart(),
-      m_mipsResources.size(),
+      m_texHeap->GetGPUDescriptorHandleForHeapStart(),
+      m_texResources.size(),
       DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 
-    m_mipsResources.push_back(output);
+    // hack!!!
+    for (unsigned mip = 0; mip < texture.resource->GetDesc().MipLevels; ++mip)
+      m_texResources.push_back(output);
 
     return output;
   }
