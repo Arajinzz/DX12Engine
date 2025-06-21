@@ -78,7 +78,7 @@ namespace Core
     float smoothFactor = 0.1f;
     XMVECTOR currentPos = XMLoadFloat3(&m_cameraPosition);
     XMVECTOR targetPos = XMLoadFloat3(&desiredPosition);
-    XMVECTOR newPos = XMVectorLerp(currentPos, targetPos, 0.1);
+    XMVECTOR newPos = XMVectorLerp(currentPos, targetPos, 0.1f);
     // smoothed position
     XMStoreFloat3(&m_cameraPosition, newPos);
 
@@ -101,6 +101,6 @@ namespace Core
     auto width = rect.right - rect.left;
     auto height = rect.bottom - rect.top;
     auto aspectRatio = static_cast<double>(width) / height;
-    m_projection = XMMatrixTranspose(XMMatrixPerspectiveFovLH(m_fov, aspectRatio, m_near, m_far));
+    m_projection = XMMatrixTranspose(XMMatrixPerspectiveFovLH(m_fov, static_cast<float>(aspectRatio), m_near, m_far));
   }
 }
