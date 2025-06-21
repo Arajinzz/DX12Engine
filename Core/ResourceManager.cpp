@@ -7,73 +7,92 @@
 namespace Core
 {
   ResourceManager::ResourceManager()
-    : m_texResources()
-    , m_texHeap(nullptr)
+    : m_resources()
+    , m_heap(nullptr)
+    , m_nextFreeTex()
+    , m_nextFreeMip()
   {
-    m_texHeap = DX12Interface::Get().CreateHeapDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 65535);
+    m_heap = DX12Interface::Get().CreateHeapDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, HEAP_SIZE);
+    // populate free Index vector
+    for (unsigned i = TEX_RANGE.begin; i <= TEX_RANGE.end; i++)
+      m_nextFreeTex.push_back(i);
+    for (unsigned i = MIPS_RANGE.begin; i <= MIPS_RANGE.end; i++)
+      m_nextFreeMip.push_back(i);
   }
 
   ResourceManager::~ResourceManager()
   {
-    m_texResources.clear();
-    m_texHeap.Reset();
+    m_resources.clear();
+    m_heap.Reset();
   }
 
-  ResourceDescriptor ResourceManager::CreateTextureResource(
-    D3D12_RESOURCE_DESC& desc, CD3DX12_HEAP_PROPERTIES& props, D3D12_RESOURCE_STATES state, bool createView)
+  D3D12_GPU_DESCRIPTOR_HANDLE ResourceManager::GetGpuHandle(unsigned index)
   {
-    ResourceDescriptor output;
-    ComPtr<ID3D12Resource> texture;
+    return CD3DX12_GPU_DESCRIPTOR_HANDLE(
+      m_heap->GetGPUDescriptorHandleForHeapStart(),
+      index,
+      DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+  }
 
+  D3D12_CPU_DESCRIPTOR_HANDLE ResourceManager::GetCpuHandle(unsigned index)
+  {
+    return CD3DX12_CPU_DESCRIPTOR_HANDLE(
+      m_heap->GetCPUDescriptorHandleForHeapStart(),
+      index,
+      DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+  }
+
+  TextureDescriptor ResourceManager::CreateTextureResource(D3D12_RESOURCE_DESC& desc, bool isCubeMap, bool generateMips)
+  {
+    TextureDescriptor output;
+    ComPtr<ID3D12Resource> texture;
+    ComPtr<ID3D12Resource> upload;
+    
+    output.index = m_nextFreeTex.front();
+    // index no longer free
+    m_nextFreeTex.erase(m_nextFreeTex.begin());
+
+    auto defaultProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+
+    // texture resource
     ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
-      &props,
+      &defaultProps,
       D3D12_HEAP_FLAG_NONE,
       &desc,
-      state,
+      D3D12_RESOURCE_STATE_COPY_DEST,
       nullptr,
       IID_PPV_ARGS(&texture)));
 
-    if (createView)
-    {
-      DX12Interface::Get().CreateShaderResourceView(
-        texture.Get(), m_texHeap.Get(), static_cast<unsigned>(m_texResources.size()), desc.DepthOrArraySize > 1 /* cube map */);
+    // upload heap
+    auto uploadDesc = CD3DX12_RESOURCE_DESC::Buffer(
+      GetRequiredIntermediateSize(texture.Get(), 0, desc.DepthOrArraySize * desc.MipLevels));
+    auto uploadProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+      &uploadProps,
+      D3D12_HEAP_FLAG_NONE,
+      &uploadDesc,
+      D3D12_RESOURCE_STATE_GENERIC_READ,
+      nullptr,
+      IID_PPV_ARGS(&upload)));
 
-      output.cpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-        m_texHeap->GetCPUDescriptorHandleForHeapStart(),
-        m_texResources.size(),
-        DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
-      output.gpuHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
-        m_texHeap->GetGPUDescriptorHandleForHeapStart(),
-        m_texResources.size(),
-        DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+    DX12Interface::Get().CreateShaderResourceView(texture.Get(), m_heap.Get(), output.index, isCubeMap);
+
+    // mips?
+    if (generateMips && m_nextFreeMip.size() >= texture->GetDesc().MipLevels)
+    {
+      // root signature takes 4 UAV at once
+      output.mipIndex = m_nextFreeMip.front();
+      for (unsigned mip = 0; mip < texture->GetDesc().MipLevels; ++mip)
+      {
+        DX12Interface::Get().CreateUnorderedAccessView(texture.Get(), m_heap.Get(), m_nextFreeMip.front(), mip);
+        m_nextFreeMip.erase(m_nextFreeMip.begin());
+      }
     }
 
     output.resource = texture;
-    m_texResources.push_back(output);
+    output.upload = upload;
 
-    return output;
-  }
-
-  ResourceDescriptor ResourceManager::CreateMipsForTexture(ResourceDescriptor texture)
-  {
-    ResourceDescriptor output;
-
-    // create views
-    for (unsigned mip = 0; mip < texture.resource->GetDesc().MipLevels; ++mip)
-      DX12Interface::Get().CreateUnorderedAccessView(texture.resource.Get(), m_texHeap.Get(), mip + m_texResources.size(), mip);
-
-    output.cpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-      m_texHeap->GetCPUDescriptorHandleForHeapStart(),
-      m_texResources.size(),
-      DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
-    output.gpuHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
-      m_texHeap->GetGPUDescriptorHandleForHeapStart(),
-      m_texResources.size(),
-      DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
-
-    // hack!!!
-    for (unsigned mip = 0; mip < texture.resource->GetDesc().MipLevels; ++mip)
-      m_texResources.push_back(output);
+    m_resources.push_back(output);
 
     return output;
   }

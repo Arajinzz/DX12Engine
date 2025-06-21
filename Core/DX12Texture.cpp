@@ -15,8 +15,6 @@ namespace Core
     , m_metaData()
     , m_mipsLevels(mips)
     , m_texture()
-    , m_upload()
-    , m_mips()
   {
     for (const auto& path : paths)
     {
@@ -37,15 +35,8 @@ namespace Core
     textureDesc.SampleDesc.Quality = 0;
     textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 
-    auto defaultProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-    m_texture = ResourceManager::Instance().CreateTextureResource(
-      textureDesc, defaultProps, D3D12_RESOURCE_STATE_COPY_DEST, true); // yes create view
-
-    auto uploadDesc = CD3DX12_RESOURCE_DESC::Buffer(
-      GetRequiredIntermediateSize(m_texture.resource.Get(), 0, textureDesc.DepthOrArraySize * textureDesc.MipLevels));
-    auto uploadProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-    m_upload = ResourceManager::Instance().CreateTextureResource(
-      uploadDesc, uploadProps, D3D12_RESOURCE_STATE_GENERIC_READ, false); // don't create view
+    // don't generate mips for skybox
+    m_texture = ResourceManager::Instance().CreateTextureResource(textureDesc, m_imgPtrs.size() > 1, m_imgPtrs.size() == 1);
 
     CD3DX12_DESCRIPTOR_RANGE1 srcMip(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
     CD3DX12_DESCRIPTOR_RANGE1 outMip(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 4, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
@@ -103,7 +94,7 @@ namespace Core
     const UINT subResourceCount = static_cast<unsigned>(1 * m_metaData.size());
     auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
       m_texture.resource.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-    UpdateSubresources(commandList, m_texture.resource.Get(), m_upload.resource.Get(), 0, 0, subResourceCount, textureData.data());
+    UpdateSubresources(commandList, m_texture.resource.Get(), m_texture.upload.Get(), 0, 0, subResourceCount, textureData.data());
     commandList->ResourceBarrier(1, &barrier);
 
     // free
@@ -118,11 +109,9 @@ namespace Core
     //Set root signature, pso and descriptor heap
     commandList->SetComputeRootSignature(m_rootSignature.Get());
     commandList->SetPipelineState(m_pipelineState.Get());
-    
-    m_mips = ResourceManager::Instance().CreateMipsForTexture(m_texture);
 
     // heap created
-    ID3D12DescriptorHeap* ppHeaps[] = { ResourceManager::Instance().GetTexHeap() };
+    ID3D12DescriptorHeap* ppHeaps[] = { ResourceManager::Instance().GetHeap() };
     commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
     //Transition from pixel shader resource to unordered access
@@ -137,8 +126,8 @@ namespace Core
     generateMipsCB.TexelSize.x = 1.0f / (float)m_texture.resource->GetDesc().Width;
     generateMipsCB.TexelSize.y = 1.0f / (float)m_texture.resource->GetDesc().Height;
     commandList->SetComputeRoot32BitConstants(0, sizeof(SGenerateMipsCB) / 4, &generateMipsCB, 0);
-    commandList->SetComputeRootDescriptorTable(1, m_texture.gpuHandle);
-    commandList->SetComputeRootDescriptorTable(2, m_mips.gpuHandle);
+    commandList->SetComputeRootDescriptorTable(1, ResourceManager::Instance().GetGpuHandle(m_texture.index));
+    commandList->SetComputeRootDescriptorTable(2, ResourceManager::Instance().GetGpuHandle(m_texture.mipIndex));
 
     //Dispatch the compute shader with one thread per 8x8 pixels
     commandList->Dispatch(

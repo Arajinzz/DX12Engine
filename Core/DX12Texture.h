@@ -45,9 +45,7 @@ namespace Core
     };
 
     // descriptor to the heap
-    ResourceDescriptor m_texture;
-    ResourceDescriptor m_upload;
-    ResourceDescriptor m_mips;
+    TextureDescriptor m_texture;
 
     // pso used for mipmaps
     ComPtr<ID3D12PipelineState> m_pipelineState;

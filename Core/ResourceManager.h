@@ -3,17 +3,39 @@
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
+// Regions
+// 0 - 999 : textures
+// 1000 - 4999 : mips [expecting 4 mips per texture]
+// 5000 - 7999 : constant buffers
+
 namespace Core
 {
+  struct Range
+  {
+    unsigned begin;
+    unsigned end;
+  };
+
   struct ResourceDescriptor
   {
     ComPtr<ID3D12Resource> resource;
-    D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
-    D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
+    unsigned index;
+  };
+
+  struct TextureDescriptor : public ResourceDescriptor
+  {
+    ComPtr<ID3D12Resource> upload;
+    unsigned mipIndex;
   };
 
   class ResourceManager
   {
+    // fixed size of 8k
+    const unsigned HEAP_SIZE = 8000;
+    const Range TEX_RANGE = { 0, 999 };
+    const Range MIPS_RANGE = { 1000, 4999 };
+    const Range CB_RANGE = { 5000, 7999 };
+
   public:
     static ResourceManager& Instance()
     {
@@ -23,15 +45,18 @@ namespace Core
     ~ResourceManager();
 
     // Getters
-    ID3D12DescriptorHeap* GetTexHeap() { return m_texHeap.Get(); }
+    ID3D12DescriptorHeap* GetHeap() { return m_heap.Get(); }
+    D3D12_GPU_DESCRIPTOR_HANDLE GetGpuHandle(unsigned index);
+    D3D12_CPU_DESCRIPTOR_HANDLE GetCpuHandle(unsigned index);
 
-    ResourceDescriptor CreateTextureResource(
-      D3D12_RESOURCE_DESC& desc, CD3DX12_HEAP_PROPERTIES& props, D3D12_RESOURCE_STATES state, bool createView);
-    ResourceDescriptor CreateMipsForTexture(ResourceDescriptor texture);
+    TextureDescriptor CreateTextureResource(D3D12_RESOURCE_DESC& desc, bool isCubeMap, bool generateMips);
 
   private:
-    std::vector<ResourceDescriptor> m_texResources;
-    ComPtr<ID3D12DescriptorHeap> m_texHeap;
+    std::vector<ResourceDescriptor> m_resources;
+    ComPtr<ID3D12DescriptorHeap> m_heap;
+    // track free heap places
+    std::vector<unsigned> m_nextFreeTex;
+    std::vector<unsigned> m_nextFreeMip;
 
   private:
     ResourceManager();
