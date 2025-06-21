@@ -35,13 +35,8 @@ namespace Core
     for (int i = 0; i < modelNumber; ++i)
       m_models.push_back(new DX12Model());
 
-    std::random_device rd;  // Seed from hardware
-    std::mt19937 gen(rd()); // Mersenne Twister PRNG
-    std::uniform_real_distribution<float> dist(-1.0f, 1.0f); // Range [0,1]
-
     for (auto model : m_models)
     {
-      //XMFLOAT3 translation = {5 * dist(gen), 5 * dist(gen), 5 * dist(gen) };
       model->LoadModel("models\\sponza.obj");
       model->SetupModel(m_context->GetCommandList());
       //mesh->SetTranslation(translation);
