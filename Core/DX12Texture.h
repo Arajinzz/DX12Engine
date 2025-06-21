@@ -32,7 +32,7 @@ namespace Core
     ~DX12Texture();
 
     unsigned GetMipsLevels() { return m_mipsLevels; }
-    ID3D12Resource* GetResource() { return m_texture.resource.Get(); }
+    const TextureDescriptor& GetResource() { return m_texture; }
     void CopyToGPU(ID3D12GraphicsCommandList* commandList);
     void GenerateMips(ID3D12GraphicsCommandList* commandList);
 

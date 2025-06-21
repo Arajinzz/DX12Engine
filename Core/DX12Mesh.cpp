@@ -59,26 +59,24 @@ namespace Core
     SetupIndexBuffer(commandList);
   }
 
-  void DX12Mesh::Draw(unsigned frameIndex, DX12Heap* heapDesc, DX12Shader* shader, unsigned texturePos, ID3D12GraphicsCommandList* commandList)
+  void DX12Mesh::Draw(unsigned frameIndex, ResourceDescriptor cb, TextureDescriptor texture, DX12Shader* shader, ID3D12GraphicsCommandList* commandList)
   {
     // 1 allocator
     commandList->SetPipelineState(m_pipelineState.Get());
     // Set necessary state.
     commandList->SetGraphicsRootSignature(shader->GetRootSignature());
-    ID3D12DescriptorHeap* ppHeaps[] = { heapDesc->Get() };
+    ID3D12DescriptorHeap* ppHeaps[] = { ResourceManager::Instance().GetHeap() };
     commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
-    auto handle = heapDesc->Get()->GetGPUDescriptorHandleForHeapStart();
-    commandList->SetGraphicsRootDescriptorTable(0, handle);
+    // scene CBV
+    commandList->SetGraphicsRootDescriptorTable(
+      0, ResourceManager::Instance().GetGpuHandle(FrameResource().GetConstantBuffer().index));
 
-    handle.ptr += DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    commandList->SetGraphicsRootDescriptorTable(1, handle);
+    // object CBV
+    commandList->SetGraphicsRootDescriptorTable(1, ResourceManager::Instance().GetGpuHandle(cb.index));
 
-    // get correct texture in the heap
-    for (unsigned i = 0; i < texturePos + 1; ++i)
-      handle.ptr += DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-    commandList->SetGraphicsRootDescriptorTable(2, handle);
+    // texture CBV
+    commandList->SetGraphicsRootDescriptorTable(2, ResourceManager::Instance().GetGpuHandle(texture.index));
 
     commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);

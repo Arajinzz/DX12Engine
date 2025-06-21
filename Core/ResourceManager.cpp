@@ -11,6 +11,7 @@ namespace Core
     , m_heap(nullptr)
     , m_nextFreeTex()
     , m_nextFreeMip()
+    , m_nextFreeCB()
   {
     m_heap = DX12Interface::Get().CreateHeapDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, HEAP_SIZE);
     // populate free Index vector
@@ -18,6 +19,8 @@ namespace Core
       m_nextFreeTex.push_back(i);
     for (unsigned i = MIPS_RANGE.begin; i <= MIPS_RANGE.end; i++)
       m_nextFreeMip.push_back(i);
+    for (unsigned i = CB_RANGE.begin; i <= CB_RANGE.end; i++)
+      m_nextFreeCB.push_back(i);
   }
 
   ResourceManager::~ResourceManager()
@@ -40,6 +43,19 @@ namespace Core
       m_heap->GetCPUDescriptorHandleForHeapStart(),
       index,
       DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+  }
+
+  ResourceDescriptor ResourceManager::CreateConstantBufferResource(size_t size, D3D12_HEAP_TYPE type)
+  {
+    ResourceDescriptor output;
+    output.resource = DX12Interface::Get().CreateConstantBuffer(size, D3D12_HEAP_TYPE_UPLOAD);
+    output.index = m_nextFreeCB.front();
+    m_nextFreeCB.erase(m_nextFreeCB.begin());
+
+    // TODO check if free
+    DX12Interface::Get().CreateConstantBufferView(output.resource.Get(), m_heap.Get(), output.index);
+
+    return output;
   }
 
   TextureDescriptor ResourceManager::CreateTextureResource(D3D12_RESOURCE_DESC& desc, bool isCubeMap, bool generateMips)

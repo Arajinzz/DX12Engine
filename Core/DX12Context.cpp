@@ -157,11 +157,7 @@ namespace Core
 
   void DX12Context::Draw(DX12Model* model)
   {
-    // RECHECK THIS!!!!!!!!!!!!!!!
-    // set heaps, this has to be the same as bundles
-    ID3D12DescriptorHeap* ppHeaps[] = { model->GetHeapDesc()->Get()};
-    m_commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
-    model->DrawModel(m_frameIndex, m_commandList.Get()); // executes bundles
+    model->DrawModel(m_frameIndex, m_commandList.Get());
   }
 
   void DX12Context::PrepareForPresenting()

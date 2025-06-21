@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core\DX12Heap.h"
+#include "Core\ResourceManager.h"
 
 #include <assimp\Importer.hpp>
 #include <assimp\scene.h>
@@ -21,7 +22,8 @@ namespace Core
     ~DX12Mesh();
 
     virtual void Setup(ID3D12GraphicsCommandList* commandList, DX12Shader* shader);
-    virtual void Draw(unsigned frameIndex, DX12Heap* heapDesc, DX12Shader* shader, unsigned texturePos, ID3D12GraphicsCommandList* commandList);
+    virtual void Draw(
+      unsigned frameIndex, ResourceDescriptor cb, TextureDescriptor texture, DX12Shader* shader, ID3D12GraphicsCommandList* commandList);
     virtual void LoadMesh(const aiMesh* pMesh);
     unsigned GetTriangleCount() { return static_cast<unsigned>(m_indices.size() / 3); }
 

@@ -2,6 +2,7 @@
 
 #include "Core\DX12Shader.h"
 #include "Core\DX12Camera.h"
+#include "Core\ResourceManager.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -22,11 +23,11 @@ namespace Core
       static DX12FrameResource instance;
       return instance;
     }
-    
+
     void CreateResources(ID3D12GraphicsCommandList* commandList);
     void Update();
+    const ResourceDescriptor& GetConstantBuffer() { return m_constantBuffer; }
     DX12Camera* GetCamera() { return m_camera.get(); }
-    ID3D12Resource* GetConstantBuffer() { return m_constantBuffer.Get(); }
     DX12Skybox* GetSkybox() { return m_skybox.get(); }
 
     ~DX12FrameResource();
@@ -45,7 +46,7 @@ namespace Core
     ConstantBufferData m_constantBufferData;
     UINT8* m_pCbvDataBegin;
     // CB resource
-    ComPtr<ID3D12Resource> m_constantBuffer;
+    ResourceDescriptor m_constantBuffer;
 
     // camera and skybox
     std::unique_ptr<DX12Camera> m_camera;

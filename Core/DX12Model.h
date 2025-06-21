@@ -21,8 +21,6 @@ namespace Core
     // Workaround!!!
     void LoadModelSkyboxSpecific(const char* path);
     void UpdateModel();
-    // workaround????
-    DX12Heap* GetHeapDesc() { return m_descHeap.get(); }
     void SetTranslation(XMFLOAT3 translate) { m_translation = translate; };
     void SetScale(XMFLOAT3 scale) { m_scale = scale; }
     unsigned GetTriangleCount();
@@ -34,7 +32,6 @@ namespace Core
     std::vector<std::unique_ptr<DX12Mesh>> m_meshes;
     std::vector<std::unique_ptr<DX12Shader>> m_shaders; // for each model
     std::vector<std::unique_ptr<DX12Texture>> m_textures; // for each model
-    std::unique_ptr<DX12Heap> m_descHeap;
     bool staticMesh = true;
     bool isModelSet = false;
 
@@ -50,7 +47,7 @@ namespace Core
     ConstantBufferData m_constantBufferData;
     UINT8* m_pCbvDataBegin;
     // constant buffer
-    ComPtr<ID3D12Resource> m_constantBuffer;
+    ResourceDescriptor m_constantBuffer;
 
     // for testing
     XMFLOAT3 m_translation;

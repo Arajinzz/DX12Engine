@@ -16,10 +16,9 @@ namespace Core
 {
   DX12Model::DX12Model()
     : m_meshes()
-    , m_descHeap(nullptr)
     , m_pCbvDataBegin(nullptr)
     , m_constantBufferData()
-    , m_constantBuffer(nullptr)
+    , m_constantBuffer()
     , m_translation(0.0f, 0.0f, 0.0f)
     , m_scale(1.0f, 1.0f, 1.0f)
     , m_angle(0.0f)
@@ -27,35 +26,26 @@ namespace Core
     , m_textures()
     , m_isCubeMap(false)
   {
-    // create heap
-    m_descHeap = std::make_unique<DX12Heap>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     // create constant buffer
-    m_constantBuffer = DX12Interface::Get().CreateConstantBuffer(sizeof(ConstantBufferData), D3D12_HEAP_TYPE_UPLOAD);
+    m_constantBuffer = ResourceManager::Instance().CreateConstantBufferResource(
+      sizeof(ConstantBufferData), D3D12_HEAP_TYPE_UPLOAD);
     // Map and initialize the constant buffer. We don't unmap this until the
     // app closes. Keeping things mapped for the lifetime of the resource is okay.
     CD3DX12_RANGE readRange(0, 0); // We do not intend to read from this resource on the CPU.
-    ThrowIfFailed(m_constantBuffer->Map(0, &readRange, reinterpret_cast<void**>(&m_pCbvDataBegin)));
+    ThrowIfFailed(m_constantBuffer.resource->Map(0, &readRange, reinterpret_cast<void**>(&m_pCbvDataBegin)));
     memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
   }
 
   DX12Model::~DX12Model()
   {
-    m_descHeap.reset();
-    m_constantBuffer.Reset();
   }
 
   void DX12Model::SetupModel(ID3D12GraphicsCommandList* commandList)
   {
-    // always Globals first
-    m_descHeap->AddResource(FrameResource().GetConstantBuffer(), CONSTANTBUFFER);
-    m_descHeap->AddResource(m_constantBuffer, CONSTANTBUFFER);
-
     for (auto& texture : m_textures)
     {
       texture->CopyToGPU(commandList);
       texture->GenerateMips(commandList);
-      
-      m_descHeap->AddResource(texture->GetResource(), m_isCubeMap ? CUBEMAP : TEXTURE);
     }
 
     for (int i = 0; i < m_meshes.size(); ++i)
@@ -65,7 +55,7 @@ namespace Core
   void DX12Model::DrawModel(unsigned frameIndex, ID3D12GraphicsCommandList* commandList)
   {
     for (int i = 0; i < m_meshes.size(); ++i)
-      m_meshes[i]->Draw(frameIndex, m_descHeap.get(), m_shaders[i].get(), i, commandList);
+      m_meshes[i]->Draw(frameIndex, m_constantBuffer, m_textures[i]->GetResource(), m_shaders[i].get(), commandList);
   }
 
   void DX12Model::LoadModel(const char* path)

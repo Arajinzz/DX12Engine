@@ -49,6 +49,7 @@ namespace Core
     D3D12_GPU_DESCRIPTOR_HANDLE GetGpuHandle(unsigned index);
     D3D12_CPU_DESCRIPTOR_HANDLE GetCpuHandle(unsigned index);
 
+    ResourceDescriptor CreateConstantBufferResource(size_t size, D3D12_HEAP_TYPE type);
     TextureDescriptor CreateTextureResource(D3D12_RESOURCE_DESC& desc, bool isCubeMap, bool generateMips);
 
   private:
@@ -57,6 +58,7 @@ namespace Core
     // track free heap places
     std::vector<unsigned> m_nextFreeTex;
     std::vector<unsigned> m_nextFreeMip;
+    std::vector<unsigned> m_nextFreeCB;
 
   private:
     ResourceManager();
