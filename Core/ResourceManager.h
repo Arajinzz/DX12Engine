@@ -56,7 +56,6 @@ namespace Core
     TextureDescriptor CreateTextureResource(D3D12_RESOURCE_DESC& desc, bool isCubeMap, bool generateMips);
 
   private:
-    std::vector<ResourceDescriptor> m_resources;
     ComPtr<ID3D12DescriptorHeap> m_resourcesHeap;
     // track free heap places
     std::vector<unsigned> m_nextFreeTex;

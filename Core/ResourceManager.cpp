@@ -7,8 +7,7 @@
 namespace Core
 {
   ResourceManager::ResourceManager()
-    : m_resources()
-    , m_resourcesHeap(nullptr)
+    : m_resourcesHeap(nullptr)
     , m_nextFreeTex()
     , m_nextFreeMip()
     , m_nextFreeCB()
@@ -26,7 +25,6 @@ namespace Core
 
   ResourceManager::~ResourceManager()
   {
-    m_resources.clear();
     m_resourcesHeap.Reset();
   }
 
@@ -119,8 +117,6 @@ namespace Core
 
     output.resource = texture;
     output.upload = upload;
-
-    m_resources.push_back(output);
 
     return output;
   }
