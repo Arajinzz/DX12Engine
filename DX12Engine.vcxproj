@@ -226,7 +226,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Core\DX12SwapChain.cpp" />
-    <ClCompile Include="Core\DX12Heap.cpp" />
     <ClCompile Include="Core\DX12FrameResource.cpp" />
     <ClCompile Include="Core\DX12Texture.cpp" />
     <ClCompile Include="Core\DX12Context.cpp" />
@@ -388,7 +387,6 @@
     <ClInclude Include="dep\imgui\misc\freetype\imgui_freetype.h" />
     <ClInclude Include="dep\imgui\misc\single_file\imgui_single_file.h" />
     <ClInclude Include="Core\DX12SwapChain.h" />
-    <ClInclude Include="Core\DX12Heap.h" />
     <ClInclude Include="Core\DX12FrameResource.h" />
     <ClInclude Include="Core\DX12Texture.h" />
     <ClInclude Include="Core\DX12Context.h" />

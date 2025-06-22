@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Core\DX12Heap.h"
 #include "Core\ResourceManager.h"
 
 #include <assimp\Importer.hpp>

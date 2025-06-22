@@ -63,9 +63,6 @@
     <ClCompile Include="Core\DX12SwapChain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\DX12Heap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Core\DX12FrameResource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -150,9 +147,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\DX12SwapChain.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\DX12Heap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\DX12FrameResource.h">

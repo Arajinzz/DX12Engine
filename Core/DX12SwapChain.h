@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Core/DX12Heap.h"
 #include "Core/ResourceManager.h"
 
 using namespace DirectX;

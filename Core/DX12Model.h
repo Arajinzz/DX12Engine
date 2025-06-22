@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Core/DX12Mesh.h"
-#include "Core/DX12Heap.h"
 
 namespace Core
 {
