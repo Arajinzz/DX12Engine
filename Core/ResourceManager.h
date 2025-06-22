@@ -26,6 +26,7 @@ namespace Core
   {
     ComPtr<ID3D12Resource> upload;
     unsigned mipIndex;
+    unsigned mipLevels;
   };
 
   class ResourceManager

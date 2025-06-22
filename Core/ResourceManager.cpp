@@ -108,6 +108,7 @@ namespace Core
     {
       // root signature takes 4 UAV at once
       output.mipIndex = m_nextFreeMip.front();
+      output.mipLevels = texture->GetDesc().MipLevels;
       for (unsigned mip = 0; mip < texture->GetDesc().MipLevels; ++mip)
       {
         DX12Interface::Get().CreateUnorderedAccessView(texture.Get(), m_resourcesHeap.Get(), m_nextFreeMip.front(), mip);
