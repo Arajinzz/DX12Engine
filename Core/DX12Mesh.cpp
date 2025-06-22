@@ -65,7 +65,7 @@ namespace Core
     commandList->SetPipelineState(m_pipelineState.Get());
     // Set necessary state.
     commandList->SetGraphicsRootSignature(shader->GetRootSignature());
-    ID3D12DescriptorHeap* ppHeaps[] = { ResourceManager::Instance().GetHeap() };
+    ID3D12DescriptorHeap* ppHeaps[] = { ResourceManager::Instance().GetResourcesHeap() };
     commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
     // scene CBV

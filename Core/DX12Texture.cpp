@@ -111,7 +111,7 @@ namespace Core
     commandList->SetPipelineState(m_pipelineState.Get());
 
     // heap created
-    ID3D12DescriptorHeap* ppHeaps[] = { ResourceManager::Instance().GetHeap() };
+    ID3D12DescriptorHeap* ppHeaps[] = { ResourceManager::Instance().GetResourcesHeap() };
     commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
     //Transition from pixel shader resource to unordered access

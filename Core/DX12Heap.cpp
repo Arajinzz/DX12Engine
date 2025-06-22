@@ -64,10 +64,6 @@ namespace Core
         DX12Interface::Get().CreateRenderTargetView(resource, m_heap.Get(), i);
       else if (type == DEPTH)
         DX12Interface::Get().CreateDepthStencilView(resource, m_heap.Get(), i);
-      else if (type == TEXTURE || type == CUBEMAP)
-        DX12Interface::Get().CreateShaderResourceView(resource, m_heap.Get(), i, type == CUBEMAP);
-      else if (type == CONSTANTBUFFER)
-        DX12Interface::Get().CreateConstantBufferView(resource, m_heap.Get(), i);
     }
 
   }

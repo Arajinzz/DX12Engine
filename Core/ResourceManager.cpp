@@ -8,12 +8,13 @@ namespace Core
 {
   ResourceManager::ResourceManager()
     : m_resources()
-    , m_heap(nullptr)
+    , m_resourcesHeap(nullptr)
     , m_nextFreeTex()
     , m_nextFreeMip()
     , m_nextFreeCB()
   {
-    m_heap = DX12Interface::Get().CreateHeapDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, HEAP_SIZE);
+    m_resourcesHeap = DX12Interface::Get().CreateHeapDescriptor(
+      D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, RESOURCE_HEAP_SIZE);
     // populate free Index vector
     for (unsigned i = TEX_RANGE.begin; i <= TEX_RANGE.end; i++)
       m_nextFreeTex.push_back(i);
@@ -26,13 +27,13 @@ namespace Core
   ResourceManager::~ResourceManager()
   {
     m_resources.clear();
-    m_heap.Reset();
+    m_resourcesHeap.Reset();
   }
 
   D3D12_GPU_DESCRIPTOR_HANDLE ResourceManager::GetGpuHandle(unsigned index)
   {
     return CD3DX12_GPU_DESCRIPTOR_HANDLE(
-      m_heap->GetGPUDescriptorHandleForHeapStart(),
+      m_resourcesHeap->GetGPUDescriptorHandleForHeapStart(),
       index,
       DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
   }
@@ -40,26 +41,37 @@ namespace Core
   D3D12_CPU_DESCRIPTOR_HANDLE ResourceManager::GetCpuHandle(unsigned index)
   {
     return CD3DX12_CPU_DESCRIPTOR_HANDLE(
-      m_heap->GetCPUDescriptorHandleForHeapStart(),
+      m_resourcesHeap->GetCPUDescriptorHandleForHeapStart(),
       index,
       DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
   }
 
   ResourceDescriptor ResourceManager::CreateConstantBufferResource(size_t size, D3D12_HEAP_TYPE type)
   {
+    // check if space is available
+    if (m_nextFreeCB.size() < 1)
+      throw std::out_of_range("[CONSTANT_BUFFER] HEAP DESCRIPTOR HAVE NO SPACE LEFT!");
+
     ResourceDescriptor output;
     output.resource = DX12Interface::Get().CreateConstantBuffer(size, D3D12_HEAP_TYPE_UPLOAD);
     output.index = m_nextFreeCB.front();
     m_nextFreeCB.erase(m_nextFreeCB.begin());
 
-    // TODO check if free
-    DX12Interface::Get().CreateConstantBufferView(output.resource.Get(), m_heap.Get(), output.index);
+    DX12Interface::Get().CreateConstantBufferView(output.resource.Get(), m_resourcesHeap.Get(), output.index);
 
     return output;
   }
 
   TextureDescriptor ResourceManager::CreateTextureResource(D3D12_RESOURCE_DESC& desc, bool isCubeMap, bool generateMips)
   {
+    // check if space is available
+    if (m_nextFreeTex.size() < 1)
+      throw std::out_of_range("[TEXTURE] HEAP DESCRIPTOR HAVE NO SPACE LEFT!");
+
+    // check if space is available
+    if (m_nextFreeMip.size() < desc.MipLevels)
+      throw std::out_of_range("[MIPS] HEAP DESCRIPTOR HAVE NO SPACE LEFT!");
+
     TextureDescriptor output;
     ComPtr<ID3D12Resource> texture;
     ComPtr<ID3D12Resource> upload;
@@ -91,7 +103,7 @@ namespace Core
       nullptr,
       IID_PPV_ARGS(&upload)));
 
-    DX12Interface::Get().CreateShaderResourceView(texture.Get(), m_heap.Get(), output.index, isCubeMap);
+    DX12Interface::Get().CreateShaderResourceView(texture.Get(), m_resourcesHeap.Get(), output.index, isCubeMap);
 
     // mips?
     if (generateMips && m_nextFreeMip.size() >= texture->GetDesc().MipLevels)
@@ -100,7 +112,7 @@ namespace Core
       output.mipIndex = m_nextFreeMip.front();
       for (unsigned mip = 0; mip < texture->GetDesc().MipLevels; ++mip)
       {
-        DX12Interface::Get().CreateUnorderedAccessView(texture.Get(), m_heap.Get(), m_nextFreeMip.front(), mip);
+        DX12Interface::Get().CreateUnorderedAccessView(texture.Get(), m_resourcesHeap.Get(), m_nextFreeMip.front(), mip);
         m_nextFreeMip.erase(m_nextFreeMip.begin());
       }
     }
