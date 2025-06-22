@@ -44,23 +44,27 @@ namespace Core
       DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
   }
 
-  ResourceDescriptor ResourceManager::CreateConstantBufferResource(size_t size, D3D12_HEAP_TYPE type)
+  std::unique_ptr<ResourceDescriptor> ResourceManager::CreateConstantBufferResource(size_t size, D3D12_HEAP_TYPE type)
   {
     // check if space is available
     if (m_nextFreeCB.size() < 1)
       throw std::out_of_range("[CONSTANT_BUFFER] HEAP DESCRIPTOR HAVE NO SPACE LEFT!");
 
-    ResourceDescriptor output;
-    output.resource = DX12Interface::Get().CreateConstantBuffer(size, D3D12_HEAP_TYPE_UPLOAD);
-    output.index = m_nextFreeCB.front();
+    std::unique_ptr<ResourceDescriptor> output = std::make_unique<ResourceDescriptor>();
+    output->resource = DX12Interface::Get().CreateConstantBuffer(size, D3D12_HEAP_TYPE_UPLOAD);
+    output->index = m_nextFreeCB.front();
     m_nextFreeCB.erase(m_nextFreeCB.begin());
 
-    DX12Interface::Get().CreateConstantBufferView(output.resource.Get(), m_resourcesHeap.Get(), output.index);
+    DX12Interface::Get().CreateConstantBufferView(output->resource.Get(), m_resourcesHeap.Get(), output->index);
+
+    output->freeResource = [&](unsigned index) {
+      m_nextFreeCB.push_back(index);
+    };
 
     return output;
   }
 
-  TextureDescriptor ResourceManager::CreateTextureResource(D3D12_RESOURCE_DESC& desc, bool isCubeMap, bool generateMips)
+  std::unique_ptr<TextureDescriptor> ResourceManager::CreateTextureResource(D3D12_RESOURCE_DESC& desc, bool isCubeMap, bool generateMips)
   {
     // check if space is available
     if (m_nextFreeTex.size() < 1)
@@ -70,11 +74,11 @@ namespace Core
     if (m_nextFreeMip.size() < desc.MipLevels)
       throw std::out_of_range("[MIPS] HEAP DESCRIPTOR HAVE NO SPACE LEFT!");
 
-    TextureDescriptor output;
+    std::unique_ptr<TextureDescriptor> output = std::make_unique<TextureDescriptor>();
     ComPtr<ID3D12Resource> texture;
     ComPtr<ID3D12Resource> upload;
     
-    output.index = m_nextFreeTex.front();
+    output->index = m_nextFreeTex.front();
     // index no longer free
     m_nextFreeTex.erase(m_nextFreeTex.begin());
 
@@ -101,14 +105,14 @@ namespace Core
       nullptr,
       IID_PPV_ARGS(&upload)));
 
-    DX12Interface::Get().CreateShaderResourceView(texture.Get(), m_resourcesHeap.Get(), output.index, isCubeMap);
+    DX12Interface::Get().CreateShaderResourceView(texture.Get(), m_resourcesHeap.Get(), output->index, isCubeMap);
 
     // mips?
     if (generateMips && m_nextFreeMip.size() >= texture->GetDesc().MipLevels)
     {
       // root signature takes 4 UAV at once
-      output.mipIndex = m_nextFreeMip.front();
-      output.mipLevels = texture->GetDesc().MipLevels;
+      output->mipIndex = m_nextFreeMip.front();
+      output->mipLevels = texture->GetDesc().MipLevels;
       for (unsigned mip = 0; mip < texture->GetDesc().MipLevels; ++mip)
       {
         DX12Interface::Get().CreateUnorderedAccessView(texture.Get(), m_resourcesHeap.Get(), m_nextFreeMip.front(), mip);
@@ -116,8 +120,15 @@ namespace Core
       }
     }
 
-    output.resource = texture;
-    output.upload = upload;
+    output->resource = texture;
+    output->upload = upload;
+    output->freeResource = [&](unsigned index) {
+      m_nextFreeTex.push_back(index);
+    };
+    output->freeMips = [&](unsigned index, unsigned mips) {
+      for (unsigned i = index; i < index + mips; ++i)
+        m_nextFreeMip.push_back(i);
+    };
 
     return output;
   }

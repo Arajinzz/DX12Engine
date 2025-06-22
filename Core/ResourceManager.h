@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
@@ -20,6 +22,14 @@ namespace Core
   {
     ComPtr<ID3D12Resource> resource;
     unsigned index;
+    std::function<void(unsigned)> freeResource;
+
+    virtual ~ResourceDescriptor()
+    {
+      resource.Reset();
+      if (freeResource)
+        freeResource(index);
+    }
   };
 
   struct TextureDescriptor : public ResourceDescriptor
@@ -27,6 +37,14 @@ namespace Core
     ComPtr<ID3D12Resource> upload;
     unsigned mipIndex;
     unsigned mipLevels;
+    std::function<void(unsigned, unsigned)> freeMips;
+
+    ~TextureDescriptor()
+    {
+      upload.Reset();
+      if (freeMips)
+        freeMips(mipIndex, mipLevels);
+    }
   };
 
   class ResourceManager
@@ -53,8 +71,8 @@ namespace Core
     D3D12_GPU_DESCRIPTOR_HANDLE GetGpuHandle(unsigned index);
     D3D12_CPU_DESCRIPTOR_HANDLE GetCpuHandle(unsigned index);
 
-    ResourceDescriptor CreateConstantBufferResource(size_t size, D3D12_HEAP_TYPE type);
-    TextureDescriptor CreateTextureResource(D3D12_RESOURCE_DESC& desc, bool isCubeMap, bool generateMips);
+    std::unique_ptr<ResourceDescriptor> CreateConstantBufferResource(size_t size, D3D12_HEAP_TYPE type);
+    std::unique_ptr<TextureDescriptor> CreateTextureResource(D3D12_RESOURCE_DESC& desc, bool isCubeMap, bool generateMips);
 
   private:
     ComPtr<ID3D12DescriptorHeap> m_resourcesHeap;

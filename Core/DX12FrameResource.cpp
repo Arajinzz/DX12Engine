@@ -29,7 +29,7 @@ namespace Core
     // Map and initialize the constant buffer. We don't unmap this until the
     // app closes. Keeping things mapped for the lifetime of the resource is okay.
     CD3DX12_RANGE readRange(0, 0); // We do not intend to read from this resource on the CPU.
-    ThrowIfFailed(m_constantBuffer.resource.Get()->Map(0, &readRange, reinterpret_cast<void**>(&m_pCbvDataBegin)));
+    ThrowIfFailed(m_constantBuffer->resource.Get()->Map(0, &readRange, reinterpret_cast<void**>(&m_pCbvDataBegin)));
     memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
 
     m_skybox = std::make_unique<DX12Skybox>();

@@ -26,7 +26,7 @@ namespace Core
 
     void CreateResources(ID3D12GraphicsCommandList* commandList);
     void Update();
-    const ResourceDescriptor& GetConstantBuffer() { return m_constantBuffer; }
+    const ResourceDescriptor* GetConstantBuffer() { return m_constantBuffer.get(); }
     DX12Camera* GetCamera() { return m_camera.get(); }
     DX12Skybox* GetSkybox() { return m_skybox.get(); }
 
@@ -46,7 +46,7 @@ namespace Core
     ConstantBufferData m_constantBufferData;
     UINT8* m_pCbvDataBegin;
     // CB resource
-    ResourceDescriptor m_constantBuffer;
+    std::unique_ptr<ResourceDescriptor> m_constantBuffer;
 
     // camera and skybox
     std::unique_ptr<DX12Camera> m_camera;

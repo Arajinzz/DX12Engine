@@ -32,7 +32,7 @@ namespace Core
     ~DX12Texture();
 
     unsigned GetMipsLevels() { return m_mipsLevels; }
-    const TextureDescriptor& GetResource() { return m_texture; }
+    TextureDescriptor* GetResource() { return m_texture.get(); }
     void CopyToGPU(ID3D12GraphicsCommandList* commandList);
     void GenerateMips(ID3D12GraphicsCommandList* commandList);
 
@@ -45,7 +45,7 @@ namespace Core
     };
 
     // descriptor to the heap
-    TextureDescriptor m_texture;
+    std::unique_ptr<TextureDescriptor> m_texture;
 
     // pso used for mipmaps
     ComPtr<ID3D12PipelineState> m_pipelineState;

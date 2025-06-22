@@ -47,7 +47,7 @@ namespace Core
     ConstantBufferData m_constantBufferData;
     UINT8* m_pCbvDataBegin;
     // constant buffer
-    ResourceDescriptor m_constantBuffer;
+    std::unique_ptr<ResourceDescriptor> m_constantBuffer;
 
     // for testing
     XMFLOAT3 m_translation;

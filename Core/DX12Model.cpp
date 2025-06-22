@@ -18,7 +18,7 @@ namespace Core
     : m_meshes()
     , m_pCbvDataBegin(nullptr)
     , m_constantBufferData()
-    , m_constantBuffer()
+    , m_constantBuffer(nullptr)
     , m_translation(0.0f, 0.0f, 0.0f)
     , m_scale(1.0f, 1.0f, 1.0f)
     , m_angle(0.0f)
@@ -32,12 +32,13 @@ namespace Core
     // Map and initialize the constant buffer. We don't unmap this until the
     // app closes. Keeping things mapped for the lifetime of the resource is okay.
     CD3DX12_RANGE readRange(0, 0); // We do not intend to read from this resource on the CPU.
-    ThrowIfFailed(m_constantBuffer.resource->Map(0, &readRange, reinterpret_cast<void**>(&m_pCbvDataBegin)));
+    ThrowIfFailed(m_constantBuffer->resource->Map(0, &readRange, reinterpret_cast<void**>(&m_pCbvDataBegin)));
     memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
   }
 
   DX12Model::~DX12Model()
   {
+    m_textures.clear();
   }
 
   void DX12Model::SetupModel(ID3D12GraphicsCommandList* commandList)
@@ -55,7 +56,7 @@ namespace Core
   void DX12Model::DrawModel(unsigned frameIndex, ID3D12GraphicsCommandList* commandList)
   {
     for (int i = 0; i < m_meshes.size(); ++i)
-      m_meshes[i]->Draw(frameIndex, m_constantBuffer, m_textures[i]->GetResource(), m_shaders[i].get(), commandList);
+      m_meshes[i]->Draw(frameIndex, m_constantBuffer.get(), m_textures[i]->GetResource(), m_shaders[i].get(), commandList);
   }
 
   void DX12Model::LoadModel(const char* path)

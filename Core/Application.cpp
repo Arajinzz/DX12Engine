@@ -87,6 +87,11 @@ namespace Core
 
   void Application::OnDestroy()
   {
+    // delete models
+    for (auto model : m_models)
+      delete model;
+    m_models.clear();
+
     // Ensure that the GPU is no longer referencing resources that are about to be
     // cleaned up by the destructor.
     // Wait for the command list to execute; we are reusing the same command 

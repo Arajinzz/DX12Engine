@@ -59,7 +59,8 @@ namespace Core
     SetupIndexBuffer(commandList);
   }
 
-  void DX12Mesh::Draw(unsigned frameIndex, ResourceDescriptor cb, TextureDescriptor texture, DX12Shader* shader, ID3D12GraphicsCommandList* commandList)
+  void DX12Mesh::Draw(
+    unsigned frameIndex, ResourceDescriptor* cb, TextureDescriptor* texture, DX12Shader* shader, ID3D12GraphicsCommandList* commandList)
   {
     // 1 allocator
     commandList->SetPipelineState(m_pipelineState.Get());
@@ -70,13 +71,13 @@ namespace Core
 
     // scene CBV
     commandList->SetGraphicsRootDescriptorTable(
-      0, ResourceManager::Instance().GetGpuHandle(FrameResource().GetConstantBuffer().index));
+      0, ResourceManager::Instance().GetGpuHandle(FrameResource().GetConstantBuffer()->index));
 
     // object CBV
-    commandList->SetGraphicsRootDescriptorTable(1, ResourceManager::Instance().GetGpuHandle(cb.index));
+    commandList->SetGraphicsRootDescriptorTable(1, ResourceManager::Instance().GetGpuHandle(cb->index));
 
     // texture CBV
-    commandList->SetGraphicsRootDescriptorTable(2, ResourceManager::Instance().GetGpuHandle(texture.index));
+    commandList->SetGraphicsRootDescriptorTable(2, ResourceManager::Instance().GetGpuHandle(texture->index));
 
     commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
