@@ -129,8 +129,13 @@ namespace Core
     ThrowIfFailed(m_commandAllocators[m_frameIndex]->Reset());
     ThrowIfFailed(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr));
 
+    // get render target resource
+    ComPtr<ID3D12Resource> renderTargetResource;
+    m_swapChain->GetBuffer(m_frameIndex, &renderTargetResource);
+
     // Indicate that the back buffer will be used as a render target.
-    auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(m_swapChain->GetRenderHeap()->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+    auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
+      renderTargetResource.Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
     m_commandList->ResourceBarrier(1, &barrier1);
 
     // these must be done in the same commandlist as drawing
@@ -139,8 +144,8 @@ namespace Core
     // since we are using bundles for drawing this should be fine
     m_commandList->RSSetViewports(1, &m_viewport);
     m_commandList->RSSetScissorRects(1, &m_scissorRect);
-    auto rtvHandle = m_swapChain->GetRenderHeap()->GetOffsetHandle(m_frameIndex);
-    auto dsvHandle = m_swapChain->GetDepthHeap()->GetOffsetHandle(0);
+    auto rtvHandle = ResourceManager::Instance().GetRTVCpuHandle(m_frameIndex);
+    auto dsvHandle = ResourceManager::Instance().GetDSVCpuHandle(0);
     m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 
     // Record commands.
@@ -162,8 +167,12 @@ namespace Core
 
   void DX12Context::PrepareForPresenting()
   {
+    // get render target resource
+    ComPtr<ID3D12Resource> renderTargetResource;
+    m_swapChain->GetBuffer(m_frameIndex, &renderTargetResource);
     // Indicate that the back buffer will now be used to present.
-    auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(m_swapChain->GetRenderHeap()->GetResource(m_frameIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+    auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
+      renderTargetResource.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
     m_commandList->ResourceBarrier(1, &barrier1);
   }
 

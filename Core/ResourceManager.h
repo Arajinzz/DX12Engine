@@ -68,14 +68,28 @@ namespace Core
 
     // Getters
     ID3D12DescriptorHeap* GetResourcesHeap() { return m_resourcesHeap.Get(); }
-    D3D12_GPU_DESCRIPTOR_HANDLE GetGpuHandle(unsigned index);
-    D3D12_CPU_DESCRIPTOR_HANDLE GetCpuHandle(unsigned index);
+    ID3D12DescriptorHeap* GetRTVHeap() { return m_rtvHeap.Get(); }
+    ID3D12DescriptorHeap* GetDSVHeap() { return m_dsvHeap.Get(); }
+
+    // for textures, CBV ...etc
+    D3D12_GPU_DESCRIPTOR_HANDLE GetResourceGpuHandle(unsigned index);
+    D3D12_CPU_DESCRIPTOR_HANDLE GetResourceCpuHandle(unsigned index);
+    D3D12_GPU_DESCRIPTOR_HANDLE GetRTVGpuHandle(unsigned index);
+    D3D12_CPU_DESCRIPTOR_HANDLE GetRTVCpuHandle(unsigned index);
+    D3D12_GPU_DESCRIPTOR_HANDLE GetDSVGpuHandle(unsigned index);
+    D3D12_CPU_DESCRIPTOR_HANDLE GetDSVCpuHandle(unsigned index);
 
     std::unique_ptr<ResourceDescriptor> CreateConstantBufferResource(size_t size, D3D12_HEAP_TYPE type);
     std::unique_ptr<TextureDescriptor> CreateTextureResource(D3D12_RESOURCE_DESC& desc, bool isCubeMap, bool generateMips);
+    std::unique_ptr<ResourceDescriptor> CreateDepthResource(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE& clearValue);
+    // view and not resource because the swap chain is the one that owns RT resources
+    // index to be removed when the views are properly tracked
+    std::unique_ptr<ResourceDescriptor> CreateRenderTargetView(ID3D12Resource* renderTarget, unsigned index);
 
   private:
     ComPtr<ID3D12DescriptorHeap> m_resourcesHeap;
+    ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
+    ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
     // track free heap places
     std::vector<unsigned> m_nextFreeTex;
     std::vector<unsigned> m_nextFreeMip;

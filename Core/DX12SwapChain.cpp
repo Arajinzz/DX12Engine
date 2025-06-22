@@ -9,6 +9,9 @@
 namespace Core
 {
   DX12SwapChain::DX12SwapChain()
+    : m_swapChain(nullptr)
+    , m_renderTargets()
+    , m_depth(nullptr)
   {
   }
 
@@ -42,18 +45,14 @@ namespace Core
     ));
     ThrowIfFailed(swapChain.As(&m_swapChain));
 
-    // Create RTV heap
-    m_rtvHeap = std::make_unique<DX12Heap>(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     // Add render targets
     for (unsigned i = 0; i < Application::FrameCount; ++i)
     {
       ComPtr<ID3D12Resource> renderTarget;
       GetBuffer(i, &renderTarget);
-      m_rtvHeap->AddResource(renderTarget, RENDERTARGET);
+      m_renderTargets.push_back(ResourceManager::Instance().CreateRenderTargetView(renderTarget.Get(), i));
     }
 
-    // Create DSV heap
-    m_dsvHeap = std::make_unique<DX12Heap>(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
     // create depth resource
     CreateDepthResource();
   }
@@ -76,9 +75,9 @@ namespace Core
 
   void DX12SwapChain::Resize(unsigned width, unsigned height)
   {
-    // release render target
-    m_rtvHeap->ResetResources();
-    m_dsvHeap->ResetResources();
+    // delete old resources
+    m_renderTargets.clear();
+    m_depth.reset();
 
     auto hr = m_swapChain->ResizeBuffers(
       Application::FrameCount, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
@@ -88,15 +87,10 @@ namespace Core
     {
       ComPtr<ID3D12Resource> renderTarget;
       GetBuffer(i, &renderTarget);
-      m_rtvHeap->AddResource(renderTarget, RENDERTARGET);
+      m_renderTargets.push_back(ResourceManager::Instance().CreateRenderTargetView(renderTarget.Get(), i));
     }
 
     CreateDepthResource();
-
-    if (FAILED(hr))
-    {
-      
-    }
   }
 
   void DX12SwapChain::CreateDepthResource()
@@ -122,15 +116,6 @@ namespace Core
     clearValue.DepthStencil.Depth = 1.0f;
     clearValue.DepthStencil.Stencil = 0;
 
-    auto heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
-      &heapProp,
-      D3D12_HEAP_FLAG_NONE,
-      &depthStencilDesc,
-      D3D12_RESOURCE_STATE_DEPTH_WRITE,
-      &clearValue,
-      IID_PPV_ARGS(&m_depthResource)));
-
-    m_dsvHeap->AddResource(m_depthResource, DEPTH);
+    m_depth = ResourceManager::Instance().CreateDepthResource(depthStencilDesc, clearValue);
   }
 }

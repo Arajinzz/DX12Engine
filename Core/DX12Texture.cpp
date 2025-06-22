@@ -126,8 +126,8 @@ namespace Core
     generateMipsCB.TexelSize.x = 1.0f / (float)m_texture->resource->GetDesc().Width;
     generateMipsCB.TexelSize.y = 1.0f / (float)m_texture->resource->GetDesc().Height;
     commandList->SetComputeRoot32BitConstants(0, sizeof(SGenerateMipsCB) / 4, &generateMipsCB, 0);
-    commandList->SetComputeRootDescriptorTable(1, ResourceManager::Instance().GetGpuHandle(m_texture->index));
-    commandList->SetComputeRootDescriptorTable(2, ResourceManager::Instance().GetGpuHandle(m_texture->mipIndex));
+    commandList->SetComputeRootDescriptorTable(1, ResourceManager::Instance().GetResourceGpuHandle(m_texture->index));
+    commandList->SetComputeRootDescriptorTable(2, ResourceManager::Instance().GetResourceGpuHandle(m_texture->mipIndex));
 
     //Dispatch the compute shader with one thread per 8x8 pixels
     commandList->Dispatch(

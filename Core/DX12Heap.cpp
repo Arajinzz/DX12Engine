@@ -59,11 +59,7 @@ namespace Core
     {
       auto type = m_resourceTypes[i];
       auto resource = m_resources[i].Get();
-
-      if (type == RENDERTARGET)
-        DX12Interface::Get().CreateRenderTargetView(resource, m_heap.Get(), i);
-      else if (type == DEPTH)
-        DX12Interface::Get().CreateDepthStencilView(resource, m_heap.Get(), i);
+        
     }
 
   }

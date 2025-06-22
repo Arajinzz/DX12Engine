@@ -8,12 +8,18 @@ namespace Core
 {
   ResourceManager::ResourceManager()
     : m_resourcesHeap(nullptr)
+    , m_rtvHeap(nullptr)
+    , m_dsvHeap(nullptr)
     , m_nextFreeTex()
     , m_nextFreeMip()
     , m_nextFreeCB()
   {
     m_resourcesHeap = DX12Interface::Get().CreateHeapDescriptor(
       D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, RESOURCE_HEAP_SIZE);
+    // depth heap and render targets heap
+    m_dsvHeap = DX12Interface::Get().CreateHeapDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, DSV_HEAP_SIZE);
+    m_rtvHeap = DX12Interface::Get().CreateHeapDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, RTV_HEAP_SIZE);
+
     // populate free Index vector
     for (unsigned i = TEX_RANGE.begin; i <= TEX_RANGE.end; i++)
       m_nextFreeTex.push_back(i);
@@ -28,7 +34,7 @@ namespace Core
     m_resourcesHeap.Reset();
   }
 
-  D3D12_GPU_DESCRIPTOR_HANDLE ResourceManager::GetGpuHandle(unsigned index)
+  D3D12_GPU_DESCRIPTOR_HANDLE ResourceManager::GetResourceGpuHandle(unsigned index)
   {
     return CD3DX12_GPU_DESCRIPTOR_HANDLE(
       m_resourcesHeap->GetGPUDescriptorHandleForHeapStart(),
@@ -36,12 +42,44 @@ namespace Core
       DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
   }
 
-  D3D12_CPU_DESCRIPTOR_HANDLE ResourceManager::GetCpuHandle(unsigned index)
+  D3D12_CPU_DESCRIPTOR_HANDLE ResourceManager::GetResourceCpuHandle(unsigned index)
   {
     return CD3DX12_CPU_DESCRIPTOR_HANDLE(
       m_resourcesHeap->GetCPUDescriptorHandleForHeapStart(),
       index,
       DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+  }
+
+  D3D12_GPU_DESCRIPTOR_HANDLE ResourceManager::GetRTVGpuHandle(unsigned index)
+  {
+    return CD3DX12_GPU_DESCRIPTOR_HANDLE(
+      m_rtvHeap->GetGPUDescriptorHandleForHeapStart(),
+      index,
+      DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
+  }
+
+  D3D12_CPU_DESCRIPTOR_HANDLE ResourceManager::GetRTVCpuHandle(unsigned index)
+  {
+    return CD3DX12_CPU_DESCRIPTOR_HANDLE(
+      m_rtvHeap->GetCPUDescriptorHandleForHeapStart(),
+      index,
+      DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
+  }
+
+  D3D12_GPU_DESCRIPTOR_HANDLE ResourceManager::GetDSVGpuHandle(unsigned index)
+  {
+    return CD3DX12_GPU_DESCRIPTOR_HANDLE(
+      m_dsvHeap->GetGPUDescriptorHandleForHeapStart(),
+      index,
+      DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV));
+  }
+
+  D3D12_CPU_DESCRIPTOR_HANDLE ResourceManager::GetDSVCpuHandle(unsigned index)
+  {
+    return CD3DX12_CPU_DESCRIPTOR_HANDLE(
+      m_dsvHeap->GetCPUDescriptorHandleForHeapStart(),
+      index,
+      DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV));
   }
 
   std::unique_ptr<ResourceDescriptor> ResourceManager::CreateConstantBufferResource(size_t size, D3D12_HEAP_TYPE type)
@@ -129,6 +167,40 @@ namespace Core
       for (unsigned i = index; i < index + mips; ++i)
         m_nextFreeMip.push_back(i);
     };
+
+    return output;
+  }
+  std::unique_ptr<ResourceDescriptor> ResourceManager::CreateDepthResource(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE& clearValue)
+  {
+    // no need to check for free place I guess, I expect to have only one depth buffer
+    std::unique_ptr<ResourceDescriptor> output = std::make_unique<ResourceDescriptor>();
+    ComPtr<ID3D12Resource> depth;
+
+    auto heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+      &heapProp,
+      D3D12_HEAP_FLAG_NONE,
+      &desc,
+      D3D12_RESOURCE_STATE_DEPTH_WRITE,
+      &clearValue,
+      IID_PPV_ARGS(&depth)));
+
+    // create view
+    DX12Interface::Get().CreateDepthStencilView(depth.Get(), m_dsvHeap.Get(), 0);
+
+    output->resource = depth;
+    // no need to set index because this resource is not tracked yet
+
+    return output;
+  }
+
+  std::unique_ptr<ResourceDescriptor> ResourceManager::CreateRenderTargetView(ID3D12Resource* renderTarget, unsigned index)
+  {
+    std::unique_ptr<ResourceDescriptor> output = std::make_unique<ResourceDescriptor>();
+    DX12Interface::Get().CreateRenderTargetView(renderTarget, m_rtvHeap.Get(), index);
+
+    // we will not store the resource because swapchain is the owner of the render target
+    // no need to set index because this resource is not tracked yet
 
     return output;
   }
