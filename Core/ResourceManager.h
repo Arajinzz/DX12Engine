@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include <functional>
 
 using namespace DirectX;
@@ -94,13 +95,17 @@ namespace Core
     ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
     ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
     // track free heap places
-    // since I plan to maybe create some resources on different threads
-    // maybe these should be accessed using a mutex
     std::vector<unsigned> m_nextFreeTex;
     std::vector<unsigned> m_nextFreeMip;
     std::vector<unsigned> m_nextFreeCB;
     std::vector<unsigned> m_nextFreeRT;
     std::vector<unsigned> m_nextFreeDS;
+    // mutex
+    std::mutex m_mutexTex;
+    std::mutex m_mutexMip;
+    std::mutex m_mutexCB;
+    std::mutex m_mutexRT;
+    std::mutex m_mutexDS;
 
   private:
     ResourceManager();

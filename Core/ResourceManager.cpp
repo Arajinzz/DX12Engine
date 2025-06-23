@@ -15,6 +15,11 @@ namespace Core
     , m_nextFreeCB()
     , m_nextFreeRT()
     , m_nextFreeDS()
+    , m_mutexTex()
+    , m_mutexMip()
+    , m_mutexCB()
+    , m_mutexRT()
+    , m_mutexDS()
   {
     m_resourcesHeap = DX12Interface::Get().CreateHeapDescriptor(
       D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, RESOURCE_HEAP_SIZE);
@@ -96,12 +101,17 @@ namespace Core
 
     std::unique_ptr<ResourceDescriptor> output = std::make_unique<ResourceDescriptor>();
     output->resource = DX12Interface::Get().CreateConstantBuffer(size, D3D12_HEAP_TYPE_UPLOAD);
-    output->index = m_nextFreeCB.front();
-    m_nextFreeCB.erase(m_nextFreeCB.begin());
+    
+    {
+      std::lock_guard<std::mutex> lock(m_mutexCB);
+      output->index = m_nextFreeCB.front();
+      m_nextFreeCB.erase(m_nextFreeCB.begin());
+    }
 
     DX12Interface::Get().CreateConstantBufferView(output->resource.Get(), m_resourcesHeap.Get(), output->index);
 
     output->freeResource = [&](unsigned index) {
+      std::lock_guard<std::mutex> lock(m_mutexCB);
       m_nextFreeCB.push_back(index);
     };
 
@@ -122,9 +132,12 @@ namespace Core
     ComPtr<ID3D12Resource> texture;
     ComPtr<ID3D12Resource> upload;
     
-    output->index = m_nextFreeTex.front();
-    // index no longer free
-    m_nextFreeTex.erase(m_nextFreeTex.begin());
+    {
+      std::lock_guard<std::mutex> lock(m_mutexTex);
+      output->index = m_nextFreeTex.front();
+      // index no longer free
+      m_nextFreeTex.erase(m_nextFreeTex.begin());
+    }
 
     auto defaultProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 
@@ -152,24 +165,29 @@ namespace Core
     DX12Interface::Get().CreateShaderResourceView(texture.Get(), m_resourcesHeap.Get(), output->index, isCubeMap);
 
     // mips?
-    if (generateMips && m_nextFreeMip.size() >= texture->GetDesc().MipLevels)
     {
-      // root signature takes 4 UAV at once
-      output->mipIndex = m_nextFreeMip.front();
-      output->mipLevels = texture->GetDesc().MipLevels;
-      for (unsigned mip = 0; mip < texture->GetDesc().MipLevels; ++mip)
+      std::lock_guard<std::mutex> lock(m_mutexMip);
+      if (generateMips && m_nextFreeMip.size() >= texture->GetDesc().MipLevels)
       {
-        DX12Interface::Get().CreateUnorderedAccessView(texture.Get(), m_resourcesHeap.Get(), m_nextFreeMip.front(), mip);
-        m_nextFreeMip.erase(m_nextFreeMip.begin());
+        // root signature takes 4 UAV at once
+        output->mipIndex = m_nextFreeMip.front();
+        output->mipLevels = texture->GetDesc().MipLevels;
+        for (unsigned mip = 0; mip < texture->GetDesc().MipLevels; ++mip)
+        {
+          DX12Interface::Get().CreateUnorderedAccessView(texture.Get(), m_resourcesHeap.Get(), m_nextFreeMip.front(), mip);
+          m_nextFreeMip.erase(m_nextFreeMip.begin());
+        }
       }
     }
 
     output->resource = texture;
     output->upload = upload;
     output->freeResource = [&](unsigned index) {
+      std::lock_guard<std::mutex> lock(m_mutexTex);
       m_nextFreeTex.push_back(index);
     };
     output->freeMips = [&](unsigned index, unsigned mips) {
+      std::lock_guard<std::mutex> lock(m_mutexMip);
       for (unsigned i = index; i < index + mips; ++i)
         m_nextFreeMip.push_back(i);
     };
@@ -185,8 +203,12 @@ namespace Core
     // no need to check for free place I guess, I expect to have only one depth buffer
     std::unique_ptr<ResourceDescriptor> output = std::make_unique<ResourceDescriptor>();
     ComPtr<ID3D12Resource> depth;
-    output->index = m_nextFreeDS.front();
-    m_nextFreeDS.erase(m_nextFreeDS.begin());
+    
+    {
+      std::lock_guard<std::mutex> lock(m_mutexDS);
+      output->index = m_nextFreeDS.front();
+      m_nextFreeDS.erase(m_nextFreeDS.begin());
+    }
 
     auto heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
     ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
@@ -202,6 +224,7 @@ namespace Core
 
     output->resource = depth;
     output->freeResource = [&](unsigned index) {
+      std::lock_guard<std::mutex> lock(m_mutexDS);
       m_nextFreeDS.push_back(index);
     };
 
@@ -215,13 +238,18 @@ namespace Core
       throw std::out_of_range("[RENDERTARGET] HEAP DESCRIPTOR HAVE NO SPACE LEFT!");
 
     std::unique_ptr<ResourceDescriptor> output = std::make_unique<ResourceDescriptor>();
-    output->index = m_nextFreeRT.front();
-    m_nextFreeRT.erase(m_nextFreeRT.begin());
+
+    {
+      std::lock_guard<std::mutex> lock(m_mutexRT);
+      output->index = m_nextFreeRT.front();
+      m_nextFreeRT.erase(m_nextFreeRT.begin());
+    }
 
     DX12Interface::Get().CreateRenderTargetView(renderTarget, m_rtvHeap.Get(), output->index);
 
     // we will not store the resource because swapchain is the owner of the render target
     output->freeResource = [&](unsigned index) {
+      std::lock_guard<std::mutex> lock(m_mutexRT);
       m_nextFreeRT.push_back(index);
     };
 
