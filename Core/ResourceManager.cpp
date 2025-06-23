@@ -13,6 +13,8 @@ namespace Core
     , m_nextFreeTex()
     , m_nextFreeMip()
     , m_nextFreeCB()
+    , m_nextFreeRT()
+    , m_nextFreeDS()
   {
     m_resourcesHeap = DX12Interface::Get().CreateHeapDescriptor(
       D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, RESOURCE_HEAP_SIZE);
@@ -27,6 +29,10 @@ namespace Core
       m_nextFreeMip.push_back(i);
     for (unsigned i = CB_RANGE.begin; i <= CB_RANGE.end; i++)
       m_nextFreeCB.push_back(i);
+    for (unsigned i = RT_RANGE.begin; i <= RT_RANGE.end; i++)
+      m_nextFreeRT.push_back(i);
+    for (unsigned i = DS_RANGE.begin; i <= DS_RANGE.end; i++)
+      m_nextFreeDS.push_back(i);
   }
 
   ResourceManager::~ResourceManager()
@@ -172,9 +178,15 @@ namespace Core
   }
   std::unique_ptr<ResourceDescriptor> ResourceManager::CreateDepthResource(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE& clearValue)
   {
+    // check if space is available
+    if (m_nextFreeDS.size() < 1)
+      throw std::out_of_range("[DEPTH] HEAP DESCRIPTOR HAVE NO SPACE LEFT!");
+
     // no need to check for free place I guess, I expect to have only one depth buffer
     std::unique_ptr<ResourceDescriptor> output = std::make_unique<ResourceDescriptor>();
     ComPtr<ID3D12Resource> depth;
+    output->index = m_nextFreeDS.front();
+    m_nextFreeDS.erase(m_nextFreeDS.begin());
 
     auto heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
     ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
@@ -186,21 +198,32 @@ namespace Core
       IID_PPV_ARGS(&depth)));
 
     // create view
-    DX12Interface::Get().CreateDepthStencilView(depth.Get(), m_dsvHeap.Get(), 0);
+    DX12Interface::Get().CreateDepthStencilView(depth.Get(), m_dsvHeap.Get(), output->index);
 
     output->resource = depth;
-    // no need to set index because this resource is not tracked yet
+    output->freeResource = [&](unsigned index) {
+      m_nextFreeDS.push_back(index);
+    };
 
     return output;
   }
 
-  std::unique_ptr<ResourceDescriptor> ResourceManager::CreateRenderTargetView(ID3D12Resource* renderTarget, unsigned index)
+  std::unique_ptr<ResourceDescriptor> ResourceManager::CreateRenderTargetView(ID3D12Resource* renderTarget)
   {
+    // check if space is available
+    if (m_nextFreeRT.size() < 1)
+      throw std::out_of_range("[RENDERTARGET] HEAP DESCRIPTOR HAVE NO SPACE LEFT!");
+
     std::unique_ptr<ResourceDescriptor> output = std::make_unique<ResourceDescriptor>();
-    DX12Interface::Get().CreateRenderTargetView(renderTarget, m_rtvHeap.Get(), index);
+    output->index = m_nextFreeRT.front();
+    m_nextFreeRT.erase(m_nextFreeRT.begin());
+
+    DX12Interface::Get().CreateRenderTargetView(renderTarget, m_rtvHeap.Get(), output->index);
 
     // we will not store the resource because swapchain is the owner of the render target
-    // no need to set index because this resource is not tracked yet
+    output->freeResource = [&](unsigned index) {
+      m_nextFreeRT.push_back(index);
+    };
 
     return output;
   }

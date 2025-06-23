@@ -57,6 +57,9 @@ namespace Core
     const Range CB_RANGE = { 0, 7499 }; // for each mesh 5 CBVs
     const Range TEX_RANGE = { 7500, 14999 }; // since PBR is planned, normally we need 5 textures per mesh
     const Range MIPS_RANGE = { 15000, 44999 }; // for each texture we have 4 mips
+    // has its own heap
+    const Range RT_RANGE = { 0, RTV_HEAP_SIZE - 1 }; // for each texture we have 4 mips
+    const Range DS_RANGE = { 0, DSV_HEAP_SIZE - 1 };
 
   public:
     static ResourceManager& Instance()
@@ -84,16 +87,20 @@ namespace Core
     std::unique_ptr<ResourceDescriptor> CreateDepthResource(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE& clearValue);
     // view and not resource because the swap chain is the one that owns RT resources
     // index to be removed when the views are properly tracked
-    std::unique_ptr<ResourceDescriptor> CreateRenderTargetView(ID3D12Resource* renderTarget, unsigned index);
+    std::unique_ptr<ResourceDescriptor> CreateRenderTargetView(ID3D12Resource* renderTarget);
 
   private:
     ComPtr<ID3D12DescriptorHeap> m_resourcesHeap;
     ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
     ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
     // track free heap places
+    // since I plan to maybe create some resources on different threads
+    // maybe these should be accessed using a mutex
     std::vector<unsigned> m_nextFreeTex;
     std::vector<unsigned> m_nextFreeMip;
     std::vector<unsigned> m_nextFreeCB;
+    std::vector<unsigned> m_nextFreeRT;
+    std::vector<unsigned> m_nextFreeDS;
 
   private:
     ResourceManager();
