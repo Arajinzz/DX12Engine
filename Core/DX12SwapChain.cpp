@@ -34,15 +34,11 @@ namespace Core
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     swapChainDesc.SampleDesc.Count = 1;
 
-    ComPtr<IDXGISwapChain1> swapChain;
-    ThrowIfFailed(DX12Interface::Get().GetFactory()->CreateSwapChainForHwnd(
-      queue, // Swap chain needs the queue so that it can force a flush on it.
+    ComPtr<IDXGISwapChain1> swapChain = DX12Interface::Get().CreateSwapChainForHwnd(
+      swapChainDesc,
       WindowsApplication::GetHwnd(),
-      &swapChainDesc,
-      nullptr,
-      nullptr,
-      &swapChain
-    ));
+      queue // Swap chain needs the queue so that it can force a flush on it.
+    );
     ThrowIfFailed(swapChain.As(&m_swapChain));
 
     // Add render targets

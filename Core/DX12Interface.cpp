@@ -271,8 +271,28 @@ namespace Core
     // Describe and create a constant buffer view
     D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
     cbvDesc.BufferLocation = resource->GetGPUVirtualAddress();
-    cbvDesc.SizeInBytes = resource->GetDesc().Width;
+    cbvDesc.SizeInBytes = static_cast<unsigned>(resource->GetDesc().Width);
     m_device->CreateConstantBufferView(&cbvDesc, handle);
+  }
+
+  void DX12Interface::MakeWindowAssociation(HWND windowHandle, unsigned flags)
+  {
+    ThrowIfFailed(m_factory->MakeWindowAssociation(windowHandle, flags));
+  }
+
+  ComPtr<IDXGISwapChain1> DX12Interface::CreateSwapChainForHwnd(DXGI_SWAP_CHAIN_DESC1& desc, HWND windowHandle, ID3D12CommandQueue* commandQueue)
+  {
+    ComPtr<IDXGISwapChain1> swapChain;
+    ThrowIfFailed(m_factory->CreateSwapChainForHwnd(
+      commandQueue, // Swap chain needs the queue so that it can force a flush on it.
+      windowHandle,
+      &desc,
+      nullptr,
+      nullptr,
+      &swapChain
+    ));
+
+    return swapChain;
   }
 
 }

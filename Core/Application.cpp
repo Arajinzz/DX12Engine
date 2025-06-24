@@ -160,6 +160,6 @@ namespace Core
     m_context = std::make_unique<DX12Context>();
 
     // full screen transitions not supported.
-    ThrowIfFailed(DX12Interface::Get().GetFactory()->MakeWindowAssociation(WindowsApplication::GetHwnd(), DXGI_MWA_NO_ALT_ENTER));
+    DX12Interface::Get().MakeWindowAssociation(WindowsApplication::GetHwnd(), DXGI_MWA_NO_ALT_ENTER);
   }
 }

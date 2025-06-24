@@ -22,11 +22,6 @@ namespace Core
       return m_device.Get();
     }
 
-    inline IDXGIFactory4* GetFactory()
-    {
-      return m_factory.Get();
-    }
-
     ~DX12Interface();
 
   protected:
@@ -46,6 +41,9 @@ namespace Core
     void CreateShaderResourceView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset, bool isCubeMap = false);
     void CreateUnorderedAccessView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset, unsigned currentMipLevel = 0);
     void CreateConstantBufferView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset);
+
+    void MakeWindowAssociation(HWND windowHandle, unsigned flags);
+    ComPtr<IDXGISwapChain1> CreateSwapChainForHwnd(DXGI_SWAP_CHAIN_DESC1& desc, HWND windowHandle, ID3D12CommandQueue* commandQueue);
 
   private:
     void GetHardwareAdapter(
