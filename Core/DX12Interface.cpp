@@ -212,7 +212,7 @@ namespace Core
     heapDesc.NumDescriptors = size;
     heapDesc.Type = type;
     heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-    if (type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)
+    if (type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV || type == D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER)
       heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
     ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&heap)));
 
@@ -275,9 +275,21 @@ namespace Core
     m_device->CreateConstantBufferView(&cbvDesc, handle);
   }
 
+  void DX12Interface::CreateSampler(D3D12_SAMPLER_DESC* desc, ID3D12DescriptorHeap* heap, unsigned offset)
+  {
+    auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+      heap->GetCPUDescriptorHandleForHeapStart(), offset, m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
+    m_device->CreateSampler(desc, handle);
+  }
+
   void DX12Interface::MakeWindowAssociation(HWND windowHandle, unsigned flags)
   {
     ThrowIfFailed(m_factory->MakeWindowAssociation(windowHandle, flags));
+  }
+
+  unsigned DX12Interface::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE type)
+  {
+    return m_device->GetDescriptorHandleIncrementSize(type);
   }
 
   ComPtr<IDXGISwapChain1> DX12Interface::CreateSwapChainForHwnd(DXGI_SWAP_CHAIN_DESC1& desc, HWND windowHandle, ID3D12CommandQueue* commandQueue)

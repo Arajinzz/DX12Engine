@@ -10,22 +10,26 @@ namespace Core
     : m_resourcesHeap(nullptr)
     , m_rtvHeap(nullptr)
     , m_dsvHeap(nullptr)
+    , m_samplerHeap(nullptr)
     , m_nextFreeTex()
     , m_nextFreeMip()
     , m_nextFreeCB()
     , m_nextFreeRT()
     , m_nextFreeDS()
+    , m_nextFreeSampler()
     , m_mutexTex()
     , m_mutexMip()
     , m_mutexCB()
     , m_mutexRT()
     , m_mutexDS()
+    , m_mutexSampler()
   {
     m_resourcesHeap = DX12Interface::Get().CreateHeapDescriptor(
       D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, RESOURCE_HEAP_SIZE);
     // depth heap and render targets heap
     m_dsvHeap = DX12Interface::Get().CreateHeapDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, DSV_HEAP_SIZE);
     m_rtvHeap = DX12Interface::Get().CreateHeapDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, RTV_HEAP_SIZE);
+    m_samplerHeap = DX12Interface::Get().CreateHeapDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, SAMPLER_HEAP_SIZE);
 
     // populate free Index vector
     for (unsigned i = TEX_RANGE.begin; i <= TEX_RANGE.end; i++)
@@ -38,11 +42,16 @@ namespace Core
       m_nextFreeRT.push_back(i);
     for (unsigned i = DS_RANGE.begin; i <= DS_RANGE.end; i++)
       m_nextFreeDS.push_back(i);
+    for (unsigned i = SAMPLER_RANGE.begin; i <= SAMPLER_RANGE.end; i++)
+      m_nextFreeSampler.push_back(i);
   }
 
   ResourceManager::~ResourceManager()
   {
     m_resourcesHeap.Reset();
+    m_dsvHeap.Reset();
+    m_rtvHeap.Reset();
+    m_samplerHeap.Reset();
   }
 
   D3D12_GPU_DESCRIPTOR_HANDLE ResourceManager::GetResourceGpuHandle(unsigned index)
@@ -50,7 +59,7 @@ namespace Core
     return CD3DX12_GPU_DESCRIPTOR_HANDLE(
       m_resourcesHeap->GetGPUDescriptorHandleForHeapStart(),
       index,
-      DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+      DX12Interface::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
   }
 
   D3D12_CPU_DESCRIPTOR_HANDLE ResourceManager::GetResourceCpuHandle(unsigned index)
@@ -58,7 +67,7 @@ namespace Core
     return CD3DX12_CPU_DESCRIPTOR_HANDLE(
       m_resourcesHeap->GetCPUDescriptorHandleForHeapStart(),
       index,
-      DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+      DX12Interface::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
   }
 
   D3D12_GPU_DESCRIPTOR_HANDLE ResourceManager::GetRTVGpuHandle(unsigned index)
@@ -66,7 +75,7 @@ namespace Core
     return CD3DX12_GPU_DESCRIPTOR_HANDLE(
       m_rtvHeap->GetGPUDescriptorHandleForHeapStart(),
       index,
-      DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
+      DX12Interface::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
   }
 
   D3D12_CPU_DESCRIPTOR_HANDLE ResourceManager::GetRTVCpuHandle(unsigned index)
@@ -74,7 +83,7 @@ namespace Core
     return CD3DX12_CPU_DESCRIPTOR_HANDLE(
       m_rtvHeap->GetCPUDescriptorHandleForHeapStart(),
       index,
-      DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
+      DX12Interface::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
   }
 
   D3D12_GPU_DESCRIPTOR_HANDLE ResourceManager::GetDSVGpuHandle(unsigned index)
@@ -82,7 +91,7 @@ namespace Core
     return CD3DX12_GPU_DESCRIPTOR_HANDLE(
       m_dsvHeap->GetGPUDescriptorHandleForHeapStart(),
       index,
-      DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV));
+      DX12Interface::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV));
   }
 
   D3D12_CPU_DESCRIPTOR_HANDLE ResourceManager::GetDSVCpuHandle(unsigned index)
@@ -90,7 +99,23 @@ namespace Core
     return CD3DX12_CPU_DESCRIPTOR_HANDLE(
       m_dsvHeap->GetCPUDescriptorHandleForHeapStart(),
       index,
-      DX12Interface::Get().GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV));
+      DX12Interface::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV));
+  }
+
+  D3D12_GPU_DESCRIPTOR_HANDLE ResourceManager::GetSamplerGpuHandle(unsigned index)
+  {
+    return CD3DX12_GPU_DESCRIPTOR_HANDLE(
+      m_samplerHeap->GetGPUDescriptorHandleForHeapStart(),
+      index,
+      DX12Interface::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
+  }
+
+  D3D12_CPU_DESCRIPTOR_HANDLE ResourceManager::GetSamplerCpuHandle(unsigned index)
+  {
+    return CD3DX12_CPU_DESCRIPTOR_HANDLE(
+      m_samplerHeap->GetCPUDescriptorHandleForHeapStart(),
+      index,
+      DX12Interface::Get().GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
   }
 
   std::unique_ptr<ResourceDescriptor> ResourceManager::CreateConstantBufferResource(size_t size, D3D12_HEAP_TYPE type)
@@ -231,13 +256,13 @@ namespace Core
     return output;
   }
 
-  std::unique_ptr<ResourceDescriptor> ResourceManager::CreateRenderTargetView(ID3D12Resource* renderTarget)
+  std::unique_ptr<Descriptor> ResourceManager::CreateRenderTargetView(ID3D12Resource* renderTarget)
   {
     // check if space is available
     if (m_nextFreeRT.size() < 1)
       throw std::out_of_range("[RENDERTARGET] HEAP DESCRIPTOR HAVE NO SPACE LEFT!");
 
-    std::unique_ptr<ResourceDescriptor> output = std::make_unique<ResourceDescriptor>();
+    std::unique_ptr<Descriptor> output = std::make_unique<Descriptor>();
 
     {
       std::lock_guard<std::mutex> lock(m_mutexRT);
@@ -251,6 +276,31 @@ namespace Core
     output->freeResource = [&](unsigned index) {
       std::lock_guard<std::mutex> lock(m_mutexRT);
       m_nextFreeRT.push_back(index);
+    };
+
+    return output;
+  }
+
+  std::unique_ptr<Descriptor> ResourceManager::CreateSampler(D3D12_SAMPLER_DESC& desc)
+  {
+    // check if space is available
+    if (m_nextFreeSampler.size() < 1)
+      throw std::out_of_range("[SAMPLER] HEAP DESCRIPTOR HAVE NO SPACE LEFT!");
+
+    std::unique_ptr<Descriptor> output = std::make_unique<Descriptor>();
+
+    {
+      std::lock_guard<std::mutex> lock(m_mutexSampler);
+      output->index = m_nextFreeSampler.front();
+      m_nextFreeSampler.erase(m_nextFreeSampler.begin());
+    }
+
+    DX12Interface::Get().CreateSampler(&desc, m_samplerHeap.Get(), output->index);
+
+    // no need to sore resource
+    output->freeResource = [&](unsigned index) {
+      std::lock_guard<std::mutex> lock(m_mutexSampler);
+      m_nextFreeSampler.push_back(index);
     };
 
     return output;

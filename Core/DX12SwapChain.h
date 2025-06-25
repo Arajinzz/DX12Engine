@@ -29,7 +29,7 @@ namespace Core
   private:
     ComPtr<IDXGISwapChain3> m_swapChain;
     // rtv
-    std::vector<std::unique_ptr<ResourceDescriptor>> m_renderTargets;
+    std::vector<std::unique_ptr<Descriptor>> m_renderTargets;
     // depth resource
     std::unique_ptr<ResourceDescriptor> m_depth;
 

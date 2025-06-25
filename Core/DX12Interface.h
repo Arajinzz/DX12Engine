@@ -35,15 +35,18 @@ namespace Core
     ComPtr<ID3D12CommandAllocator> CreateCommandAllocator();
     ComPtr<ID3D12GraphicsCommandList> CreateCommandList(std::vector<ComPtr<ID3D12CommandAllocator>> allocators);
     ComPtr<ID3D12DescriptorHeap> CreateHeapDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE type, unsigned size);
+    ComPtr<IDXGISwapChain1> CreateSwapChainForHwnd(DXGI_SWAP_CHAIN_DESC1& desc, HWND windowHandle, ID3D12CommandQueue* commandQueue);
 
     void CreateRenderTargetView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset);
     void CreateDepthStencilView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset);
     void CreateShaderResourceView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset, bool isCubeMap = false);
     void CreateUnorderedAccessView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset, unsigned currentMipLevel = 0);
     void CreateConstantBufferView(ID3D12Resource* resource, ID3D12DescriptorHeap* heap, unsigned offset);
+    void CreateSampler(D3D12_SAMPLER_DESC* desc, ID3D12DescriptorHeap* heap, unsigned offset);
 
     void MakeWindowAssociation(HWND windowHandle, unsigned flags);
-    ComPtr<IDXGISwapChain1> CreateSwapChainForHwnd(DXGI_SWAP_CHAIN_DESC1& desc, HWND windowHandle, ID3D12CommandQueue* commandQueue);
+
+    unsigned GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE type);
 
   private:
     void GetHardwareAdapter(

@@ -19,17 +19,25 @@ namespace Core
     unsigned end;
   };
 
-  struct ResourceDescriptor
+  struct Descriptor
   {
-    ComPtr<ID3D12Resource> resource;
     unsigned index;
     std::function<void(unsigned)> freeResource;
 
+    virtual ~Descriptor()
+    {
+      if (freeResource)
+        freeResource(index);
+    }
+  };
+
+  struct ResourceDescriptor : public Descriptor
+  {
+    ComPtr<ID3D12Resource> resource;
+    
     virtual ~ResourceDescriptor()
     {
       resource.Reset();
-      if (freeResource)
-        freeResource(index);
     }
   };
 
@@ -54,6 +62,7 @@ namespace Core
     const unsigned RESOURCE_HEAP_SIZE = 65535;
     const unsigned DSV_HEAP_SIZE = 1;
     const unsigned RTV_HEAP_SIZE = 2; // double buffering
+    const unsigned SAMPLER_HEAP_SIZE = 2048; // overkill reduce this later
     // resources are ordered in regions, assuming that I will be loading 1500 meshes at once
     const Range CB_RANGE = { 0, 7499 }; // for each mesh 5 CBVs
     const Range TEX_RANGE = { 7500, 14999 }; // since PBR is planned, normally we need 5 textures per mesh
@@ -61,6 +70,7 @@ namespace Core
     // has its own heap
     const Range RT_RANGE = { 0, RTV_HEAP_SIZE - 1 }; // for each texture we have 4 mips
     const Range DS_RANGE = { 0, DSV_HEAP_SIZE - 1 };
+    const Range SAMPLER_RANGE = { 0, SAMPLER_HEAP_SIZE - 1 };
 
   public:
     static ResourceManager& Instance()
@@ -74,6 +84,7 @@ namespace Core
     ID3D12DescriptorHeap* GetResourcesHeap() { return m_resourcesHeap.Get(); }
     ID3D12DescriptorHeap* GetRTVHeap() { return m_rtvHeap.Get(); }
     ID3D12DescriptorHeap* GetDSVHeap() { return m_dsvHeap.Get(); }
+    ID3D12DescriptorHeap* GetSamplerHeap() { return m_samplerHeap.Get(); }
 
     // for textures, CBV ...etc
     D3D12_GPU_DESCRIPTOR_HANDLE GetResourceGpuHandle(unsigned index);
@@ -82,30 +93,37 @@ namespace Core
     D3D12_CPU_DESCRIPTOR_HANDLE GetRTVCpuHandle(unsigned index);
     D3D12_GPU_DESCRIPTOR_HANDLE GetDSVGpuHandle(unsigned index);
     D3D12_CPU_DESCRIPTOR_HANDLE GetDSVCpuHandle(unsigned index);
+    D3D12_GPU_DESCRIPTOR_HANDLE GetSamplerGpuHandle(unsigned index);
+    D3D12_CPU_DESCRIPTOR_HANDLE GetSamplerCpuHandle(unsigned index);
 
     std::unique_ptr<ResourceDescriptor> CreateConstantBufferResource(size_t size, D3D12_HEAP_TYPE type);
     std::unique_ptr<TextureDescriptor> CreateTextureResource(D3D12_RESOURCE_DESC& desc, bool isCubeMap, bool generateMips);
     std::unique_ptr<ResourceDescriptor> CreateDepthResource(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE& clearValue);
     // view and not resource because the swap chain is the one that owns RT resources
     // index to be removed when the views are properly tracked
-    std::unique_ptr<ResourceDescriptor> CreateRenderTargetView(ID3D12Resource* renderTarget);
+    std::unique_ptr<Descriptor> CreateRenderTargetView(ID3D12Resource* renderTarget);
+    // also sampler will have no resource
+    std::unique_ptr<Descriptor> CreateSampler(D3D12_SAMPLER_DESC& desc);
 
   private:
     ComPtr<ID3D12DescriptorHeap> m_resourcesHeap;
     ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
     ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
+    ComPtr<ID3D12DescriptorHeap> m_samplerHeap;
     // track free heap places
     std::vector<unsigned> m_nextFreeTex;
     std::vector<unsigned> m_nextFreeMip;
     std::vector<unsigned> m_nextFreeCB;
     std::vector<unsigned> m_nextFreeRT;
     std::vector<unsigned> m_nextFreeDS;
+    std::vector<unsigned> m_nextFreeSampler;
     // mutex
     std::mutex m_mutexTex;
     std::mutex m_mutexMip;
     std::mutex m_mutexCB;
     std::mutex m_mutexRT;
     std::mutex m_mutexDS;
+    std::mutex m_mutexSampler;
 
   private:
     ResourceManager();
