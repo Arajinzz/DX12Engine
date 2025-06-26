@@ -78,9 +78,6 @@
     <ClCompile Include="Core\DX12Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\DX12Mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Core\DX12Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -474,9 +471,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\DX12Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\DX12Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\DX12Camera.h">

@@ -3,7 +3,6 @@
 #include "Core/DirectXApplication.h"
 #include "Core/DX12Model.h"
 #include "Core/DX12Context.h"
-#include "Core/DX12Mesh.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;

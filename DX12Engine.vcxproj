@@ -231,7 +231,6 @@
     <ClCompile Include="Core\DX12Context.cpp" />
     <ClCompile Include="Core\DX12Model.cpp" />
     <ClCompile Include="Core\DX12Shader.cpp" />
-    <ClCompile Include="Core\DX12Mesh.cpp" />
     <ClCompile Include="Core\DX12Camera.cpp" />
     <ClCompile Include="Core\DX12Skybox.cpp" />
     <ClCompile Include="Core\DX12Interface.cpp" />
@@ -412,7 +411,6 @@
     <ClInclude Include="dep\stb\stb_truetype.h" />
     <ClInclude Include="dep\stb\stb_voxel_render.h" />
     <ClInclude Include="Core\DX12Shader.h" />
-    <ClInclude Include="Core\DX12Mesh.h" />
     <ClInclude Include="Core\DX12Camera.h" />
     <ClInclude Include="Core\DX12Skybox.h" />
     <ClInclude Include="Core\DX12Interface.h" />
