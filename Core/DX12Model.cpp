@@ -5,7 +5,7 @@
 #include "Core/WindowsApplication.h"
 #include "Core/DX12Texture.h"
 #include "Core/DX12Interface.h"
-#include "Core/DX12Shader.h"
+#include "Core/ShaderManager.h"
 
 #include <assimp\Importer.hpp>
 #include <assimp\scene.h>
@@ -16,8 +16,6 @@ namespace Core
   DX12Mesh::DX12Mesh(D3D12_CULL_MODE cullMode, bool depthEnabled)
     : m_vertices()
     , m_indices()
-    , m_cullMode(cullMode)
-    , m_depthEnabled(depthEnabled)
   {
   }
 
@@ -25,48 +23,25 @@ namespace Core
   {
   }
 
-  void DX12Mesh::Setup(ID3D12GraphicsCommandList* commandList, DX12Shader* shader)
+  void DX12Mesh::Setup(ID3D12GraphicsCommandList* commandList)
   {
-    // Define the vertex input layout.
-    D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
-    {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-    };
-
-    // Describe and create the graphics pipeline state object (PSO).
-    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
-    psoDesc.InputLayout = { inputElementDescs, _countof(inputElementDescs) };
-    psoDesc.pRootSignature = shader->GetRootSignature();
-    psoDesc.VS = CD3DX12_SHADER_BYTECODE(shader->GetVertexShader());
-    psoDesc.PS = CD3DX12_SHADER_BYTECODE(shader->GetPixelShader());
-    psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-    psoDesc.RasterizerState.CullMode = m_cullMode;
-    psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-    psoDesc.DepthStencilState.DepthEnable = m_depthEnabled;
-    psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-    psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
-    psoDesc.DepthStencilState.StencilEnable = FALSE;
-    psoDesc.SampleMask = UINT_MAX;
-    psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-    psoDesc.NumRenderTargets = 1;
-    psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-    psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
-    psoDesc.SampleDesc.Count = 1;
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
-
     SetupVertexBuffer(commandList);
     SetupIndexBuffer(commandList);
   }
 
   void DX12Mesh::Draw(
-    unsigned frameIndex, ResourceDescriptor* cb, TextureDescriptor* texture, DX12Shader* shader, ID3D12GraphicsCommandList* commandList)
+    unsigned frameIndex, ResourceDescriptor* cb, TextureDescriptor* texture, bool cubeMap, ID3D12GraphicsCommandList* commandList)
   {
-    // 1 allocator
-    commandList->SetPipelineState(m_pipelineState.Get());
-    // Set necessary state.
-    commandList->SetGraphicsRootSignature(shader->GetRootSignature());
+    if (cubeMap)
+    {
+      commandList->SetPipelineState(ShaderManager::Instance().GetShader(L"skybox_shaders.hlsl").m_pipelineState.Get());
+      commandList->SetGraphicsRootSignature(ShaderManager::Instance().GetShader(L"skybox_shaders.hlsl").m_rootSignature.Get());
+    } else
+    {
+      commandList->SetPipelineState(ShaderManager::Instance().GetShader(L"shaders.hlsl").m_pipelineState.Get());
+      commandList->SetGraphicsRootSignature(ShaderManager::Instance().GetShader(L"shaders.hlsl").m_rootSignature.Get());
+    }
+    
     ID3D12DescriptorHeap* ppHeaps[] = { ResourceManager::Instance().GetResourcesHeap() };
     commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
@@ -205,7 +180,6 @@ namespace Core
     , m_translation(0.0f, 0.0f, 0.0f)
     , m_scale(1.0f, 1.0f, 1.0f)
     , m_angle(0.0f)
-    , m_shaders()
     , m_textures()
     , m_isCubeMap(false)
   {
@@ -233,13 +207,13 @@ namespace Core
     }
 
     for (int i = 0; i < m_meshes.size(); ++i)
-      m_meshes[i]->Setup(commandList, m_shaders[i].get());
+      m_meshes[i]->Setup(commandList);
   }
 
   void DX12Model::DrawModel(unsigned frameIndex, ID3D12GraphicsCommandList* commandList)
   {
     for (int i = 0; i < m_meshes.size(); ++i)
-      m_meshes[i]->Draw(frameIndex, m_constantBuffer.get(), m_textures[i]->GetResource(), m_shaders[i].get(), commandList);
+      m_meshes[i]->Draw(frameIndex, m_constantBuffer.get(), m_textures[i]->GetResource(), m_isCubeMap, commandList);
   }
 
   void DX12Model::LoadModel(const char* path)
@@ -260,17 +234,6 @@ namespace Core
       const auto pMesh = pModel->mMeshes[i];
       auto mesh = std::make_unique<DX12Mesh>();
       mesh->LoadMesh(pMesh);
-
-      auto shader = std::make_unique<DX12Shader>(L"shaders.hlsl"); // for each model
-      // add slots
-      shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
-      shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
-      shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL);
-
-      // create rootsignature
-      shader->CreateRootSignature();
-
-      m_shaders.emplace_back(shader.release());
 
       const auto material = pModel->mMaterials[pMesh->mMaterialIndex];
       aiString texturePath;
@@ -309,14 +272,6 @@ namespace Core
     auto mesh = std::make_unique<DX12Mesh>(D3D12_CULL_MODE_FRONT, false);
     mesh->LoadMesh(pMesh);
 
-    auto shader = std::make_unique<DX12Shader>(L"skybox_shaders.hlsl");
-    // add slots
-    shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
-    shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, D3D12_SHADER_VISIBILITY_VERTEX);
-    shader->AddParameter(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL);
-    // create rootSignature
-    shader->CreateRootSignature();
-
     std::vector<std::string> paths;
     paths.push_back("skybox\\bluecloud_ft.jpg");
     paths.push_back("skybox\\bluecloud_bk.jpg");
@@ -327,7 +282,6 @@ namespace Core
 
     auto cubeMap = std::make_unique<DX12Texture>(paths, 1);
 
-    m_shaders.emplace_back(shader.release());
     m_meshes.emplace_back(mesh.release());
     m_textures.emplace_back(cubeMap.release());
   }

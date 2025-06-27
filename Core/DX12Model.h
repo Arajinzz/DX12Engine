@@ -11,7 +11,6 @@ using Microsoft::WRL::ComPtr;
 
 namespace Core
 {
-  class DX12Shader;
   class DX12Texture;
 
   class DX12Mesh
@@ -20,9 +19,9 @@ namespace Core
     DX12Mesh(D3D12_CULL_MODE cullMode = D3D12_CULL_MODE_BACK, bool depthEnabled = true);
     ~DX12Mesh();
 
-    virtual void Setup(ID3D12GraphicsCommandList* commandList, DX12Shader* shader);
+    virtual void Setup(ID3D12GraphicsCommandList* commandList);
     virtual void Draw(
-      unsigned frameIndex, ResourceDescriptor* cb, TextureDescriptor* texture, DX12Shader* shader, ID3D12GraphicsCommandList* commandList);
+      unsigned frameIndex, ResourceDescriptor* cb, TextureDescriptor* texture, bool cubeMap, ID3D12GraphicsCommandList* commandList);
     virtual void LoadMesh(const aiMesh* pMesh);
     unsigned GetTriangleCount() { return static_cast<unsigned>(m_indices.size() / 3); }
 
@@ -42,11 +41,6 @@ namespace Core
     std::vector<Vertex> m_vertices;
     std::vector<uint16_t> m_indices;
 
-    D3D12_CULL_MODE m_cullMode;
-    bool m_depthEnabled;
-    // pso
-    ComPtr<ID3D12PipelineState> m_pipelineState;
-
     // buffers
     ComPtr<ID3D12Resource> m_vertexBuffer;
     ComPtr<ID3D12Resource> m_vertexBufferUploadHeap;
@@ -65,7 +59,6 @@ namespace Core
 
 namespace Core
 {
-  class DX12Shader;
   class DX12Texture;
 
   // Mesh can have multiple models
@@ -90,7 +83,6 @@ namespace Core
 
   private:
     std::vector<std::unique_ptr<DX12Mesh>> m_meshes;
-    std::vector<std::unique_ptr<DX12Shader>> m_shaders; // for each model
     std::vector<std::unique_ptr<DX12Texture>> m_textures; // for each model
     bool staticMesh = true;
     bool isModelSet = false;

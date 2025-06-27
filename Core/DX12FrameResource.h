@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Core\DX12Shader.h"
 #include "Core\DX12Camera.h"
 #include "Core\ResourceManager.h"
 

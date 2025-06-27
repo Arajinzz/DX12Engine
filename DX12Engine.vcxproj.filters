@@ -75,9 +75,6 @@
     <ClCompile Include="Core\DX12Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\DX12Shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Core\DX12Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -88,6 +85,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Core\ResourceManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ShaderManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -470,9 +470,6 @@
     <ClInclude Include="dep\stb\stb_voxel_render.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Core\DX12Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Core\DX12Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -606,6 +603,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="dep\DX12Headers\include\wsl\wrladapter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ShaderManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

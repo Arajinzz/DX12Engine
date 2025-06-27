@@ -5,6 +5,7 @@
 #include "Core/DX12FrameResource.h"
 #include "Core/DX12Skybox.h"
 #include "Core/ResourceManager.h"
+#include "Core/ShaderManager.h"
 
 #include <random>
 
@@ -24,6 +25,9 @@ namespace Core
 
     // create resource manager
     ResourceManager::Instance();
+
+    // create shader manager
+    ShaderManager::Instance();
 
     CreateFrameResource();
     

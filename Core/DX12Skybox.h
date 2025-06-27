@@ -2,7 +2,6 @@
 
 #include "Core/DX12Texture.h"
 #include "Core/DX12Model.h"
-#include "Core/DX12Shader.h"
 
 namespace Core
 {
