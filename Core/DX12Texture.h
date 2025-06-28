@@ -44,7 +44,7 @@ namespace Core
     };
 
     // descriptor to the heap
-    std::unique_ptr<TextureDescriptor> m_texture;
+    std::shared_ptr<TextureDescriptor> m_texture;
 
     // pso used for mipmaps
     ComPtr<ID3D12PipelineState> m_pipelineState;
@@ -54,6 +54,11 @@ namespace Core
     std::vector<unsigned char*> m_imgPtrs;
     std::vector<MetaData> m_metaData;
     unsigned m_mipsLevels;
+
+    // indicate that this texture was already uploaded to the GPU
+    bool m_uploaded;
+    // indicate that mips were already generated for this texture
+    bool m_mipsGenerated;
 
   private:
     DX12Texture(const DX12Texture&) = delete;

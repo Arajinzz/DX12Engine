@@ -15,6 +15,8 @@ namespace Core
     , m_metaData()
     , m_mipsLevels(mips)
     , m_texture()
+    , m_uploaded(false)
+    , m_mipsGenerated(false)
   {
     for (const auto& path : paths)
     {
@@ -76,10 +78,15 @@ namespace Core
 
   DX12Texture::~DX12Texture()
   {
+    m_texture.reset();
   }
 
   void DX12Texture::CopyToGPU(ID3D12GraphicsCommandList* commandList)
   {
+    if (m_uploaded)
+      return;
+
+    m_uploaded = true;
     // Copy data to the intermediate upload heap and then schedule 
     // a copy from the upload heap to the diffuse texture.
     std::vector<D3D12_SUBRESOURCE_DATA> textureData(m_imgPtrs.size());
@@ -106,6 +113,11 @@ namespace Core
 
   void DX12Texture::GenerateMips(ID3D12GraphicsCommandList* commandList)
   {
+    if (m_mipsGenerated)
+      return;
+
+    m_mipsGenerated = true;
+
     //Set root signature, pso and descriptor heap
     commandList->SetComputeRootSignature(m_rootSignature.Get());
     commandList->SetPipelineState(m_pipelineState.Get());

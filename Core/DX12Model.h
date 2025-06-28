@@ -78,12 +78,9 @@ namespace Core
     void SetScale(XMFLOAT3 scale) { m_scale = scale; }
     unsigned GetTriangleCount();
 
-    DX12Texture* GetTexture(unsigned index) { return m_textures[index].get(); }
-    unsigned GetTexturesCount() { return static_cast<unsigned>(m_textures.size()); }
-
   private:
     std::vector<std::unique_ptr<DX12Mesh>> m_meshes;
-    std::vector<std::unique_ptr<DX12Texture>> m_textures; // for each model
+    std::vector<std::shared_ptr<DX12Texture>> m_textures; // for each model
     bool staticMesh = true;
     bool isModelSet = false;
 

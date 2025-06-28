@@ -6,6 +6,7 @@
 #include "Core/DX12Texture.h"
 #include "Core/DX12Interface.h"
 #include "Core/ShaderManager.h"
+#include "Core/TextureManager.h"
 
 #include <assimp\Importer.hpp>
 #include <assimp\scene.h>
@@ -238,19 +239,10 @@ namespace Core
       const auto material = pModel->mMaterials[pMesh->mMaterialIndex];
       aiString texturePath;
       std::vector<std::string> paths(1);
-      if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS)
-      {
-        paths[0] = texturePath.C_Str();
-        auto texture = std::make_unique<DX12Texture>(paths);
-        m_textures.emplace_back(texture.release());
-      } else
-      {
-        // default texture
-        paths[0] = "textures\\brick.png";
-        auto texture = std::make_unique<DX12Texture>(paths);
-        m_textures.emplace_back(texture.release());
-      }
+      // else default texture
+      paths[0] = material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS ? texturePath.C_Str() : "textures\\brick.png";
 
+      m_textures.emplace_back(TextureManager::Instance().CreateOrGetTexture(paths));
       m_meshes.emplace_back(mesh.release());
     }
   }
@@ -280,10 +272,8 @@ namespace Core
     paths.push_back("skybox\\bluecloud_rt.jpg");
     paths.push_back("skybox\\bluecloud_lf.jpg");
 
-    auto cubeMap = std::make_unique<DX12Texture>(paths, 1);
-
     m_meshes.emplace_back(mesh.release());
-    m_textures.emplace_back(cubeMap.release());
+    m_textures.emplace_back(TextureManager::Instance().CreateOrGetTexture(paths));
   }
 
   void DX12Model::UpdateModel()

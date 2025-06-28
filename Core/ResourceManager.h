@@ -97,7 +97,7 @@ namespace Core
     D3D12_CPU_DESCRIPTOR_HANDLE GetSamplerCpuHandle(unsigned index);
 
     std::unique_ptr<ResourceDescriptor> CreateConstantBufferResource(size_t size, D3D12_HEAP_TYPE type);
-    std::unique_ptr<TextureDescriptor> CreateTextureResource(D3D12_RESOURCE_DESC& desc, bool isCubeMap, bool generateMips);
+    std::shared_ptr<TextureDescriptor> CreateTextureResource(D3D12_RESOURCE_DESC& desc, bool isCubeMap, bool generateMips);
     std::unique_ptr<ResourceDescriptor> CreateDepthResource(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE& clearValue);
     // view and not resource because the swap chain is the one that owns RT resources
     // index to be removed when the views are properly tracked

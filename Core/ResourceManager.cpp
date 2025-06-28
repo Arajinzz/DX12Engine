@@ -143,7 +143,7 @@ namespace Core
     return output;
   }
 
-  std::unique_ptr<TextureDescriptor> ResourceManager::CreateTextureResource(D3D12_RESOURCE_DESC& desc, bool isCubeMap, bool generateMips)
+  std::shared_ptr<TextureDescriptor> ResourceManager::CreateTextureResource(D3D12_RESOURCE_DESC& desc, bool isCubeMap, bool generateMips)
   {
     // check if space is available
     if (m_nextFreeTex.size() < 1)
