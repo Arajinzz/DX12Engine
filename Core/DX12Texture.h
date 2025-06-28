@@ -7,23 +7,6 @@ using Microsoft::WRL::ComPtr;
 
 namespace Core
 {
-  enum
-  {
-    GenerateMipsCB,
-    SrcMip,
-    OutMip,
-    NumRootParameters
-  };
-
-  struct SGenerateMipsCB
-  {
-    uint32_t SrcMipLevel;           // Texture level of source mip
-    uint32_t NumMipLevels;          // Number of OutMips to write: [1-4]
-    uint32_t SrcDimension;          // Width and height of the source texture are even or odd.
-    uint32_t IsSRGB;                // Must apply gamma correction to sRGB textures.
-    DirectX::XMFLOAT2 TexelSize;    // 1.0 / OutMip1.Dimensions
-  };
-
   class DX12Texture
   {
   public:
@@ -45,11 +28,6 @@ namespace Core
 
     // descriptor to the heap
     std::shared_ptr<TextureDescriptor> m_texture;
-
-    // pso used for mipmaps
-    ComPtr<ID3D12PipelineState> m_pipelineState;
-    // root sig used for mipmaps
-    ComPtr<ID3D12RootSignature> m_rootSignature;
     
     std::vector<unsigned char*> m_imgPtrs;
     std::vector<MetaData> m_metaData;

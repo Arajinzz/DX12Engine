@@ -19,11 +19,13 @@ namespace Core
   void ShaderManager::RegisterShaders()
   {
     // for now we have only Skybox shader, and model shader
-    auto SkyboxShader = ShaderBlob(L"skybox_shaders.hlsl");
-    auto ModelShader = ShaderBlob(L"shaders.hlsl");
+    auto SkyboxShader = ShaderBlob(L"skybox_shaders.hlsl", false);
+    auto ModelShader = ShaderBlob(L"shaders.hlsl", false);
+    auto MipsCompute = ShaderBlob(L"GenerateMips_CS.hlsl", true);
     // register to map
     m_PSOs[SkyboxShader.filename] = PSO();
     m_PSOs[ModelShader.filename] = PSO();
+    m_PSOs[MipsCompute.filename] = PSO();
     // root signature it is shared
     ComPtr<ID3D12RootSignature> rootSig;
 
@@ -114,5 +116,41 @@ namespace Core
     modelPSODesc.SampleDesc.Count = 1;
     ThrowIfFailed(
       DX12Interface::Get().GetDevice()->CreateGraphicsPipelineState(&modelPSODesc, IID_PPV_ARGS(&m_PSOs[ModelShader.filename].m_pipelineState)));
+
+    // compute part
+    ComPtr<ID3D12RootSignature> computeRootSig;
+
+    CD3DX12_DESCRIPTOR_RANGE1 srcMip(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
+    CD3DX12_DESCRIPTOR_RANGE1 outMip(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 4, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
+    CD3DX12_ROOT_PARAMETER1 rootParameters[Core::NumRootParameters];
+    rootParameters[Core::GenerateMipsCB].InitAsConstants(sizeof(SGenerateMipsCB) / 4, 0);
+    rootParameters[Core::SrcMip].InitAsDescriptorTable(1, &srcMip);
+    rootParameters[Core::OutMip].InitAsDescriptorTable(1, &outMip);
+    CD3DX12_STATIC_SAMPLER_DESC linearClampSampler(
+      0,
+      D3D12_FILTER_MIN_MAG_MIP_LINEAR,
+      D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+      D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+      D3D12_TEXTURE_ADDRESS_MODE_CLAMP
+    );
+    CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC computeRootSignatureDesc(
+      Core::NumRootParameters,
+      rootParameters, 1, &linearClampSampler
+    );
+    ThrowIfFailed(D3DX12SerializeVersionedRootSignature(&computeRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_1, &signature, &error));
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateRootSignature(
+      0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&computeRootSig)));
+    
+    // Pipeline state descriptor
+    D3D12_COMPUTE_PIPELINE_STATE_DESC computePsoDesc = {};
+    computePsoDesc.pRootSignature = computeRootSig.Get();  // Root signature
+    computePsoDesc.CS.pShaderBytecode = MipsCompute.computeShader->GetBufferPointer();
+    computePsoDesc.CS.BytecodeLength = MipsCompute.computeShader->GetBufferSize();
+    computePsoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE; // Default flag
+    // set
+    m_PSOs[MipsCompute.filename].m_rootSignature = computeRootSig;
+    // Create the compute PSO
+    DX12Interface::Get().GetDevice()->CreateComputePipelineState(&computePsoDesc, IID_PPV_ARGS(&m_PSOs[MipsCompute.filename].m_pipelineState));
+
   }
 }
