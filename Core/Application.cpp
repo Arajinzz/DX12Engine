@@ -9,6 +9,10 @@
 
 #include <random>
 
+// TODO: better ERROR handling
+// for example if a texture is not available like skybox
+// Program exits silently without any error
+
 namespace Core
 {
   Application::Application(UINT width, UINT height, std::wstring name)
@@ -22,8 +26,6 @@ namespace Core
   void Application::OnInit()
   {
     LoadPipeline();
-
-    //assert(1 == 0);
 
     // create resource manager
     ResourceManager::Instance();
