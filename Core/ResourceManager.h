@@ -97,6 +97,8 @@ namespace Core
     D3D12_CPU_DESCRIPTOR_HANDLE GetSamplerCpuHandle(unsigned index);
 
     std::unique_ptr<ResourceDescriptor> CreateConstantBufferResource(size_t size, D3D12_HEAP_TYPE type);
+    // right now I believe the upload buffer is not freed after the texture has been uploaded to the GPU
+    // TODO: remove free the upload resource
     std::shared_ptr<TextureDescriptor> CreateTextureResource(D3D12_RESOURCE_DESC& desc, bool isCubeMap, bool generateMips);
     std::unique_ptr<ResourceDescriptor> CreateDepthResource(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE& clearValue);
     // view and not resource because the swap chain is the one that owns RT resources
