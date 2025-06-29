@@ -22,7 +22,7 @@ namespace Core
     virtual void Setup(ID3D12GraphicsCommandList* commandList);
     virtual void Draw(
       unsigned frameIndex, ResourceDescriptor* cb, TextureDescriptor* texture, bool cubeMap, ID3D12GraphicsCommandList* commandList);
-    virtual void LoadMesh(const aiMesh* pMesh);
+    virtual void LoadMesh(const aiMesh* pMesh, const aiMatrix4x4& transform);
     unsigned GetTriangleCount() { return static_cast<unsigned>(m_indices.size() / 3); }
 
   private:
@@ -79,6 +79,9 @@ namespace Core
     unsigned GetTriangleCount();
 
   private:
+    void ProcessNode(const aiNode* node, const aiScene* scene, const aiMatrix4x4& parentTransform);
+
+  private:
     std::vector<std::unique_ptr<DX12Mesh>> m_meshes;
     std::vector<std::shared_ptr<DX12Texture>> m_textures; // for each model
     bool staticMesh = true;
@@ -102,7 +105,6 @@ namespace Core
     XMFLOAT3 m_translation;
     XMFLOAT3 m_scale;
     float m_angle;
-    aiMatrix4x4 m_transformation;
     // workaround
     bool m_isCubeMap;
 

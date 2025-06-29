@@ -23,6 +23,8 @@ namespace Core
   {
     LoadPipeline();
 
+    //assert(1 == 0);
+
     // create resource manager
     ResourceManager::Instance();
 

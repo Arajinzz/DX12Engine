@@ -12,6 +12,8 @@
 #include <assimp\scene.h>
 #include <assimp\postprocess.h>
 
+#include <filesystem>
+
 namespace Core
 {
   DX12Mesh::DX12Mesh(D3D12_CULL_MODE cullMode, bool depthEnabled)
@@ -62,16 +64,27 @@ namespace Core
     commandList->DrawIndexedInstanced(static_cast<unsigned>(m_indices.size()), 1, 0, 0, 0);
   }
 
-  void DX12Mesh::LoadMesh(const aiMesh* pMesh)
+  void DX12Mesh::LoadMesh(const aiMesh* pMesh, const aiMatrix4x4& transform)
   {
     m_vertices.reserve(pMesh->mNumVertices);
+    // debug
+    float minY = 0;
+    float maxY = 0;
 
     for (unsigned i = 0; i < pMesh->mNumVertices; ++i)
     {
+      minY = std::min(minY, pMesh->mVertices[i].x);
+      maxY = max(maxY, pMesh->mVertices[i].x);
+
+      aiVector3D transformed = transform * pMesh->mVertices[i];
+
       Vertex vertex;
-      vertex.position = { pMesh->mVertices[i].x, pMesh->mVertices[i].y, pMesh->mVertices[i].z };
+      vertex.position = { transformed.x, transformed.y, transformed.z };
       if (pMesh->HasNormals())
-        vertex.normal = { pMesh->mNormals[i].x, pMesh->mNormals[i].y, pMesh->mNormals[i].z };
+      {
+        aiVector3D normalTransformed = transform * pMesh->mNormals[i];
+        vertex.normal = { normalTransformed.x, normalTransformed.y, normalTransformed.z };
+      }
       if (pMesh->HasTextureCoords(0))
         vertex.uv = { pMesh->mTextureCoords[0][i].x, pMesh->mTextureCoords[0][i].y };
       m_vertices.push_back(vertex);
@@ -217,6 +230,36 @@ namespace Core
       m_meshes[i]->Draw(frameIndex, m_constantBuffer.get(), m_textures[i]->GetResource(), m_isCubeMap, commandList);
   }
 
+  void DX12Model::ProcessNode(const aiNode* node, const aiScene* scene, const aiMatrix4x4& parentTransform)
+  {
+    aiMatrix4x4 nodeTransform = parentTransform * node->mTransformation;
+
+    for (unsigned int i = 0; i < node->mNumMeshes; ++i)
+    {
+      const aiMesh* pMesh = scene->mMeshes[node->mMeshes[i]];
+      auto mesh = std::make_unique<DX12Mesh>();
+      mesh->LoadMesh(pMesh, nodeTransform);
+
+      const auto material = scene->mMaterials[pMesh->mMaterialIndex];
+      aiString texturePath;
+      std::vector<std::string> paths(1);
+      // else default texture
+      paths[0] = material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS ? texturePath.C_Str() : "textures\\brick.png";
+
+      // does file exists?
+      if (!std::filesystem::exists(paths[0]))
+        paths[0] = "textures\\brick.png";
+
+      m_textures.emplace_back(TextureManager::Instance().CreateOrGetTexture(paths));
+      m_meshes.emplace_back(mesh.release());
+    }
+
+    for (unsigned int i = 0; i < node->mNumChildren; ++i)
+    {
+      ProcessNode(node->mChildren[i], scene, nodeTransform);
+    }
+  }
+
   void DX12Model::LoadModel(const char* path)
   {
     Assimp::Importer importer;
@@ -228,23 +271,10 @@ namespace Core
       aiProcess_GenNormals |
       aiProcess_CalcTangentSpace);
 
-    m_transformation = pModel->mRootNode->mTransformation;
+    // maybe check if model is available
 
-    for (unsigned i = 0; i < pModel->mNumMeshes; ++i)
-    {
-      const auto pMesh = pModel->mMeshes[i];
-      auto mesh = std::make_unique<DX12Mesh>();
-      mesh->LoadMesh(pMesh);
-
-      const auto material = pModel->mMaterials[pMesh->mMaterialIndex];
-      aiString texturePath;
-      std::vector<std::string> paths(1);
-      // else default texture
-      paths[0] = material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS ? texturePath.C_Str() : "textures\\brick.png";
-
-      m_textures.emplace_back(TextureManager::Instance().CreateOrGetTexture(paths));
-      m_meshes.emplace_back(mesh.release());
-    }
+    aiMatrix4x4 identity; // identity matrix
+    ProcessNode(pModel->mRootNode, pModel, identity);
   }
 
   void DX12Model::LoadModelSkyboxSpecific(const char* path)
@@ -260,9 +290,10 @@ namespace Core
       aiProcess_GenNormals |
       aiProcess_CalcTangentSpace);
 
+    aiMatrix4x4 identity; // identity matrix
     const auto pMesh = pModel->mMeshes[0];
     auto mesh = std::make_unique<DX12Mesh>(D3D12_CULL_MODE_FRONT, false);
-    mesh->LoadMesh(pMesh);
+    mesh->LoadMesh(pMesh, identity);
 
     std::vector<std::string> paths;
     paths.push_back("skybox\\bluecloud_ft.jpg");
