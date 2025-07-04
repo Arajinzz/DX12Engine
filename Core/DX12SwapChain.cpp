@@ -46,7 +46,7 @@ namespace Core
     {
       ComPtr<ID3D12Resource> renderTarget;
       GetBuffer(i, &renderTarget);
-      m_renderTargets.push_back(ResourceManager::Instance().CreateRenderTargetView(renderTarget.Get()));
+      m_renderTargets.push_back(ResourceManager::Instance().CreateRenderTargetResource(renderTarget.Get()));
     }
 
     // create depth resource
@@ -83,7 +83,7 @@ namespace Core
     {
       ComPtr<ID3D12Resource> renderTarget;
       GetBuffer(i, &renderTarget);
-      m_renderTargets.push_back(ResourceManager::Instance().CreateRenderTargetView(renderTarget.Get()));
+      m_renderTargets.push_back(ResourceManager::Instance().CreateRenderTargetResource(renderTarget.Get()));
     }
 
     CreateDepthResource();

@@ -72,9 +72,7 @@ namespace Core
 
     // free
     for (auto ptr : m_imgPtrs)
-    {
       stbi_image_free(ptr);
-    }
   }
 
   void DX12Texture::GenerateMips(ID3D12GraphicsCommandList* commandList)

@@ -56,12 +56,37 @@ namespace Core
     }
   };
 
+  struct RenderTargetDescriptor : public Descriptor
+  {
+    unsigned renderTargetIndex1;
+    unsigned shaderResourceIndex1;
+    ComPtr<ID3D12Resource> renderTarget1;
+    unsigned renderTargetIndex2;
+    unsigned shaderResourceIndex2;
+    ComPtr<ID3D12Resource> renderTarget2;
+    // the swap rt associated with render targets for offscreen rendering
+    // this uses index inherited from Descriptor
+    ID3D12Resource* swapRenderTarget;
+
+    std::function<void(unsigned, unsigned, unsigned, unsigned)> freeRT;
+
+    ~RenderTargetDescriptor()
+    {
+      renderTarget1.Reset();
+      renderTarget2.Reset();
+
+      if (freeRT)
+        freeRT(
+          renderTargetIndex1, shaderResourceIndex1, renderTargetIndex2, shaderResourceIndex2);
+    }
+  };
+
   class ResourceManager
   {
     // fixed size of 64k, (max supported by DX12)
     const unsigned RESOURCE_HEAP_SIZE = 65535;
     const unsigned DSV_HEAP_SIZE = 1;
-    const unsigned RTV_HEAP_SIZE = 2; // double buffering
+    const unsigned RTV_HEAP_SIZE = 2 + (2 * 2); // double buffering (for offscreen rendering each framebuffer need 2 RenderTargets)
     const unsigned SAMPLER_HEAP_SIZE = 2048; // overkill reduce this later
     // resources are ordered in regions, assuming that I will be loading 1500 meshes at once
     const Range CB_RANGE = { 0, 7499 }; // for each mesh 5 CBVs
@@ -103,7 +128,7 @@ namespace Core
     std::unique_ptr<ResourceDescriptor> CreateDepthResource(D3D12_RESOURCE_DESC& desc, D3D12_CLEAR_VALUE& clearValue);
     // view and not resource because the swap chain is the one that owns RT resources
     // index to be removed when the views are properly tracked
-    std::unique_ptr<Descriptor> CreateRenderTargetView(ID3D12Resource* renderTarget);
+    std::shared_ptr<RenderTargetDescriptor> CreateRenderTargetResource(ID3D12Resource* swapRenderTarget);
     // also sampler will have no resource
     std::unique_ptr<Descriptor> CreateSampler(D3D12_SAMPLER_DESC& desc);
 

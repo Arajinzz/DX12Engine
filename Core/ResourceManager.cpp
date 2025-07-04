@@ -145,6 +145,7 @@ namespace Core
 
   std::shared_ptr<TextureDescriptor> ResourceManager::CreateTextureResource(D3D12_RESOURCE_DESC& desc, bool isCubeMap, bool generateMips)
   {
+    // TODO: add condition for cubemap
     // check if space is available
     if (m_nextFreeTex.size() < 1)
       throw std::out_of_range("[TEXTURE] HEAP DESCRIPTOR HAVE NO SPACE LEFT!");
@@ -165,7 +166,6 @@ namespace Core
     }
 
     auto defaultProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-
     // texture resource
     ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &defaultProps,
@@ -256,26 +256,77 @@ namespace Core
     return output;
   }
 
-  std::unique_ptr<Descriptor> ResourceManager::CreateRenderTargetView(ID3D12Resource* renderTarget)
+  std::shared_ptr<RenderTargetDescriptor> ResourceManager::CreateRenderTargetResource(ID3D12Resource* swapRenderTarget)
   {
     // check if space is available
-    if (m_nextFreeRT.size() < 1)
+    if (m_nextFreeRT.size() < 1) // TODO: this condition should be changed because we create multiple render targets per swap
       throw std::out_of_range("[RENDERTARGET] HEAP DESCRIPTOR HAVE NO SPACE LEFT!");
 
-    std::unique_ptr<Descriptor> output = std::make_unique<Descriptor>();
+    // TODO: a condition for textures
 
+    std::unique_ptr<RenderTargetDescriptor> output = std::make_unique<RenderTargetDescriptor>();
+
+    // swap render target
     {
       std::lock_guard<std::mutex> lock(m_mutexRT);
       output->index = m_nextFreeRT.front();
       m_nextFreeRT.erase(m_nextFreeRT.begin());
+      // render targets
+      output->renderTargetIndex1 = m_nextFreeRT.front();
+      m_nextFreeRT.erase(m_nextFreeRT.begin());
+      output->renderTargetIndex2 = m_nextFreeRT.front();
+      m_nextFreeRT.erase(m_nextFreeRT.begin());
+    }
+    DX12Interface::Get().CreateRenderTargetView(swapRenderTarget, m_rtvHeap.Get(), output->index);
+
+    {
+      std::lock_guard<std::mutex> lock(m_mutexTex);
+      output->shaderResourceIndex1 = m_nextFreeTex.front();
+      m_nextFreeTex.erase(m_nextFreeTex.begin());
+      output->shaderResourceIndex2 = m_nextFreeTex.front();
+      m_nextFreeTex.erase(m_nextFreeTex.begin());
     }
 
-    DX12Interface::Get().CreateRenderTargetView(renderTarget, m_rtvHeap.Get(), output->index);
+    // create resources and views
+    // texture resource
+    auto defaultProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+    auto swapDesc = swapRenderTarget->GetDesc();
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+      &defaultProps,
+      D3D12_HEAP_FLAG_NONE,
+      &swapDesc,
+      D3D12_RESOURCE_STATE_COMMON,
+      nullptr,
+      IID_PPV_ARGS(&output->renderTarget1)));
+
+    // texture resource
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+      &defaultProps,
+      D3D12_HEAP_FLAG_NONE,
+      &swapDesc,
+      D3D12_RESOURCE_STATE_COMMON,
+      nullptr,
+      IID_PPV_ARGS(&output->renderTarget2)));
+
+    // create views
+    DX12Interface::Get().CreateRenderTargetView(output->renderTarget1.Get(), m_rtvHeap.Get(), output->renderTargetIndex1);
+    DX12Interface::Get().CreateRenderTargetView(output->renderTarget2.Get(), m_rtvHeap.Get(), output->renderTargetIndex2);
+    DX12Interface::Get().CreateShaderResourceView(output->renderTarget1.Get(), m_resourcesHeap.Get(), output->shaderResourceIndex1);
+    DX12Interface::Get().CreateShaderResourceView(output->renderTarget2.Get(), m_resourcesHeap.Get(), output->shaderResourceIndex2);
 
     // we will not store the resource because swapchain is the owner of the render target
     output->freeResource = [&](unsigned index) {
       std::lock_guard<std::mutex> lock(m_mutexRT);
       m_nextFreeRT.push_back(index);
+    };
+
+    output->freeRT = [&](unsigned RTIndex1, unsigned SRIndex1, unsigned RTIndex2, unsigned SRIndex2) {
+      std::lock_guard<std::mutex> lockTex(m_mutexTex);
+      std::lock_guard<std::mutex> lockRT(m_mutexRT);
+      m_nextFreeRT.push_back(RTIndex1);
+      m_nextFreeRT.push_back(RTIndex2);
+      m_nextFreeTex.push_back(SRIndex1);
+      m_nextFreeTex.push_back(SRIndex2);
     };
 
     return output;

@@ -19,6 +19,7 @@ namespace Core
     void GetBuffer(unsigned int n, Microsoft::WRL::Details::ComPtrRef<Microsoft::WRL::ComPtr<ID3D12Resource>> renderTarget);
     void Present();
     void Resize(unsigned width, unsigned height);
+    std::shared_ptr<RenderTargetDescriptor> GetRenderTarget(unsigned index) { return m_renderTargets[index]; }
 
   private:
     void CreateDepthResource();
@@ -29,7 +30,7 @@ namespace Core
   private:
     ComPtr<IDXGISwapChain3> m_swapChain;
     // rtv
-    std::vector<std::unique_ptr<Descriptor>> m_renderTargets;
+    std::vector<std::shared_ptr<RenderTargetDescriptor>> m_renderTargets;
     // depth resource
     std::unique_ptr<ResourceDescriptor> m_depth;
 
