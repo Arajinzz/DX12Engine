@@ -131,7 +131,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)dep/DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;$(SolutionDir)dep/stb;$(SolutionDir)dep/DX12MemoryAllocator/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dep/DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;$(SolutionDir)dep/stb;$(SolutionDir)dep/DX12MemoryAllocator/include;$(SolutionDir)dep/nlohmann-json/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
@@ -150,7 +150,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)dep/DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;$(SolutionDir)dep/stb;$(SolutionDir)dep/D3D12MemoryAllocator/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dep/DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;$(SolutionDir)dep/stb;$(SolutionDir)dep/D3D12MemoryAllocator/include;$(SolutionDir)dep/nlohmann-json/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
@@ -391,6 +391,7 @@
     <ClInclude Include="Core\DX12Texture.h" />
     <ClInclude Include="Core\DX12Context.h" />
     <ClInclude Include="Core\DX12Model.h" />
+    <ClInclude Include="dep\nlohmann-json\include\json.hpp" />
     <ClInclude Include="dep\stb\stb_connected_components.h" />
     <ClInclude Include="dep\stb\stb_c_lexer.h" />
     <ClInclude Include="dep\stb\stb_divide.h" />

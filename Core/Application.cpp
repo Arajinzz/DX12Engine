@@ -9,6 +9,9 @@
 
 #include <random>
 
+#include <json.hpp>
+using json = nlohmann::json;
+
 // TODO: better ERROR handling
 // for example if a texture is not available like skybox
 // Program exits silently without any error
