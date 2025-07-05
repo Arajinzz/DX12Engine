@@ -3,6 +3,7 @@
 #include "Core/DXApplicationHelper.h"
 
 #include <unordered_map>
+#include <filesystem>
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -38,20 +39,15 @@ namespace Core
     {
       // Enable better shader debugging with the graphics debugging tools.
       UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-
-      auto GetAssetFullPath = [&](std::wstring assetName) {
-        WCHAR assetsPath[512];
-        GetAssetsPath(assetsPath, _countof(assetsPath));
-        return std::wstring(assetsPath) + assetName;
-        };
+      auto fullPath = std::filesystem::current_path().wstring() + L"/" + path;
 
       if (isCompute)
       {
-        ThrowIfFailed(D3DCompileFromFile(GetAssetFullPath(path).c_str(), nullptr, nullptr, "main", "cs_5_1", compileFlags, 0, &computeShader, &errorBlob));
+        ThrowIfFailed(D3DCompileFromFile(fullPath.c_str(), nullptr, nullptr, "main", "cs_5_1", compileFlags, 0, &computeShader, &errorBlob));
       } else
       {
-        ThrowIfFailed(D3DCompileFromFile(GetAssetFullPath(path).c_str(), nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &vertexShader, &errorBlob));
-        ThrowIfFailed(D3DCompileFromFile(GetAssetFullPath(path).c_str(), nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pixelShader, &errorBlob));
+        ThrowIfFailed(D3DCompileFromFile(fullPath.c_str(), nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &vertexShader, &errorBlob));
+        ThrowIfFailed(D3DCompileFromFile(fullPath.c_str(), nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pixelShader, &errorBlob));
       }
 
       // set the file name

@@ -1,0 +1,23 @@
+{
+    "PipelineStateObjects" : [
+        {
+            "Name" : "Base",
+            "Type" : "Graphics",
+            "Shader" : "BaseShader",
+            "CullMode" : "Back",
+            "DepthTesting" : "Less"
+        },
+        {
+            "Name" : "BaseSkybox",
+            "Type" : "Graphics",
+            "Shader" : "BaseSkyboxShader",
+            "CullMode" : "Front",
+            "DepthTesting" : "None"
+        },
+        {
+            "Name" : "MipsCompute",
+            "Type" : "Compute",
+            "Shader" : "MipsGeneratorShader"
+        }
+    ]
+}

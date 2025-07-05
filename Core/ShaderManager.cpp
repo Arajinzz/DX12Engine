@@ -19,9 +19,9 @@ namespace Core
   void ShaderManager::RegisterShaders()
   {
     // for now we have only Skybox shader, and model shader
-    auto SkyboxShader = ShaderBlob(L"skybox_shaders.hlsl", false);
-    auto ModelShader = ShaderBlob(L"shaders.hlsl", false);
-    auto MipsCompute = ShaderBlob(L"GenerateMips_CS.hlsl", true);
+    auto SkyboxShader = ShaderBlob(L"Shaders/skybox_shaders.hlsl", false);
+    auto ModelShader = ShaderBlob(L"Shaders/shaders.hlsl", false);
+    auto MipsCompute = ShaderBlob(L"Shaders/GenerateMips_CS.hlsl", true);
     // register to map
     m_PSOs[SkyboxShader.filename] = PSO();
     m_PSOs[ModelShader.filename] = PSO();
