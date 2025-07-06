@@ -5,7 +5,7 @@
 #include "Core/WindowsApplication.h"
 #include "Core/DX12Texture.h"
 #include "Core/DX12Interface.h"
-#include "Core/ShaderManager.h"
+#include "Core/PSOManager.h"
 #include "Core/TextureManager.h"
 
 #include <assimp\Importer.hpp>
@@ -35,15 +35,9 @@ namespace Core
   void DX12Mesh::Draw(
     unsigned frameIndex, ResourceDescriptor* cb, TextureDescriptor* texture, bool cubeMap, ID3D12GraphicsCommandList* commandList)
   {
-    if (cubeMap)
-    {
-      commandList->SetPipelineState(ShaderManager::Instance().GetShader("BaseSkyboxShader").m_pipelineState.Get());
-      commandList->SetGraphicsRootSignature(ShaderManager::Instance().GetShader("BaseSkyboxShader").m_rootSignature.Get());
-    } else
-    {
-      commandList->SetPipelineState(ShaderManager::Instance().GetShader("BaseShader").m_pipelineState.Get());
-      commandList->SetGraphicsRootSignature(ShaderManager::Instance().GetShader("BaseShader").m_rootSignature.Get());
-    }
+    auto key = cubeMap ? "BaseSkybox" : "Base";
+    commandList->SetPipelineState(PSOManager::Instance().GetPSO(key));
+    commandList->SetGraphicsRootSignature(PSOManager::Instance().GetRootSignature(key));
     
     ID3D12DescriptorHeap* ppHeaps[] = { ResourceManager::Instance().GetResourcesHeap() };
     commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);

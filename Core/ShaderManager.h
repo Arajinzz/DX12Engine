@@ -10,23 +10,6 @@ using Microsoft::WRL::ComPtr;
 
 namespace Core
 {
-  enum
-  {
-    GenerateMipsCB,
-    SrcMip,
-    OutMip,
-    NumRootParameters
-  };
-
-  struct SGenerateMipsCB
-  {
-    uint32_t SrcMipLevel;           // Texture level of source mip
-    uint32_t NumMipLevels;          // Number of OutMips to write: [1-4]
-    uint32_t SrcDimension;          // Width and height of the source texture are even or odd.
-    uint32_t IsSRGB;                // Must apply gamma correction to sRGB textures.
-    DirectX::XMFLOAT2 TexelSize;    // 1.0 / OutMip1.Dimensions
-  };
-
   struct ShaderBlob
   {
     ComPtr<ID3DBlob> vertexShader;
@@ -63,18 +46,6 @@ namespace Core
     }
   };
 
-  struct PSO
-  {
-    ComPtr<ID3D12RootSignature> m_rootSignature;
-    ComPtr<ID3D12PipelineState> m_pipelineState;
-
-    ~PSO()
-    {
-      m_pipelineState.Reset();
-      m_rootSignature.Reset();
-    }
-  };
-
   class ShaderManager
   {
   public:
@@ -85,16 +56,13 @@ namespace Core
     }
     ~ShaderManager();
 
-    PSO GetShader(const std::string& shaderName) { return m_PSOs[shaderName]; }
+    const std::shared_ptr<ShaderBlob> GetShader(const std::string& shaderName) { return m_shaderMap[shaderName]; }
 
   private:
     // function that reads and compiles all available shaders
     void RegisterShaders();
 
   private:
-    // go simple for now, use shader file name as a key
-    // refactor this as needed
-    std::unordered_map<std::string, PSO> m_PSOs;
     // shader map
     std::unordered_map<std::string, std::shared_ptr<ShaderBlob>> m_shaderMap;
 

@@ -4,7 +4,7 @@
 #include "Core/DX12Interface.h"
 #include "Core/DXApplicationHelper.h"
 #include "Core/DX12FrameResource.h"
-#include "Core/ShaderManager.h"
+#include "Core/PSOManager.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -83,8 +83,8 @@ namespace Core
     m_mipsGenerated = true;
 
     //Set root signature, pso and descriptor heap
-    commandList->SetComputeRootSignature(ShaderManager::Instance().GetShader("MipsGeneratorShader").m_rootSignature.Get());
-    commandList->SetPipelineState(ShaderManager::Instance().GetShader("MipsGeneratorShader").m_pipelineState.Get());
+    commandList->SetComputeRootSignature(PSOManager::Instance().GetRootSignature("MipsCompute"));
+    commandList->SetPipelineState(PSOManager::Instance().GetPSO("MipsCompute"));
 
     // heap created
     ID3D12DescriptorHeap* ppHeaps[] = { ResourceManager::Instance().GetResourcesHeap() };
