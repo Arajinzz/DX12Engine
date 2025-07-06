@@ -6,6 +6,7 @@
 #include "Core/DX12Skybox.h"
 #include "Core/ResourceManager.h"
 #include "Core/ShaderManager.h"
+#include "Core/PSOManager.h"
 
 #include <random>
 
@@ -37,6 +38,9 @@ namespace Core
 
     // create shader manager
     ShaderManager::Instance();
+
+    // create PSO manager, it has to be after shader manager
+    PSOManager::Instance();
 
     CreateFrameResource();
     
