@@ -9,9 +9,6 @@
 
 #include <random>
 
-#include <json.hpp>
-using json = nlohmann::json;
-
 #define TINYOBJLOADER_IMPLEMENTATION // define this in only *one* .cc
 // Optional. define TINYOBJLOADER_USE_MAPBOX_EARCUT gives robust triangulation. Requires C++11
 //#define TINYOBJLOADER_USE_MAPBOX_EARCUT

@@ -3,6 +3,11 @@
 
 #include "Core/DX12Interface.h"
 
+#include <filesystem>
+#include <fstream>
+#include <json.hpp>
+using json = nlohmann::json;
+
 namespace Core
 {
   ShaderManager::ShaderManager()
@@ -18,6 +23,12 @@ namespace Core
 
   void ShaderManager::RegisterShaders()
   {
+    // TODO: handle errors
+    auto configPath = std::filesystem::current_path().string() + "/Configs/Shaders.json";
+
+    // read config file and parse it
+    json configData = json::parse(std::ifstream(configPath))["Shaders"];
+
     // for now we have only Skybox shader, and model shader
     auto SkyboxShader = ShaderBlob(L"Shaders/skybox_shaders.hlsl", false);
     auto ModelShader = ShaderBlob(L"Shaders/shaders.hlsl", false);
@@ -30,7 +41,7 @@ namespace Core
     ComPtr<ID3D12RootSignature> rootSig;
 
     D3D12_STATIC_SAMPLER_DESC sampler = {};
-    sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+    sampler.Filter = D3D12_FILTER_COMPARISON_ANISOTROPIC;
     sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
