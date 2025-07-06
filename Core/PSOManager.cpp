@@ -10,6 +10,8 @@
 #include <json.hpp>
 using json = nlohmann::json;
 
+// TODO: move root signatures inside shaders
+
 namespace Core
 {
   PSOManager::PSOManager()
