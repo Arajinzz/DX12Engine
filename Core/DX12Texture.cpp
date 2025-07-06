@@ -83,8 +83,8 @@ namespace Core
     m_mipsGenerated = true;
 
     //Set root signature, pso and descriptor heap
-    commandList->SetComputeRootSignature(ShaderManager::Instance().GetShader(L"GenerateMips_CS.hlsl").m_rootSignature.Get());
-    commandList->SetPipelineState(ShaderManager::Instance().GetShader(L"GenerateMips_CS.hlsl").m_pipelineState.Get());
+    commandList->SetComputeRootSignature(ShaderManager::Instance().GetShader("MipsGeneratorShader").m_rootSignature.Get());
+    commandList->SetPipelineState(ShaderManager::Instance().GetShader("MipsGeneratorShader").m_pipelineState.Get());
 
     // heap created
     ID3D12DescriptorHeap* ppHeaps[] = { ResourceManager::Instance().GetResourcesHeap() };

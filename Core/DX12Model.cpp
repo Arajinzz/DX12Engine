@@ -37,12 +37,12 @@ namespace Core
   {
     if (cubeMap)
     {
-      commandList->SetPipelineState(ShaderManager::Instance().GetShader(L"skybox_shaders.hlsl").m_pipelineState.Get());
-      commandList->SetGraphicsRootSignature(ShaderManager::Instance().GetShader(L"skybox_shaders.hlsl").m_rootSignature.Get());
+      commandList->SetPipelineState(ShaderManager::Instance().GetShader("BaseSkyboxShader").m_pipelineState.Get());
+      commandList->SetGraphicsRootSignature(ShaderManager::Instance().GetShader("BaseSkyboxShader").m_rootSignature.Get());
     } else
     {
-      commandList->SetPipelineState(ShaderManager::Instance().GetShader(L"shaders.hlsl").m_pipelineState.Get());
-      commandList->SetGraphicsRootSignature(ShaderManager::Instance().GetShader(L"shaders.hlsl").m_rootSignature.Get());
+      commandList->SetPipelineState(ShaderManager::Instance().GetShader("BaseShader").m_pipelineState.Get());
+      commandList->SetGraphicsRootSignature(ShaderManager::Instance().GetShader("BaseShader").m_rootSignature.Get());
     }
     
     ID3D12DescriptorHeap* ppHeaps[] = { ResourceManager::Instance().GetResourcesHeap() };

@@ -5,6 +5,8 @@
 
 #include <filesystem>
 #include <fstream>
+
+// json
 #include <json.hpp>
 using json = nlohmann::json;
 
@@ -12,6 +14,7 @@ namespace Core
 {
   ShaderManager::ShaderManager()
     : m_PSOs()
+    , m_shaderMap()
   {
     RegisterShaders();
   }
@@ -19,6 +22,7 @@ namespace Core
   ShaderManager::~ShaderManager()
   {
     m_PSOs.clear();
+    m_shaderMap.clear();
   }
 
   void ShaderManager::RegisterShaders()
@@ -29,14 +33,28 @@ namespace Core
     // read config file and parse it
     json configData = json::parse(std::ifstream(configPath))["Shaders"];
 
+    for (auto data : configData)
+    {
+      std::string name;
+      std::string type;
+      std::string path;
+      
+      data.at("Name").get_to(name);
+      data.at("Type").get_to(type);
+      data.at("Path").get_to(path);
+
+      // create shader blob, which will compile the shader for now
+      m_shaderMap[name] = std::make_shared<ShaderBlob>(path, type == "Compute");
+    }
+
     // for now we have only Skybox shader, and model shader
-    auto SkyboxShader = ShaderBlob(L"Shaders/skybox_shaders.hlsl", false);
-    auto ModelShader = ShaderBlob(L"Shaders/shaders.hlsl", false);
-    auto MipsCompute = ShaderBlob(L"Shaders/GenerateMips_CS.hlsl", true);
+    auto SkyboxShader = *m_shaderMap["BaseSkyboxShader"];
+    auto ModelShader = *m_shaderMap["BaseShader"];
+    auto MipsCompute = *m_shaderMap["MipsGeneratorShader"];
     // register to map
-    m_PSOs[SkyboxShader.filename] = PSO();
-    m_PSOs[ModelShader.filename] = PSO();
-    m_PSOs[MipsCompute.filename] = PSO();
+    m_PSOs["BaseSkyboxShader"] = PSO();
+    m_PSOs["BaseShader"] = PSO();
+    m_PSOs["MipsGeneratorShader"] = PSO();
     // root signature it is shared
     ComPtr<ID3D12RootSignature> rootSig;
 
@@ -73,8 +91,8 @@ namespace Core
     ThrowIfFailed(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_1, &signature, &error));
     ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSig)));
 
-    m_PSOs[SkyboxShader.filename].m_rootSignature = rootSig;
-    m_PSOs[ModelShader.filename].m_rootSignature = rootSig;
+    m_PSOs["BaseSkyboxShader"].m_rootSignature = rootSig;
+    m_PSOs["BaseShader"].m_rootSignature = rootSig;
 
     // create pipeline state object
     // Define the vertex input layout.
@@ -105,7 +123,7 @@ namespace Core
     skyboxPSODesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
     skyboxPSODesc.SampleDesc.Count = 1;
     ThrowIfFailed(
-      DX12Interface::Get().GetDevice()->CreateGraphicsPipelineState(&skyboxPSODesc, IID_PPV_ARGS(&m_PSOs[SkyboxShader.filename].m_pipelineState)));
+      DX12Interface::Get().GetDevice()->CreateGraphicsPipelineState(&skyboxPSODesc, IID_PPV_ARGS(&m_PSOs["BaseSkyboxShader"].m_pipelineState)));
 
     D3D12_GRAPHICS_PIPELINE_STATE_DESC modelPSODesc = {};
     modelPSODesc.InputLayout = { inputElementDescs, _countof(inputElementDescs) };
@@ -126,7 +144,7 @@ namespace Core
     modelPSODesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
     modelPSODesc.SampleDesc.Count = 1;
     ThrowIfFailed(
-      DX12Interface::Get().GetDevice()->CreateGraphicsPipelineState(&modelPSODesc, IID_PPV_ARGS(&m_PSOs[ModelShader.filename].m_pipelineState)));
+      DX12Interface::Get().GetDevice()->CreateGraphicsPipelineState(&modelPSODesc, IID_PPV_ARGS(&m_PSOs["BaseShader"].m_pipelineState)));
 
     // compute part
     ComPtr<ID3D12RootSignature> computeRootSig;
@@ -159,9 +177,9 @@ namespace Core
     computePsoDesc.CS.BytecodeLength = MipsCompute.computeShader->GetBufferSize();
     computePsoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE; // Default flag
     // set
-    m_PSOs[MipsCompute.filename].m_rootSignature = computeRootSig;
+    m_PSOs["MipsGeneratorShader"].m_rootSignature = computeRootSig;
     // Create the compute PSO
-    DX12Interface::Get().GetDevice()->CreateComputePipelineState(&computePsoDesc, IID_PPV_ARGS(&m_PSOs[MipsCompute.filename].m_pipelineState));
+    DX12Interface::Get().GetDevice()->CreateComputePipelineState(&computePsoDesc, IID_PPV_ARGS(&m_PSOs["MipsGeneratorShader"].m_pipelineState));
 
   }
 }
