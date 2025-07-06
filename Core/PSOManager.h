@@ -26,13 +26,12 @@ namespace Core
 
   struct PSO
   {
-    ComPtr<ID3D12RootSignature> rootSignature;
+    std::string shaderName; // necessary to query the root signature
     ComPtr<ID3D12PipelineState> pipelineState;
 
     ~PSO()
     {
       pipelineState.Reset();
-      rootSignature.Reset();
     }
   };
 
@@ -47,7 +46,7 @@ namespace Core
     ~PSOManager();
 
     ID3D12PipelineState* GetPSO(const std::string& name) { return m_psoMap[name]->pipelineState.Get(); }
-    ID3D12RootSignature* GetRootSignature(const std::string& name) { return m_psoMap[name]->rootSignature.Get(); }
+    ID3D12RootSignature* GetRootSignature(const std::string& name);
 
   private:
     void RegisterPSOs();

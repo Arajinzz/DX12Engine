@@ -50,13 +50,14 @@ SamplerState LinearClampSampler : register( s0 );
 #define GenerateMips_RootSignature \
     "RootFlags(0), " \
     "RootConstants(b0, num32BitConstants = 6), " \
-    "DescriptorTable( SRV(t0, numDescriptors = 1) )," \
-    "DescriptorTable( UAV(u0, numDescriptors = 4) )," \
+    "DescriptorTable( SRV(t0, numDescriptors = 1, flags = DESCRIPTORS_VOLATILE | DATA_VOLATILE) )," \
+    "DescriptorTable( UAV(u0, numDescriptors = 4, flags = DESCRIPTORS_VOLATILE | DATA_VOLATILE ) )," \
     "StaticSampler(s0," \
         "addressU = TEXTURE_ADDRESS_CLAMP," \
         "addressV = TEXTURE_ADDRESS_CLAMP," \
         "addressW = TEXTURE_ADDRESS_CLAMP," \
-        "filter = FILTER_MIN_MAG_MIP_LINEAR)"
+        "filter = FILTER_ANISOTROPIC," \
+        "maxAnisotropy = 16)"
 
 // The reason for separating channels is to reduce bank conflicts in the
 // local data memory controller.  A large stride will cause more threads

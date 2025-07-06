@@ -1,3 +1,15 @@
+#define ROOTSIG \
+  "RootFlags(ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT), " \
+  "DescriptorTable(CBV(b0, numDescriptors=1)), " \
+  "DescriptorTable(CBV(b1, numDescriptors=1)), " \
+  "DescriptorTable(SRV(t0, numDescriptors=1, flags = DESCRIPTORS_VOLATILE | DATA_VOLATILE)), " \
+  "StaticSampler(s0," \
+        "addressU = TEXTURE_ADDRESS_CLAMP," \
+        "addressV = TEXTURE_ADDRESS_CLAMP," \
+        "addressW = TEXTURE_ADDRESS_CLAMP," \
+        "filter = FILTER_ANISOTROPIC," \
+        "maxAnisotropy = 16)"
+
 cbuffer SceneConstantBuffer : register(b0)
 {
     float4x4 s_model;
@@ -29,6 +41,7 @@ float remap(float value, float inMin, float inMax, float outMin, float outMax)
     return outMin + (value - inMin) * (outMax - outMin) / (inMax - inMin);
 }
 
+[RootSignature(ROOTSIG)]
 PSInput VSMain(float4 position : POSITION, float3 normal : NORMAL, float2 uv : TEXCOORD)
 {
     PSInput result;

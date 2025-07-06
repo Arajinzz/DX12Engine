@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/DXApplicationHelper.h"
+#include "Core/DX12Interface.h"
 
 #include <unordered_map>
 #include <filesystem>
@@ -15,6 +16,7 @@ namespace Core
     ComPtr<ID3DBlob> vertexShader;
     ComPtr<ID3DBlob> pixelShader;
     ComPtr<ID3DBlob> computeShader;
+    ComPtr<ID3D12RootSignature> rootSignature;
     ComPtr<ID3DBlob> errorBlob;
 
     ShaderBlob(const std::string& path, bool isCompute)
@@ -36,12 +38,27 @@ namespace Core
         ThrowIfFailed(D3DCompileFromFile(wFullPath.c_str(), nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &vertexShader, &errorBlob));
         ThrowIfFailed(D3DCompileFromFile(wFullPath.c_str(), nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pixelShader, &errorBlob));
       }
+
+      auto shaderBlob = isCompute ? computeShader : vertexShader;
+
+      // Extract the root signature from shader
+      ID3DBlob* rootSigBlob = nullptr;
+      D3DGetBlobPart(
+        shaderBlob->GetBufferPointer(),
+        shaderBlob->GetBufferSize(),
+        D3D_BLOB_ROOT_SIGNATURE,
+        0,
+        &rootSigBlob
+      );
+      ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateRootSignature(
+        0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
     }
 
     ~ShaderBlob()
     {
       vertexShader.Reset();
       pixelShader.Reset();
+      rootSignature.Reset();
       errorBlob.Reset();
     }
   };
