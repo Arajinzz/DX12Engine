@@ -163,6 +163,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\BasePass.cpp" />
     <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Core\DirectXApplication.cpp" />
     <ClCompile Include="dep\imgui\backends\imgui_impl_dx11.cpp">
@@ -237,6 +238,7 @@
     <ClCompile Include="Core\ResourceManager.cpp" />
     <ClCompile Include="Core\ShaderManager.cpp" />
     <ClCompile Include="Core\PSOManager.cpp" />
+    <ClCompile Include="Core\SkyboxPass.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -247,6 +249,7 @@
     <ClCompile Include="Core\TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\BasePass.h" />
     <ClInclude Include="Core\Application.h" />
     <ClInclude Include="Core\DirectXApplication.h" />
     <ClInclude Include="Core\DXApplicationHelper.h" />
@@ -419,6 +422,7 @@
     <ClInclude Include="Core\ResourceManager.h" />
     <ClInclude Include="Core\ShaderManager.h" />
     <ClInclude Include="Core\PSOManager.h" />
+    <ClInclude Include="Core\SkyboxPass.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Core\WindowsApplication.h" />
     <ClInclude Include="Core\TextureManager.h" />
