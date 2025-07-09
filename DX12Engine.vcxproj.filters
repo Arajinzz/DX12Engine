@@ -105,6 +105,9 @@
     <ClCompile Include="Core\RenderGraph.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Core\SceneGraph.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -639,6 +642,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\RenderGraph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\SceneGraph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

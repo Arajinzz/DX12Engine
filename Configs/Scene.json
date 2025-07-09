@@ -1,0 +1,14 @@
+{
+  "CurrentScene": "Sponza",
+  "Scenes": [
+    {
+      "Name": "Sponza",
+      "Skybox": "skybox/bluecloud",
+      "Objects": [
+        {
+          "Path": "models/sponza.obj"
+        }
+      ]
+    }
+  ]
+}

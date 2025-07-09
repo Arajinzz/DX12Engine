@@ -240,6 +240,7 @@
     <ClCompile Include="Core\PSOManager.cpp" />
     <ClCompile Include="Core\SkyboxPass.cpp" />
     <ClCompile Include="Core\RenderGraph.cpp" />
+    <ClCompile Include="Core\SceneGraph.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -425,6 +426,7 @@
     <ClInclude Include="Core\PSOManager.h" />
     <ClInclude Include="Core\SkyboxPass.h" />
     <ClInclude Include="Core\RenderGraph.h" />
+    <ClInclude Include="Core\SceneGraph.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Core\WindowsApplication.h" />
     <ClInclude Include="Core\TextureManager.h" />
