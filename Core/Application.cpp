@@ -7,6 +7,8 @@
 #include "Core/ResourceManager.h"
 #include "Core/ShaderManager.h"
 #include "Core/PSOManager.h"
+#include "Core/SceneGraph.h"
+#include "Core/RenderGraph.h"
 
 #include <random>
 
@@ -31,6 +33,7 @@ namespace Core
 
   void Application::OnInit()
   {
+    // things like device, context ...etc
     LoadPipeline();
 
     // create resource manager
@@ -42,6 +45,13 @@ namespace Core
     // create PSO manager, it has to be after shader manager
     PSOManager::Instance();
 
+    // create render graph
+    RenderGraph::Instance();
+
+    // create scene graph
+    SceneGraph::Instance();
+
+    // TODO: maybe delete this
     CreateFrameResource();
     
     // create resources before doing anything
