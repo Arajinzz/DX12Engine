@@ -26,8 +26,6 @@ namespace Core
   Application::Application(UINT width, UINT height, std::wstring name)
     : DirectXApplication(width, height, name)
     , m_context(nullptr)
-    , m_triangleCount(0)
-    , m_models()
   {
   }
 
@@ -58,17 +56,9 @@ namespace Core
     FrameResource().CreateResources(m_context->GetCommandList());
 
     // Create Cube, will also create pso and root signature and constant buffer for transformation
-    auto modelNumber = 1;
-    for (int i = 0; i < modelNumber; ++i)
-      m_models.push_back(new DX12Model());
 
-    for (auto model : m_models)
-    {
-      model->LoadModel("models\\sponza.obj");
+    for (auto model : SceneGraph::Instance().GetModels())
       model->SetupModel(m_context->GetCommandList());
-      //mesh->SetTranslation(translation);
-      m_triangleCount += model->GetTriangleCount();
-    }
 
     FrameResource().GetSkybox()->Setup(m_context->GetCommandList());
 
@@ -83,7 +73,7 @@ namespace Core
   {
     FrameResource().Update();
 
-    for (auto model: m_models)
+    for (auto model : SceneGraph::Instance().GetModels())
       model->UpdateModel();
   }
 
@@ -97,7 +87,7 @@ namespace Core
     m_context->Draw(FrameResource().GetSkybox()->GetModel());
 
     // draw meshes
-    for (auto model : m_models)
+    for (auto model : SceneGraph::Instance().GetModels())
       m_context->Draw(model);
 
     // transition to present state
@@ -114,11 +104,6 @@ namespace Core
 
   void Application::OnDestroy()
   {
-    // delete models
-    for (auto model : m_models)
-      delete model;
-    m_models.clear();
-
     // Ensure that the GPU is no longer referencing resources that are about to be
     // cleaned up by the destructor.
     // Wait for the command list to execute; we are reusing the same command 

@@ -29,14 +29,9 @@ namespace Core
   private:
     void LoadPipeline();
 
-    unsigned m_triangleCount;
-
   private:
     // main context
     std::unique_ptr<DX12Context> m_context;
-
-    // meshes
-    std::vector<DX12Model*> m_models;
 
   };
 }
