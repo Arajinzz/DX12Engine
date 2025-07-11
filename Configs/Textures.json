@@ -1,0 +1,192 @@
+{
+    "Textures" : [
+        {
+            "Name": "lion.tga",
+            "Path": "textures/lion.tga"
+        },
+        {
+            "Name": "lion_ddn.tga",
+            "Path": "textures/lion_ddn.tga"
+        },
+        {
+            "Name": "background.tga",
+            "Path": "textures/background.tga"
+        },
+        {
+            "Name": "background_ddn.tga",
+            "Path": "textures/background_ddn.tga"
+        },
+        {
+            "Name": "vase_plant.tga",
+            "Path": "textures/vase_plant.tga"
+        },
+        {
+            "Name": "vase_plant_mask.tga",
+            "Path": "textures/vase_plant_mask.tga"
+        },
+        {
+            "Name": "sponza_arch_diff.tga",
+            "Path": "textures/sponza_arch_diff.tga"
+        },
+        {
+            "Name": "sponza_arch_ddn.tga",
+            "Path": "textures/sponza_arch_ddn.tga"
+        },
+        {
+            "Name": "spnza_bricks_a_diff.tga",
+            "Path": "textures/spnza_bricks_a_diff.tga"
+        },
+        {
+            "Name": "spnza_bricks_a_ddn.tga",
+            "Path": "textures/spnza_bricks_a_ddn.tga"
+        },
+        {
+            "Name": "sponza_ceiling_a_diff.tga",
+            "Path": "textures/sponza_ceiling_a_diff.tga"
+        },
+        {
+            "Name": "sponza_ceiling_a_ddn.tga",
+            "Path": "textures/sponza_ceiling_a_ddn.tga"
+        },
+        {
+            "Name": "chain_texture.tga",
+            "Path": "textures/chain_texture.tga"
+        },
+        {
+            "Name": "chain_texture_mask.tga",
+            "Path": "textures/chain_texture_mask.tga"
+        },
+        {
+            "Name": "chain_texture_ddn.tga",
+            "Path": "textures/chain_texture_ddn.tga"
+        },
+        {
+            "Name": "sponza_column_a_diff.tga",
+            "Path": "textures/sponza_column_a_diff.tga"
+        },
+        {
+            "Name": "sponza_column_a_ddn.tga",
+            "Path": "textures/sponza_column_a_ddn.tga"
+        },
+        {
+            "Name": "sponza_column_b_diff.tga",
+            "Path": "textures/sponza_column_b_diff.tga"
+        },
+        {
+            "Name": "sponza_column_b_ddn.tga",
+            "Path": "textures/sponza_column_b_ddn.tga"
+        },
+        {
+            "Name": "sponza_column_c_diff.tga",
+            "Path": "textures/sponza_column_c_diff.tga"
+        },
+        {
+            "Name": "sponza_column_c_ddn.tga",
+            "Path": "textures/sponza_column_c_ddn.tga"
+        },
+        {
+            "Name": "sponza_details_diff.tga",
+            "Path": "textures/sponza_details_diff.tga"
+        },
+        {
+            "Name": "sponza_details_ddn.tga",
+            "Path": "textures/sponza_details_ddn.tga"
+        },
+        {
+            "Name": "sponza_fabric_diff.tga",
+            "Path": "textures/sponza_fabric_diff.tga"
+        },
+        {
+            "Name": "sponza_fabric_blue_diff.tga",
+            "Path": "textures/sponza_fabric_blue_diff.tga"
+        },
+        {
+            "Name": "sponza_fabric_green_diff.tga",
+            "Path": "textures/sponza_fabric_green_diff.tga"
+        },
+        {
+            "Name": "sponza_fabric_ddn.tga",
+            "Path": "textures/sponza_fabric_ddn.tga"
+        },
+        {
+            "Name": "sponza_curtain_diff.tga",
+            "Path": "textures/sponza_curtain_diff.tga"
+        },
+        {
+            "Name": "sponza_curtain_green_diff.tga",
+            "Path": "textures/sponza_curtain_green_diff.tga"
+        },
+        {
+            "Name": "sponza_curtain_blue_diff.tga",
+            "Path": "textures/sponza_curtain_blue_diff.tga"
+        },
+        {
+            "Name": "sponza_curtain_ddn.tga",
+            "Path": "textures/sponza_curtain_ddn.tga"
+        },
+        {
+            "Name": "sponza_flagpole_diff.tga",
+            "Path": "textures/sponza_flagpole_diff.tga"
+        },
+        {
+            "Name": "sponza_flagpole_ddn.tga",
+            "Path": "textures/sponza_flagpole_ddn.tga"
+        },
+        {
+            "Name": "sponza_floor_a_diff.tga",
+            "Path": "textures/sponza_floor_a_diff.tga"
+        },
+        {
+            "Name": "sponza_floor_a_ddn.tga",
+            "Path": "textures/sponza_floor_a_ddn.tga"
+        },
+        {
+            "Name": "sponza_thorn_diff.tga",
+            "Path": "textures/sponza_thorn_diff.tga"
+        },
+        {
+            "Name": "sponza_thorn_mask.tga",
+            "Path": "textures/sponza_thorn_mask.tga"
+        },
+        {
+            "Name": "sponza_thorn_ddn.tga",
+            "Path": "textures/sponza_thorn_ddn.tga"
+        },
+        {
+            "Name": "sponza_roof_diff.tga",
+            "Path": "textures/sponza_roof_diff.tga"
+        },
+        {
+            "Name": "sponza_roof_ddn.tga",
+            "Path": "textures/sponza_roof_ddn.tga"
+        },
+        {
+            "Name": "vase_dif.tga",
+            "Path": "textures/vase_dif.tga"
+        },
+        {
+            "Name": "vase_ddn.tga",
+            "Path": "textures/vase_ddn.tga"
+        },
+        {
+            "Name": "vase_hanging.tga",
+            "Path": "textures/vase_hanging.tga"
+        },
+        {
+            "Name": "vase_hanging_ddn.tga",
+            "Path": "textures/vase_hanging_ddn.tga"
+        },
+        {
+            "Name": "vase_round.tga",
+            "Path": "textures/vase_round.tga"
+        },
+        {
+            "Name": "vase_round_ddn.tga",
+            "Path": "textures/vase_round_ddn.tga"
+        },
+        {
+            "Name": "default",
+            "Path": "textures/brick.png"
+        }
+    ]
+}
