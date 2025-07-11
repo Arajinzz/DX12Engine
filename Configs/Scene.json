@@ -1,14 +1,8 @@
 {
-  "CurrentScene": "Sponza",
-  "Scenes": [
+  "Name": "Sponza",
+  "Objects": [
     {
-      "Name": "Sponza",
-      "Skybox": "skybox/bluecloud",
-      "Objects": [
-        {
-          "Path": "models/sponza.obj"
-        }
-      ]
+      "Path": "models/sponza.obj"
     }
   ]
 }
