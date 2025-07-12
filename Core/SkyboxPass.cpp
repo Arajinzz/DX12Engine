@@ -4,6 +4,7 @@
 namespace Core
 {
   SkyboxPass::SkyboxPass()
+    : RenderPass()
   {
   }
 

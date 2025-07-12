@@ -1,5 +1,9 @@
 #pragma once
 
+#include "Core/RenderPass.h"
+
+#include <unordered_map>
+
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
@@ -14,6 +18,10 @@ namespace Core
       return instance;
     }
     ~RenderGraph();
+
+  private:
+    // passes in order
+    std::unordered_map<std::string, RenderPass> m_passes;
 
   private:
     RenderGraph();

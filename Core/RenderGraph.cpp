@@ -4,7 +4,9 @@
 namespace Core
 {
   RenderGraph::RenderGraph()
+    : m_passes()
   {
+
   }
 
   RenderGraph::~RenderGraph()
