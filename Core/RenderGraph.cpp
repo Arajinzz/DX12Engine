@@ -3,6 +3,7 @@
 
 #include "Core/BasePass.h"
 #include "Core/SkyboxPass.h"
+#include "Core/PSOManager.h"
 
 #include <filesystem>
 #include <fstream>
@@ -19,13 +20,10 @@ namespace Core
   {
     // register creators
     // key has to match name in RenderGraph.json
-    m_creators["BasePass"] = [&]() {
-      return new BasePass();
-    };
-    m_creators["SkyboxPass"] = [&]() {
-      return new SkyboxPass();
-    };
+    m_creators["BasePass"] = [&]() { return new BasePass(); };
+    m_creators["SkyboxPass"] = [&]() { return new SkyboxPass(); };
 
+    // read the config file
     ReadRenderGraph();
   }
 
@@ -57,6 +55,8 @@ namespace Core
 
       // just plain pass for now
       m_passes[name] = m_creators[name](); // create
+      // set pso
+      m_passes[name]->SetPSO(PSOManager::Instance().GetPSO(pso));
     }
   }
 
