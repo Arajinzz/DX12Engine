@@ -1,11 +1,13 @@
 #pragma once
 
+#include "Core/RenderPass.h"
+
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
 namespace Core
 {
-  class SkyboxPass
+  class SkyboxPass : public RenderPass
   {
   public:
     SkyboxPass();

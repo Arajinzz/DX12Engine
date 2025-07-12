@@ -1,11 +1,13 @@
 #pragma once
 
+#include "Core/RenderPass.h"
+
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
 namespace Core
 {
-  class BasePass
+  class BasePass : public RenderPass
   {
   public:
     BasePass();
