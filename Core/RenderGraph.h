@@ -2,6 +2,7 @@
 
 #include "Core/RenderPass.h"
 
+#include <functional>
 #include <unordered_map>
 
 using namespace DirectX;
@@ -20,6 +21,13 @@ namespace Core
     ~RenderGraph();
 
   private:
+    void ReadRenderGraph();
+
+  private:
+    using Creator = std::function<RenderPass*()>;
+    // creator
+    std::unordered_map<std::string, Creator> m_creators;
+
     // passes in order
     std::unordered_map<std::string, RenderPass*> m_passes;
 
