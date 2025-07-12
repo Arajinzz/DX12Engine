@@ -21,7 +21,7 @@ namespace Core
 
   private:
     // passes in order
-    std::unordered_map<std::string, RenderPass> m_passes;
+    std::unordered_map<std::string, RenderPass*> m_passes;
 
   private:
     RenderGraph();
