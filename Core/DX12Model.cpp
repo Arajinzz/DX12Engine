@@ -16,7 +16,7 @@
 
 namespace Core
 {
-  DX12Mesh::DX12Mesh(D3D12_CULL_MODE cullMode, bool depthEnabled)
+  DX12Mesh::DX12Mesh()
     : m_vertices()
     , m_indices()
     , m_vertexBufferView()

@@ -27,7 +27,7 @@ namespace Core
 
     aiMatrix4x4 identity; // identity matrix
     const auto pMesh = pModel->mMeshes[0];
-    auto mesh = std::make_unique<DX12Mesh>(D3D12_CULL_MODE_FRONT, false);
+    auto mesh = std::make_unique<DX12Mesh>();
     mesh->LoadMesh(pMesh, identity);
 
     std::vector<std::string> paths;

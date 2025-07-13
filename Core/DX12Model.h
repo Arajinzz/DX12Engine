@@ -16,7 +16,7 @@ namespace Core
   class DX12Mesh
   {
   public:
-    DX12Mesh(D3D12_CULL_MODE cullMode = D3D12_CULL_MODE_BACK, bool depthEnabled = true);
+    DX12Mesh();
     ~DX12Mesh();
 
     virtual void Setup(ID3D12GraphicsCommandList* commandList);
