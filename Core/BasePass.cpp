@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "BasePass.h"
 
+#include "Core/SceneGraph.h"
+
 namespace Core
 {
   BasePass::BasePass()
@@ -12,7 +14,10 @@ namespace Core
   {
   }
 
-  void BasePass::Render(ID3D12CommandList* cmdList)
+  void BasePass::Render(DX12Context* ctx)
   {
+    // draw meshes
+    for (auto model : SceneGraph::Instance().GetModels())
+      ctx->Draw(model);
   }
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/PSOManager.h"
+#include "Core/DX12Context.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -13,7 +14,7 @@ namespace Core
     RenderPass();
     ~RenderPass();
 
-    virtual void Render(ID3D12CommandList* cmdList) = 0;
+    virtual void Render(DX12Context* ctx) = 0;
 
     void SetPSO(ID3D12PipelineState* pso);
 

@@ -83,12 +83,9 @@ namespace Core
     // Reset and transition to Rendering state
     m_context->PrepareForRendering(); // set heaps, rects ...etc
 
-    // draw skybox first
-    m_context->Draw(FrameResource().GetSkybox()->GetModel());
-
-    // draw meshes
-    for (auto model : SceneGraph::Instance().GetModels())
-      m_context->Draw(model);
+    // execute passes in order
+    for (auto pass : RenderGraph::Instance().GetPasses())
+      pass.second->Render(m_context.get());
 
     // transition to present state
     m_context->PrepareForPresenting();

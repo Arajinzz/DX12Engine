@@ -36,6 +36,11 @@ namespace Core
     m_creators.clear();
   }
 
+  const std::unordered_map<std::string, RenderPass*>& RenderGraph::GetPasses()
+  {
+    return m_passes;
+  }
+
   void RenderGraph::ReadRenderGraph()
   {
     // TODO: handle errors

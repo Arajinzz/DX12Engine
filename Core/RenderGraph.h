@@ -20,6 +20,9 @@ namespace Core
     }
     ~RenderGraph();
 
+    // get passes in order from config
+    const std::unordered_map<std::string, RenderPass*>& GetPasses();
+
   private:
     void ReadRenderGraph();
 

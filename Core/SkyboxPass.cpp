@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "SkyboxPass.h"
 
+#include "Core/DX12FrameResource.h"
+#include "Core/DX12Skybox.h"
+
 namespace Core
 {
   SkyboxPass::SkyboxPass()
@@ -12,7 +15,9 @@ namespace Core
   {
   }
 
-  void SkyboxPass::Render(ID3D12CommandList* cmdList)
+  void SkyboxPass::Render(DX12Context* ctx)
   {
+    // draw skybox first
+    ctx->Draw(FrameResource().GetSkybox()->GetModel());
   }
 }
