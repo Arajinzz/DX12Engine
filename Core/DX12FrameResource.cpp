@@ -33,13 +33,13 @@ namespace Core
     memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
 
     m_skybox = std::make_unique<DX12Skybox>();
-    m_skybox->GetModel()->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
+    m_skybox->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
   }
 
   void DX12FrameResource::Update()
   {
     m_camera->Update();
-    m_skybox->Update();
+    m_skybox->UpdateModel();
 
     m_constantBufferData.view = m_camera->GetView();
     m_constantBufferData.projection = m_camera->GetProjection();

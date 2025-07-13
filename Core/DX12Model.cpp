@@ -32,12 +32,10 @@ namespace Core
     SetupIndexBuffer(commandList);
   }
 
-  void DX12Mesh::Draw(
-    unsigned frameIndex, ResourceDescriptor* cb, TextureDescriptor* texture, bool cubeMap, ID3D12GraphicsCommandList* commandList)
+  void DX12Mesh::Draw(ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, ResourceDescriptor* cb, TextureDescriptor* texture, ID3D12GraphicsCommandList* commandList)
   {
-    auto key = cubeMap ? "BaseSkybox" : "Base";
-    commandList->SetPipelineState(PSOManager::Instance().GetPSO(key));
-    commandList->SetGraphicsRootSignature(PSOManager::Instance().GetRootSignature(key));
+    commandList->SetPipelineState(pso);
+    commandList->SetGraphicsRootSignature(rootSig);
     
     ID3D12DescriptorHeap* ppHeaps[] = { ResourceManager::Instance().GetResourcesHeap() };
     commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
@@ -189,7 +187,6 @@ namespace Core
     , m_scale(1.0f, 1.0f, 1.0f)
     , m_angle(0.0f)
     , m_textures()
-    , m_isCubeMap(false)
   {
     // create constant buffer
     m_constantBuffer = ResourceManager::Instance().CreateConstantBufferResource(
@@ -203,6 +200,7 @@ namespace Core
 
   DX12Model::~DX12Model()
   {
+    m_meshes.clear();
     m_textures.clear();
   }
 
@@ -218,10 +216,10 @@ namespace Core
       m_meshes[i]->Setup(commandList);
   }
 
-  void DX12Model::DrawModel(unsigned frameIndex, ID3D12GraphicsCommandList* commandList)
+  void DX12Model::DrawModel(ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, ID3D12GraphicsCommandList* commandList)
   {
     for (int i = 0; i < m_meshes.size(); ++i)
-      m_meshes[i]->Draw(frameIndex, m_constantBuffer.get(), m_textures[i]->GetResource(), m_isCubeMap, commandList);
+      m_meshes[i]->Draw(pso, rootSig, m_constantBuffer.get(), m_textures[i]->GetResource(), commandList);
   }
 
   void DX12Model::ProcessNode(const aiNode* node, const aiScene* scene, const aiMatrix4x4& parentTransform)
@@ -271,52 +269,14 @@ namespace Core
     ProcessNode(pModel->mRootNode, pModel, identity);
   }
 
-  void DX12Model::LoadModelSkyboxSpecific(const char* path)
-  {
-    m_isCubeMap = true;
-
-    Assimp::Importer importer;
-
-    const aiScene* pModel = importer.ReadFile(path,
-      aiProcess_Triangulate |
-      aiProcess_JoinIdenticalVertices |
-      aiProcess_ConvertToLeftHanded |
-      aiProcess_GenNormals |
-      aiProcess_CalcTangentSpace);
-
-    aiMatrix4x4 identity; // identity matrix
-    const auto pMesh = pModel->mMeshes[0];
-    auto mesh = std::make_unique<DX12Mesh>(D3D12_CULL_MODE_FRONT, false);
-    mesh->LoadMesh(pMesh, identity);
-
-    std::vector<std::string> paths;
-    paths.push_back("skybox\\bluecloud_ft.jpg");
-    paths.push_back("skybox\\bluecloud_bk.jpg");
-    paths.push_back("skybox\\bluecloud_up.jpg");
-    paths.push_back("skybox\\bluecloud_dn.jpg");
-    paths.push_back("skybox\\bluecloud_rt.jpg");
-    paths.push_back("skybox\\bluecloud_lf.jpg");
-
-    m_meshes.emplace_back(mesh.release());
-    m_textures.emplace_back(TextureManager::Instance().CreateOrGetTexture(paths));
-  }
-
   void DX12Model::UpdateModel()
   {
-    /*m_angle += 100 * WindowsApplication::deltaTime;
-    if (m_angle > 360.0)
-      m_angle = 0.0;*/
+    XMMATRIX T = XMMatrixTranslation(m_translation.x, m_translation.y, m_translation.z);
+    XMMATRIX R = XMMatrixRotationY(XMConvertToRadians(m_angle));
+    XMMATRIX S = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
 
-      // quick hack to test performance
-    if (staticMesh && !isModelSet)
-    {
-      XMMATRIX T = XMMatrixTranslation(m_translation.x, m_translation.y, m_translation.z);
-      XMMATRIX R = XMMatrixRotationY(XMConvertToRadians(m_angle));
-      XMMATRIX S = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
-
-      m_constantBufferData.model = XMMatrixTranspose(S * R * T);
-      memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
-    }
+    m_constantBufferData.model = XMMatrixTranspose(S * R * T);
+    memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
   }
 
   unsigned DX12Model::GetTriangleCount()

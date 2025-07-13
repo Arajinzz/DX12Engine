@@ -18,6 +18,6 @@ namespace Core
   {
     // draw meshes
     for (auto model : SceneGraph::Instance().GetModels())
-      ctx->Draw(model);
+      ctx->Draw(model, m_pso, m_rootSignature);
   }
 }

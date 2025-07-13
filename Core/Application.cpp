@@ -62,12 +62,13 @@ namespace Core
     // create resources before doing anything
     FrameResource().CreateResources(m_context->GetCommandList());
 
-    // Create Cube, will also create pso and root signature and constant buffer for transformation
-
+    // create index/vertex buffers and necessary CBs/SRVs
     for (auto model : SceneGraph::Instance().GetModels())
       model->SetupModel(m_context->GetCommandList());
 
-    FrameResource().GetSkybox()->Setup(m_context->GetCommandList());
+    // this should be done on the scene graph
+    FrameResource().GetSkybox()->LoadModel("models//cube.obj");
+    FrameResource().GetSkybox()->SetupModel(m_context->GetCommandList());
 
     // Execute command lists
     m_context->Execute();

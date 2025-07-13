@@ -160,9 +160,9 @@ namespace Core
     m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
   }
 
-  void DX12Context::Draw(DX12Model* model)
+  void DX12Context::Draw(DX12Model* model, ID3D12PipelineState* pso, ID3D12RootSignature* rootSig)
   {
-    model->DrawModel(m_frameIndex, m_commandList.Get());
+    model->DrawModel(pso, rootSig, m_commandList.Get());
   }
 
   void DX12Context::PrepareForPresenting()

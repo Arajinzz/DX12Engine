@@ -18,6 +18,6 @@ namespace Core
   void SkyboxPass::Render(DX12Context* ctx)
   {
     // draw skybox first
-    ctx->Draw(FrameResource().GetSkybox()->GetModel());
+    ctx->Draw(FrameResource().GetSkybox(), m_pso, m_rootSignature);
   }
 }

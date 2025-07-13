@@ -60,8 +60,9 @@ namespace Core
 
       // just plain pass for now
       m_passes[name] = m_creators[name](); // create
-      // set pso
+      // set pso and root signature
       m_passes[name]->SetPSO(PSOManager::Instance().GetPSO(pso));
+      m_passes[name]->SetRootSignature(PSOManager::Instance().GetRootSignature(pso));
     }
   }
 

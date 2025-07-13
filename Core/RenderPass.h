@@ -17,9 +17,11 @@ namespace Core
     virtual void Render(DX12Context* ctx) = 0;
 
     void SetPSO(ID3D12PipelineState* pso);
+    void SetRootSignature(ID3D12RootSignature* rootSig);
 
-  private:
+  protected:
     ID3D12PipelineState* m_pso;
+    ID3D12RootSignature* m_rootSignature;
 
   };
 }

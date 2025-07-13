@@ -21,7 +21,7 @@ namespace Core
 
     virtual void Setup(ID3D12GraphicsCommandList* commandList);
     virtual void Draw(
-      unsigned frameIndex, ResourceDescriptor* cb, TextureDescriptor* texture, bool cubeMap, ID3D12GraphicsCommandList* commandList);
+      ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, ResourceDescriptor* cb, TextureDescriptor* texture, ID3D12GraphicsCommandList* commandList);
     virtual void LoadMesh(const aiMesh* pMesh, const aiMatrix4x4& transform);
     unsigned GetTriangleCount() { return static_cast<unsigned>(m_indices.size() / 3); }
 
@@ -69,10 +69,8 @@ namespace Core
     ~DX12Model();
 
     void SetupModel(ID3D12GraphicsCommandList* commandList);
-    void DrawModel(unsigned frameIndex, ID3D12GraphicsCommandList* commandList);
-    void LoadModel(const char* path);
-    // Workaround!!!
-    void LoadModelSkyboxSpecific(const char* path);
+    void DrawModel(ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, ID3D12GraphicsCommandList* commandList);
+    virtual void LoadModel(const char* path);
     void UpdateModel();
     void SetTranslation(XMFLOAT3 translate) { m_translation = translate; };
     void SetScale(XMFLOAT3 scale) { m_scale = scale; }
@@ -81,12 +79,11 @@ namespace Core
   private:
     void ProcessNode(const aiNode* node, const aiScene* scene, const aiMatrix4x4& parentTransform);
 
-  private:
+  protected:
     std::vector<std::unique_ptr<DX12Mesh>> m_meshes;
     std::vector<std::shared_ptr<DX12Texture>> m_textures; // for each model
-    bool staticMesh = true;
-    bool isModelSet = false;
 
+  private:
     // temporary
     struct ConstantBufferData
     {
@@ -105,8 +102,6 @@ namespace Core
     XMFLOAT3 m_translation;
     XMFLOAT3 m_scale;
     float m_angle;
-    // workaround
-    bool m_isCubeMap;
 
   private:
     DX12Model(const DX12Model&) = delete;

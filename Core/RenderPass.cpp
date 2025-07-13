@@ -5,6 +5,7 @@ namespace Core
 {
   RenderPass::RenderPass()
     : m_pso()
+    , m_rootSignature()
   {
   }
 
@@ -16,5 +17,11 @@ namespace Core
   {
     // set the pso
     m_pso = pso;
+  }
+
+  void RenderPass::SetRootSignature(ID3D12RootSignature* rootSig)
+  {
+    // set the root signature
+    m_rootSignature = rootSig;
   }
 }

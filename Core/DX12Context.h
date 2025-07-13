@@ -22,7 +22,7 @@ namespace Core
     void Resize(unsigned width, unsigned height);
 
     void PrepareForRendering();
-    void Draw(DX12Model* model);
+    void Draw(DX12Model* model, ID3D12PipelineState* pso, ID3D12RootSignature* rootSig);
     void PrepareForPresenting();
 
     ID3D12CommandQueue* GetCommandQueue() { return m_commandQueue.Get(); }

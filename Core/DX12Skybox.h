@@ -5,19 +5,13 @@
 
 namespace Core
 {
-  class DX12Skybox
+  class DX12Skybox : public DX12Model
   {
   public:
     DX12Skybox();
     ~DX12Skybox();
     
-    void Setup(ID3D12GraphicsCommandList* commandList);
-    void Update();
-    
-    DX12Model* GetModel() { return m_cube.get(); }
-
-  private:
-    std::unique_ptr<DX12Model> m_cube;
+    virtual void LoadModel(const char* path) override;
 
   private:
     DX12Skybox(const DX12Skybox&) = delete;
