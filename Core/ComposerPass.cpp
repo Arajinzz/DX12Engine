@@ -32,6 +32,10 @@ namespace Core
 
   ComposerPass::~ComposerPass()
   {
+    m_vertexBuffer.Reset();
+    m_indexBuffer.Reset();
+    m_vertexBufferUploadHeap.Reset();
+    m_indexBufferUploadHeap.Reset();
   }
 
   void ComposerPass::Render(DX12Context* ctx)
