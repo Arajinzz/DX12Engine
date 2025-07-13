@@ -27,9 +27,6 @@ namespace Core
     static const uint32_t FrameCount = 2;
 
   private:
-    void LoadPipeline();
-
-  private:
     // main context
     std::unique_ptr<DX12Context> m_context;
 

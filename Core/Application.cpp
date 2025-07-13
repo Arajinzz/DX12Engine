@@ -31,8 +31,15 @@ namespace Core
 
   void Application::OnInit()
   {
-    // things like device, context ...etc
-    LoadPipeline();
+    // Create DX12Interface, It will create Device and factory
+    DX12Interface::Get();
+
+    // Create Context
+    // Create SwapChain, swap chain creates depth buffer and render targets
+    m_context = std::make_unique<DX12Context>();
+
+    // full screen transitions not supported.
+    DX12Interface::Get().MakeWindowAssociation(WindowsApplication::GetHwnd(), DXGI_MWA_NO_ALT_ENTER);
 
     // create resource manager
     ResourceManager::Instance();
@@ -161,14 +168,6 @@ namespace Core
 
   void Application::LoadPipeline()
   {
-    // Create DX12Interface, It will create Device and factory
-    DX12Interface::Get();
-
-    // Create Context
-    // Create SwapChain, swap chain creates depth buffer and render targets
-    m_context = std::make_unique<DX12Context>();
-
-    // full screen transitions not supported.
-    DX12Interface::Get().MakeWindowAssociation(WindowsApplication::GetHwnd(), DXGI_MWA_NO_ALT_ENTER);
+    
   }
 }
