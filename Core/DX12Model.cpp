@@ -19,11 +19,17 @@ namespace Core
   DX12Mesh::DX12Mesh(D3D12_CULL_MODE cullMode, bool depthEnabled)
     : m_vertices()
     , m_indices()
+    , m_vertexBufferView()
+    , m_indexBufferView()
   {
   }
 
   DX12Mesh::~DX12Mesh()
   {
+    m_vertexBuffer.Reset();
+    m_vertexBufferUploadHeap.Reset();
+    m_indexBuffer.Reset();
+    m_indexBufferUploadHeap.Reset();
   }
 
   void DX12Mesh::Setup(ID3D12GraphicsCommandList* commandList)
