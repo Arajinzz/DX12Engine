@@ -5,6 +5,7 @@
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
+// this will create a quad and map a texture to the screen
 namespace Core
 {
   class ComposerPass : public RenderPass
@@ -14,6 +15,24 @@ namespace Core
     ~ComposerPass();
 
     virtual void Render(DX12Context* ctx) override;
+
+  private:
+    struct Vertex
+    {
+      XMFLOAT3 position;
+      XMFLOAT3 normal;
+      XMFLOAT2 uv;
+    };
+    Vertex m_vertices[4]; // for a quad
+    uint16_t m_indices[6]; // 2 triangles needed for a quad
+    // vertex buffer
+    ComPtr<ID3D12Resource> m_vertexBuffer;
+    ComPtr<ID3D12Resource> m_vertexBufferUploadHeap;
+    D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+    // index buffer
+    ComPtr<ID3D12Resource> m_indexBuffer;
+    ComPtr<ID3D12Resource> m_indexBufferUploadHeap;
+    D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
 
   private:
     ComposerPass(const ComposerPass&) = delete;
