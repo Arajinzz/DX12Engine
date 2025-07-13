@@ -13,6 +13,8 @@ namespace Core
     BasePass();
     ~BasePass();
 
+    virtual void Render(ID3D12CommandList* cmdList) override;
+
   private:
     BasePass(const BasePass&) = delete;
     BasePass& operator=(const BasePass&) = delete;

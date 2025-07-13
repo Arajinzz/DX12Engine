@@ -11,4 +11,8 @@ namespace Core
   BasePass::~BasePass()
   {
   }
+
+  void BasePass::Render(ID3D12CommandList* cmdList)
+  {
+  }
 }

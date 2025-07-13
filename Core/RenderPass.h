@@ -13,6 +13,8 @@ namespace Core
     RenderPass();
     ~RenderPass();
 
+    virtual void Render(ID3D12CommandList* cmdList) = 0;
+
     void SetPSO(ID3D12PipelineState* pso);
 
   private:

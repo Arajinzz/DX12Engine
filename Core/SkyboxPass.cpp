@@ -11,4 +11,8 @@ namespace Core
   SkyboxPass::~SkyboxPass()
   {
   }
+
+  void SkyboxPass::Render(ID3D12CommandList* cmdList)
+  {
+  }
 }
