@@ -165,9 +165,4 @@ namespace Core
   {
     FrameResource().GetCamera()->Rotate(dx, dy);
   }
-
-  void Application::LoadPipeline()
-  {
-    
-  }
 }
