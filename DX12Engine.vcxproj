@@ -163,6 +163,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\ComposerPass.cpp" />
     <ClCompile Include="Core\BasePass.cpp" />
     <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Core\DirectXApplication.cpp" />
@@ -252,6 +253,7 @@
     <ClCompile Include="Core\TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\ComposerPass.h" />
     <ClInclude Include="Core\BasePass.h" />
     <ClInclude Include="Core\Application.h" />
     <ClInclude Include="Core\DirectXApplication.h" />

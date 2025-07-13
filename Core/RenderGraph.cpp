@@ -4,6 +4,7 @@
 #include "Core/BasePass.h"
 #include "Core/SkyboxPass.h"
 #include "Core/PSOManager.h"
+#include "Core/ComposerPass.h"
 
 #include <filesystem>
 #include <fstream>
@@ -22,6 +23,7 @@ namespace Core
     // key has to match name in RenderGraph.json
     m_creators["BasePass"] = [&]() { return new BasePass(); };
     m_creators["SkyboxPass"] = [&]() { return new SkyboxPass(); };
+    m_creators["ComposerPass"] = [&]() { return new ComposerPass(); };
 
     // read the config file
     ReadRenderGraph();

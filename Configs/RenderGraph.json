@@ -8,6 +8,10 @@
             {
               "Name": "BasePass",
               "PSO": "Base"
+            },
+            {
+              "Name": "ComposerPass",
+              "PSO": "Composer"
             }
         ]
     }

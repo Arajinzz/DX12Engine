@@ -18,6 +18,13 @@
             "Name" : "MipsCompute",
             "Type" : "Compute",
             "Shader" : "MipsGeneratorShader"
+        },
+        {
+            "Name": "Composer",
+            "Type": "Graphics",
+            "Shader": "ComposerShader",
+            "CullMode": "None",
+            "DepthTesting": "None"
         }
     ]
 }

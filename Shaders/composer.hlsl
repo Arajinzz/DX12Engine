@@ -32,5 +32,5 @@ PSInput VSMain(float4 position : POSITION, float3 normal : NORMAL, float2 uv : T
 
 float4 PSMain(PSInput input) : SV_TARGET
 {
-    return g_texture.Sample(g_sampler, uv);
+    return g_texture.Sample(g_sampler, input.uv);
 }
