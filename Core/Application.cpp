@@ -89,14 +89,14 @@ namespace Core
   {
     // Populate Command list
     // Reset and transition to Rendering state
-    m_context->PrepareForRendering(); // set heaps, rects ...etc
+    m_context->BeginFrame(); // set heaps, rects ...etc
 
     // execute passes in order
     for (auto pass : RenderGraph::Instance().GetPasses())
       pass.second->Render(m_context.get());
 
     // transition to present state
-    m_context->PrepareForPresenting();
+    m_context->EndFrame();
 
     // execute command list
     m_context->Execute();

@@ -118,7 +118,7 @@ namespace Core
     InitFence();
   }
 
-  void DX12Context::PrepareForRendering()
+  void DX12Context::BeginFrame()
   {
     // Command list allocators can only be reset when the associated 
     // command lists have finished execution on the GPU; apps should use 
@@ -165,7 +165,7 @@ namespace Core
     model->DrawModel(pso, rootSig, m_commandList.Get());
   }
 
-  void DX12Context::PrepareForPresenting()
+  void DX12Context::EndFrame()
   {
     // get render target resource
     ComPtr<ID3D12Resource> renderTargetResource;
