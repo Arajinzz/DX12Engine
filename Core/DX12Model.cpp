@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "DX12Model.h"
 
-#include "Core/DX12FrameResource.h"
 #include "Core/WindowsApplication.h"
 #include "Core/DX12Texture.h"
 #include "Core/DX12Interface.h"
 #include "Core/PSOManager.h"
 #include "Core/TextureManager.h"
+#include "Core/SceneGraph.h"
 
 #include <assimp\Importer.hpp>
 #include <assimp\scene.h>
@@ -48,7 +48,7 @@ namespace Core
 
     // scene CBV
     commandList->SetGraphicsRootDescriptorTable(
-      0, ResourceManager::Instance().GetResourceGpuHandle(FrameResource().GetConstantBuffer()->index));
+      0, ResourceManager::Instance().GetResourceGpuHandle(SceneGraph::Instance().GetSceneBuffer()->index));
 
     // object CBV
     commandList->SetGraphicsRootDescriptorTable(1, ResourceManager::Instance().GetResourceGpuHandle(cb->index));

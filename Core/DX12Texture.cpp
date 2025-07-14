@@ -3,7 +3,6 @@
 
 #include "Core/DX12Interface.h"
 #include "Core/DXApplicationHelper.h"
-#include "Core/DX12FrameResource.h"
 #include "Core/PSOManager.h"
 
 #define STB_IMAGE_IMPLEMENTATION

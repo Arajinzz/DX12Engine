@@ -2,7 +2,6 @@
 #include "Application.h"
 
 #include "Core/DX12Interface.h"
-#include "Core/DX12FrameResource.h"
 #include "Core/DX12Skybox.h"
 #include "Core/ResourceManager.h"
 #include "Core/ShaderManager.h"
@@ -56,19 +55,13 @@ namespace Core
     // create scene graph
     SceneGraph::Instance();
 
-    // TODO: maybe delete this
-    CreateFrameResource();
-    
-    // create resources before doing anything
-    FrameResource().CreateResources();
-
     // create index/vertex buffers and necessary CBs/SRVs
     for (auto model : SceneGraph::Instance().GetModels())
       model->SetupModel(m_context->GetCommandList());
 
     // this should be done on the scene graph
-    FrameResource().GetSkybox()->LoadModel("models//cube.obj");
-    FrameResource().GetSkybox()->SetupModel(m_context->GetCommandList());
+    SceneGraph::Instance().GetSkybox()->LoadModel("models//cube.obj");
+    SceneGraph::Instance().GetSkybox()->SetupModel(m_context->GetCommandList());
 
     // Execute command lists
     m_context->Execute();
@@ -79,7 +72,7 @@ namespace Core
 
   void Application::OnUpdate()
   {
-    FrameResource().Update();
+    SceneGraph::Instance().UpdateScene();
 
     for (auto model : SceneGraph::Instance().GetModels())
       model->UpdateModel();
@@ -155,7 +148,7 @@ namespace Core
       x = 1.0;
     }
     
-    FrameResource().GetCamera()->Translate(x, z);
+    SceneGraph::Instance().GetCamera()->Translate(x, z);
   }
 
   void Application::OnKeyUp(UINT8 key)
@@ -164,6 +157,6 @@ namespace Core
 
   void Application::OnMouseMove(float dx, float dy)
   {
-    FrameResource().GetCamera()->Rotate(dx, dy);
+    SceneGraph::Instance().GetCamera()->Rotate(dx, dy);
   }
 }

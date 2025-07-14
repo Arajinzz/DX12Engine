@@ -30,7 +30,6 @@ namespace Core
     using Creator = std::function<RenderPass*()>;
     // creator
     std::unordered_map<std::string, Creator> m_creators;
-
     // passes in order
     std::unordered_map<std::string, RenderPass*> m_passes;
 

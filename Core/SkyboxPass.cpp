@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "SkyboxPass.h"
 
-#include "Core/DX12FrameResource.h"
 #include "Core/DX12Skybox.h"
+#include "Core/SceneGraph.h"
 
 namespace Core
 {
@@ -18,6 +18,6 @@ namespace Core
   void SkyboxPass::Render(DX12Context* ctx)
   {
     // draw skybox first
-    ctx->Draw(FrameResource().GetSkybox(), m_pso, m_rootSignature);
+    ctx->Draw(SceneGraph::Instance().GetSkybox(), m_pso, m_rootSignature);
   }
 }

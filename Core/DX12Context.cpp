@@ -3,7 +3,6 @@
 
 #include "Core/WindowsApplication.h"
 #include "Core/Application.h"
-#include "Core/DX12FrameResource.h"
 #include "Core/DX12Interface.h"
 #include "Core/DX12Texture.h"
 
