@@ -60,7 +60,7 @@ namespace Core
     CreateFrameResource();
     
     // create resources before doing anything
-    FrameResource().CreateResources(m_context->GetCommandList());
+    FrameResource().CreateResources();
 
     // create index/vertex buffers and necessary CBs/SRVs
     for (auto model : SceneGraph::Instance().GetModels())

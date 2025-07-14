@@ -18,7 +18,7 @@ namespace Core
   {
   }
 
-  void DX12FrameResource::CreateResources(ID3D12GraphicsCommandList* commandList)
+  void DX12FrameResource::CreateResources()
   {
     // create camera
     m_camera = std::make_unique<DX12Camera>(45.0, 0.5f, 10000.0f);

@@ -23,7 +23,7 @@ namespace Core
       return instance;
     }
 
-    void CreateResources(ID3D12GraphicsCommandList* commandList);
+    void CreateResources();
     void Update();
     const ResourceDescriptor* GetConstantBuffer() { return m_constantBuffer.get(); }
     DX12Camera* GetCamera() { return m_camera.get(); }
