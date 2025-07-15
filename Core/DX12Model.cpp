@@ -22,6 +22,7 @@ namespace Core
     , m_vertexBufferView()
     , m_indexBufferView()
     , m_texture(texture)
+    , m_ready(false)
   {
     // load mesh
     LoadMesh(pMesh, transform);
@@ -45,10 +46,15 @@ namespace Core
     // setup vertex/index buffers
     SetupVertexBuffer(commandList);
     SetupIndexBuffer(commandList);
+    // ready to draw
+    m_ready = true;
   }
 
   void DX12Mesh::Draw(ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, ResourceDescriptor* cb, ID3D12GraphicsCommandList* commandList)
   {
+    if (!m_ready)
+      Setup(commandList);
+
     commandList->SetPipelineState(pso);
     commandList->SetGraphicsRootSignature(rootSig);
     
@@ -215,12 +221,6 @@ namespace Core
   DX12Model::~DX12Model()
   {
     m_meshes.clear();
-  }
-
-  void DX12Model::SetupModel(ID3D12GraphicsCommandList* commandList)
-  {
-    for (int i = 0; i < m_meshes.size(); ++i)
-      m_meshes[i]->Setup(commandList);
   }
 
   void DX12Model::DrawModel(ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, ID3D12GraphicsCommandList* commandList)

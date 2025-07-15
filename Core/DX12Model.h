@@ -20,11 +20,11 @@ namespace Core
     DX12Mesh(const aiMesh* pMesh, const aiMatrix4x4& transform, std::shared_ptr<DX12Texture> texture);
     ~DX12Mesh();
 
-    void Setup(ID3D12GraphicsCommandList* commandList);
     void Draw(ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, ResourceDescriptor* cb, ID3D12GraphicsCommandList* commandList);
 
   private:
     void LoadMesh(const aiMesh* pMesh, const aiMatrix4x4& transform);
+    void Setup(ID3D12GraphicsCommandList* commandList);
     
     // setup functions
     void SetupVertexBuffer(ID3D12GraphicsCommandList* commandList);
@@ -41,7 +41,6 @@ namespace Core
     // data
     std::vector<Vertex> m_vertices;
     std::vector<uint16_t> m_indices;
-
     // vertex buffer
     ComPtr<ID3D12Resource> m_vertexBuffer;
     ComPtr<ID3D12Resource> m_vertexBufferUploadHeap;
@@ -52,6 +51,8 @@ namespace Core
     D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
     // mesh texture, one for now
     std::shared_ptr<DX12Texture> m_texture;
+    // is it ready to draw
+    bool m_ready;
 
   private:
     DX12Mesh(const DX12Mesh&) = delete;
@@ -70,8 +71,7 @@ namespace Core
     ~DX12Model();
 
     virtual void LoadModel(const char* path);
-    
-    void SetupModel(ID3D12GraphicsCommandList* commandList);
+
     void DrawModel(ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, ID3D12GraphicsCommandList* commandList);
     void UpdateModel();
     void SetTranslation(XMFLOAT3 translate) { m_translation = translate; };
@@ -97,7 +97,6 @@ namespace Core
     UINT8* m_pCbvDataBegin;
     // constant buffer
     std::unique_ptr<ResourceDescriptor> m_constantBuffer;
-
     // for testing
     XMFLOAT3 m_translation;
     XMFLOAT3 m_scale;

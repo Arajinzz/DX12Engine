@@ -55,13 +55,8 @@ namespace Core
     // create scene graph
     SceneGraph::Instance();
 
-    // create index/vertex buffers and necessary CBs/SRVs
-    for (auto model : SceneGraph::Instance().GetModels())
-      model->SetupModel(m_context->GetCommandList());
-
     // this should be done on the scene graph
     SceneGraph::Instance().GetSkybox()->LoadModel("models//cube.obj");
-    SceneGraph::Instance().GetSkybox()->SetupModel(m_context->GetCommandList());
 
     // Execute command lists
     m_context->Execute();
