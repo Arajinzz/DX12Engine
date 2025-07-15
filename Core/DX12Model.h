@@ -16,12 +16,12 @@ namespace Core
   class DX12Mesh
   {
   public:
-    DX12Mesh();
+    DX12Mesh(std::shared_ptr<DX12Texture> texture);
     ~DX12Mesh();
 
     virtual void Setup(ID3D12GraphicsCommandList* commandList);
     virtual void Draw(
-      ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, ResourceDescriptor* cb, TextureDescriptor* texture, ID3D12GraphicsCommandList* commandList);
+      ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, ResourceDescriptor* cb, ID3D12GraphicsCommandList* commandList);
     virtual void LoadMesh(const aiMesh* pMesh, const aiMatrix4x4& transform);
     unsigned GetTriangleCount() { return static_cast<unsigned>(m_indices.size() / 3); }
 
@@ -41,14 +41,16 @@ namespace Core
     std::vector<Vertex> m_vertices;
     std::vector<uint16_t> m_indices;
 
-    // buffers
+    // vertex buffer
     ComPtr<ID3D12Resource> m_vertexBuffer;
     ComPtr<ID3D12Resource> m_vertexBufferUploadHeap;
     D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
-
+    // index buffer
     ComPtr<ID3D12Resource> m_indexBuffer;
     ComPtr<ID3D12Resource> m_indexBufferUploadHeap;
     D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
+    // mesh texture, one for now
+    std::shared_ptr<DX12Texture> m_texture;
 
   private:
     DX12Mesh(const DX12Mesh&) = delete;
@@ -59,8 +61,6 @@ namespace Core
 
 namespace Core
 {
-  class DX12Texture;
-
   // Mesh can have multiple models
   class DX12Model
   {
@@ -81,7 +81,6 @@ namespace Core
 
   protected:
     std::vector<std::unique_ptr<DX12Mesh>> m_meshes;
-    std::vector<std::shared_ptr<DX12Texture>> m_textures; // for each model
 
   private:
     // temporary

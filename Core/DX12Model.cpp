@@ -16,11 +16,12 @@
 
 namespace Core
 {
-  DX12Mesh::DX12Mesh()
+  DX12Mesh::DX12Mesh(std::shared_ptr<DX12Texture> texture)
     : m_vertices()
     , m_indices()
     , m_vertexBufferView()
     , m_indexBufferView()
+    , m_texture(texture)
   {
   }
 
@@ -30,15 +31,21 @@ namespace Core
     m_vertexBufferUploadHeap.Reset();
     m_indexBuffer.Reset();
     m_indexBufferUploadHeap.Reset();
+    // owns the texture
+    m_texture.reset();
   }
 
   void DX12Mesh::Setup(ID3D12GraphicsCommandList* commandList)
   {
+    // setup texture
+    m_texture->CopyToGPU(commandList);
+    m_texture->GenerateMips(commandList);
+    // setup vertex/index buffers
     SetupVertexBuffer(commandList);
     SetupIndexBuffer(commandList);
   }
 
-  void DX12Mesh::Draw(ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, ResourceDescriptor* cb, TextureDescriptor* texture, ID3D12GraphicsCommandList* commandList)
+  void DX12Mesh::Draw(ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, ResourceDescriptor* cb, ID3D12GraphicsCommandList* commandList)
   {
     commandList->SetPipelineState(pso);
     commandList->SetGraphicsRootSignature(rootSig);
@@ -54,7 +61,7 @@ namespace Core
     commandList->SetGraphicsRootDescriptorTable(1, ResourceManager::Instance().GetResourceGpuHandle(cb->index));
 
     // texture CBV
-    commandList->SetGraphicsRootDescriptorTable(2, ResourceManager::Instance().GetResourceGpuHandle(texture->index));
+    commandList->SetGraphicsRootDescriptorTable(2, ResourceManager::Instance().GetResourceGpuHandle(m_texture->GetResource()->index));
 
     commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
@@ -192,7 +199,6 @@ namespace Core
     , m_translation(0.0f, 0.0f, 0.0f)
     , m_scale(1.0f, 1.0f, 1.0f)
     , m_angle(0.0f)
-    , m_textures()
   {
     // create constant buffer
     m_constantBuffer = ResourceManager::Instance().CreateConstantBufferResource(
@@ -207,17 +213,10 @@ namespace Core
   DX12Model::~DX12Model()
   {
     m_meshes.clear();
-    m_textures.clear();
   }
 
   void DX12Model::SetupModel(ID3D12GraphicsCommandList* commandList)
   {
-    for (auto& texture : m_textures)
-    {
-      texture->CopyToGPU(commandList);
-      texture->GenerateMips(commandList);
-    }
-
     for (int i = 0; i < m_meshes.size(); ++i)
       m_meshes[i]->Setup(commandList);
   }
@@ -225,7 +224,7 @@ namespace Core
   void DX12Model::DrawModel(ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, ID3D12GraphicsCommandList* commandList)
   {
     for (int i = 0; i < m_meshes.size(); ++i)
-      m_meshes[i]->Draw(pso, rootSig, m_constantBuffer.get(), m_textures[i]->GetResource(), commandList);
+      m_meshes[i]->Draw(pso, rootSig, m_constantBuffer.get(), commandList);
   }
 
   void DX12Model::ProcessNode(const aiNode* node, const aiScene* scene, const aiMatrix4x4& parentTransform)
@@ -235,9 +234,6 @@ namespace Core
     for (unsigned int i = 0; i < node->mNumMeshes; ++i)
     {
       const aiMesh* pMesh = scene->mMeshes[node->mMeshes[i]];
-      auto mesh = std::make_unique<DX12Mesh>();
-      mesh->LoadMesh(pMesh, nodeTransform);
-
       const auto material = scene->mMaterials[pMesh->mMaterialIndex];
       aiString texturePath;
       std::vector<std::string> paths(1);
@@ -248,7 +244,8 @@ namespace Core
       if (!std::filesystem::exists(paths[0]))
         paths[0] = "textures\\brick.png";
 
-      m_textures.emplace_back(TextureManager::Instance().CreateOrGetTexture(paths));
+      auto mesh = std::make_unique<DX12Mesh>(TextureManager::Instance().CreateOrGetTexture(paths));
+      mesh->LoadMesh(pMesh, nodeTransform);
       m_meshes.emplace_back(mesh.release());
     }
 

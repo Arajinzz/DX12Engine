@@ -27,8 +27,6 @@ namespace Core
 
     aiMatrix4x4 identity; // identity matrix
     const auto pMesh = pModel->mMeshes[0];
-    auto mesh = std::make_unique<DX12Mesh>();
-    mesh->LoadMesh(pMesh, identity);
 
     std::vector<std::string> paths;
     paths.push_back("skybox\\bluecloud_ft.jpg");
@@ -38,7 +36,8 @@ namespace Core
     paths.push_back("skybox\\bluecloud_rt.jpg");
     paths.push_back("skybox\\bluecloud_lf.jpg");
 
+    auto mesh = std::make_unique<DX12Mesh>(TextureManager::Instance().CreateOrGetTexture(paths));
+    mesh->LoadMesh(pMesh, identity);
     m_meshes.emplace_back(mesh.release());
-    m_textures.emplace_back(TextureManager::Instance().CreateOrGetTexture(paths));
   }
 }
