@@ -36,8 +36,7 @@ namespace Core
     paths.push_back("skybox\\bluecloud_rt.jpg");
     paths.push_back("skybox\\bluecloud_lf.jpg");
 
-    auto mesh = std::make_unique<DX12Mesh>(TextureManager::Instance().CreateOrGetTexture(paths));
-    mesh->LoadMesh(pMesh, identity);
+    auto mesh = std::make_unique<DX12Mesh>(pMesh, identity, TextureManager::Instance().CreateOrGetTexture(paths));
     m_meshes.emplace_back(mesh.release());
   }
 }

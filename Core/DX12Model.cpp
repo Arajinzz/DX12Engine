@@ -16,13 +16,15 @@
 
 namespace Core
 {
-  DX12Mesh::DX12Mesh(std::shared_ptr<DX12Texture> texture)
+  DX12Mesh::DX12Mesh(const aiMesh* pMesh, const aiMatrix4x4& transform, std::shared_ptr<DX12Texture> texture)
     : m_vertices()
     , m_indices()
     , m_vertexBufferView()
     , m_indexBufferView()
     , m_texture(texture)
   {
+    // load mesh
+    LoadMesh(pMesh, transform);
   }
 
   DX12Mesh::~DX12Mesh()
@@ -244,8 +246,7 @@ namespace Core
       if (!std::filesystem::exists(paths[0]))
         paths[0] = "textures\\brick.png";
 
-      auto mesh = std::make_unique<DX12Mesh>(TextureManager::Instance().CreateOrGetTexture(paths));
-      mesh->LoadMesh(pMesh, nodeTransform);
+      auto mesh = std::make_unique<DX12Mesh>(pMesh, nodeTransform, TextureManager::Instance().CreateOrGetTexture(paths));
       m_meshes.emplace_back(mesh.release());
     }
 
@@ -280,13 +281,5 @@ namespace Core
 
     m_constantBufferData.model = XMMatrixTranspose(S * R * T);
     memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
-  }
-
-  unsigned DX12Model::GetTriangleCount()
-  {
-    unsigned count = 0;
-    for (const auto& mesh : m_meshes)
-      count += mesh->GetTriangleCount();
-    return count;
   }
 }

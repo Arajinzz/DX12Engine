@@ -16,16 +16,17 @@ namespace Core
   class DX12Mesh
   {
   public:
-    DX12Mesh(std::shared_ptr<DX12Texture> texture);
+    // context needed for setup and draw
+    DX12Mesh(const aiMesh* pMesh, const aiMatrix4x4& transform, std::shared_ptr<DX12Texture> texture);
     ~DX12Mesh();
 
-    virtual void Setup(ID3D12GraphicsCommandList* commandList);
-    virtual void Draw(
-      ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, ResourceDescriptor* cb, ID3D12GraphicsCommandList* commandList);
-    virtual void LoadMesh(const aiMesh* pMesh, const aiMatrix4x4& transform);
-    unsigned GetTriangleCount() { return static_cast<unsigned>(m_indices.size() / 3); }
+    void Setup(ID3D12GraphicsCommandList* commandList);
+    void Draw(ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, ResourceDescriptor* cb, ID3D12GraphicsCommandList* commandList);
 
   private:
+    void LoadMesh(const aiMesh* pMesh, const aiMatrix4x4& transform);
+    
+    // setup functions
     void SetupVertexBuffer(ID3D12GraphicsCommandList* commandList);
     void SetupIndexBuffer(ID3D12GraphicsCommandList* commandList);
 
@@ -68,13 +69,13 @@ namespace Core
     DX12Model();
     ~DX12Model();
 
+    virtual void LoadModel(const char* path);
+    
     void SetupModel(ID3D12GraphicsCommandList* commandList);
     void DrawModel(ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, ID3D12GraphicsCommandList* commandList);
-    virtual void LoadModel(const char* path);
     void UpdateModel();
     void SetTranslation(XMFLOAT3 translate) { m_translation = translate; };
     void SetScale(XMFLOAT3 scale) { m_scale = scale; }
-    unsigned GetTriangleCount();
 
   private:
     void ProcessNode(const aiNode* node, const aiScene* scene, const aiMatrix4x4& parentTransform);
