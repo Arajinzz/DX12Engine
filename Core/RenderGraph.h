@@ -21,7 +21,7 @@ namespace Core
     ~RenderGraph();
 
     // get passes in order from config
-    const std::unordered_map<std::string, RenderPass*>& GetPasses();
+    const std::vector<RenderPass*>& GetPasses();
 
   private:
     void ReadRenderGraph();
@@ -30,8 +30,10 @@ namespace Core
     using Creator = std::function<RenderPass*()>;
     // creator
     std::unordered_map<std::string, Creator> m_creators;
-    // passes in order
-    std::unordered_map<std::string, RenderPass*> m_passes;
+    // passes map
+    std::unordered_map<std::string, RenderPass*> m_passesMap;
+    // to maintain passes order
+    std::vector<RenderPass*> m_passesVec;
 
   private:
     RenderGraph();

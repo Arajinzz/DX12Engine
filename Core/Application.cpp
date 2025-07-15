@@ -81,7 +81,7 @@ namespace Core
 
     // execute passes in order
     for (auto pass : RenderGraph::Instance().GetPasses())
-      pass.second->Render(m_context.get());
+      pass->Render(m_context.get());
 
     // transition to present state
     m_context->EndFrame();

@@ -16,7 +16,8 @@ using json = nlohmann::json;
 namespace Core
 {
   RenderGraph::RenderGraph()
-    : m_passes()
+    : m_passesMap()
+    , m_passesVec()
     , m_creators()
   {
     // register creators
@@ -31,16 +32,17 @@ namespace Core
 
   RenderGraph::~RenderGraph()
   {
-    for (auto& pass : m_passes)
-      delete pass.second;
+    for (auto& pass : m_passesVec)
+      delete pass;
 
-    m_passes.clear();
+    m_passesMap.clear();
+    m_passesVec.clear();
     m_creators.clear();
   }
 
-  const std::unordered_map<std::string, RenderPass*>& RenderGraph::GetPasses()
+  const std::vector<RenderPass*>& RenderGraph::GetPasses()
   {
-    return m_passes;
+    return m_passesVec;
   }
 
   void RenderGraph::ReadRenderGraph()
@@ -61,10 +63,12 @@ namespace Core
       pass.at("PSO").get_to(pso);
 
       // just plain pass for now
-      m_passes[name] = m_creators[name](); // create
+      m_passesMap[name] = m_creators[name](); // create
       // set pso and root signature
-      m_passes[name]->SetPSO(PSOManager::Instance().GetPSO(pso));
-      m_passes[name]->SetRootSignature(PSOManager::Instance().GetRootSignature(pso));
+      m_passesMap[name]->SetPSO(PSOManager::Instance().GetPSO(pso));
+      m_passesMap[name]->SetRootSignature(PSOManager::Instance().GetRootSignature(pso));
+      // store in vec to maintain order of config file
+      m_passesVec.emplace_back(m_passesMap[name]);
     }
   }
 

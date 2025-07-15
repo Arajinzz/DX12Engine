@@ -17,6 +17,11 @@ namespace Core
     virtual void Render(DX12Context* ctx) override;
 
   private:
+    // setup functions
+    void SetupVertexBuffer(ID3D12GraphicsCommandList* commandList);
+    void SetupIndexBuffer(ID3D12GraphicsCommandList* commandList);
+
+  private:
     struct Vertex
     {
       XMFLOAT3 position;
@@ -33,6 +38,8 @@ namespace Core
     ComPtr<ID3D12Resource> m_indexBuffer;
     ComPtr<ID3D12Resource> m_indexBufferUploadHeap;
     D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
+    // did we setup?
+    bool m_quadReady;
 
   private:
     ComposerPass(const ComposerPass&) = delete;

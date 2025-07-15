@@ -2,6 +2,8 @@
 #include "ComposerPass.h"
 
 #include "Core/TextureManager.h"
+#include "Core/DX12Interface.h"
+#include "Core/DXApplicationHelper.h"
 
 namespace Core
 {
@@ -15,12 +17,13 @@ namespace Core
     , m_indexBuffer()
     , m_indexBufferUploadHeap()
     , m_indexBufferView()
+    , m_quadReady(false)
   {
     // vertex data
-    m_vertices[0] = Vertex({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f });
-    m_vertices[1] = Vertex({ 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f });
-    m_vertices[2] = Vertex({ 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f });
-    m_vertices[3] = Vertex({ 1.0f, 1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f });
+    m_vertices[0] = Vertex({ -1.0f, -1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f });
+    m_vertices[1] = Vertex({  1.0f, -1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f });
+    m_vertices[2] = Vertex({ -1.0f,  1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f });
+    m_vertices[3] = Vertex({  1.0f,  1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f });
     // index data
     m_indices[0] = 0;
     m_indices[1] = 1;
@@ -40,12 +43,19 @@ namespace Core
 
   void ComposerPass::Render(DX12Context* ctx)
   {
-    return; // not active yet
-
     auto commandList = ctx->GetCommandList();
+    
+    if (!m_quadReady)
+    {
+      SetupVertexBuffer(commandList);
+      SetupIndexBuffer(commandList);
+      m_quadReady = true;
+    }
+
     std::vector<std::string> paths(1); 
     // test
     paths[0] = "textures\\brick.png";
+    // should already be created
     auto texture = TextureManager::Instance().CreateOrGetTexture(paths);
 
     commandList->SetPipelineState(m_pso);
@@ -61,5 +71,86 @@ namespace Core
     commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
     commandList->IASetIndexBuffer(&m_indexBufferView);
     commandList->DrawIndexedInstanced(6 /* indices */, 1, 0, 0, 0);
+  }
+
+  void ComposerPass::SetupVertexBuffer(ID3D12GraphicsCommandList* commandList)
+  {
+    const unsigned vertexBufferSize = static_cast<unsigned>(sizeof(m_vertices));
+    auto uploadHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+    auto defaultHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+    auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+      &defaultHeapProps,
+      D3D12_HEAP_FLAG_NONE,
+      &resDesc,
+      D3D12_RESOURCE_STATE_COMMON,
+      nullptr,
+      IID_PPV_ARGS(&m_vertexBuffer)));
+
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+      &uploadHeapProps,
+      D3D12_HEAP_FLAG_NONE,
+      &resDesc,
+      D3D12_RESOURCE_STATE_GENERIC_READ,
+      nullptr,
+      IID_PPV_ARGS(&m_vertexBufferUploadHeap)));
+
+    // copy data to intermediate upload heap
+    D3D12_SUBRESOURCE_DATA vertexData = {};
+    vertexData.pData = m_vertices;
+    vertexData.RowPitch = vertexBufferSize;
+    vertexData.SlicePitch = vertexData.RowPitch;
+
+    auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(m_vertexBuffer.Get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
+    auto barrier2 = CD3DX12_RESOURCE_BARRIER::Transition(m_vertexBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+    commandList->ResourceBarrier(1, &barrier1);
+    UpdateSubresources(commandList, m_vertexBuffer.Get(), m_vertexBufferUploadHeap.Get(), 0, 0, 1, &vertexData);
+    commandList->ResourceBarrier(1, &barrier2);
+
+    // Initialize the vertex buffer view.
+    m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
+    m_vertexBufferView.StrideInBytes = sizeof(Vertex);
+    m_vertexBufferView.SizeInBytes = vertexBufferSize;
+  }
+
+  void ComposerPass::SetupIndexBuffer(ID3D12GraphicsCommandList* commandList)
+  {
+    const unsigned indexBufferSize = static_cast<unsigned>(sizeof(m_indices));
+    auto uploadHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+    auto defaultHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+    auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize);
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+      &defaultHeapProps,
+      D3D12_HEAP_FLAG_NONE,
+      &resDesc,
+      D3D12_RESOURCE_STATE_COMMON,
+      nullptr,
+      IID_PPV_ARGS(&m_indexBuffer)));
+
+    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+      &uploadHeapProps,
+      D3D12_HEAP_FLAG_NONE,
+      &resDesc,
+      D3D12_RESOURCE_STATE_GENERIC_READ,
+      nullptr,
+      IID_PPV_ARGS(&m_indexBufferUploadHeap)));
+
+    // Copy data to the intermediate upload heap and then schedule a copy 
+    // from the upload heap to the index buffer.
+    D3D12_SUBRESOURCE_DATA indexData = {};
+    indexData.pData = m_indices;
+    indexData.RowPitch = indexBufferSize;
+    indexData.SlicePitch = indexData.RowPitch;
+
+    auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(m_indexBuffer.Get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
+    auto barrier2 = CD3DX12_RESOURCE_BARRIER::Transition(m_indexBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_INDEX_BUFFER);
+    commandList->ResourceBarrier(1, &barrier1);
+    UpdateSubresources(commandList, m_indexBuffer.Get(), m_indexBufferUploadHeap.Get(), 0, 0, 1, &indexData);
+    commandList->ResourceBarrier(1, &barrier2);
+
+    // Initialize the index buffer view.
+    m_indexBufferView.BufferLocation = m_indexBuffer->GetGPUVirtualAddress();
+    m_indexBufferView.SizeInBytes = indexBufferSize;
+    m_indexBufferView.Format = DXGI_FORMAT_R16_UINT;
   }
 }
