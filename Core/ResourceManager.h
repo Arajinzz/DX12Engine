@@ -67,8 +67,36 @@ namespace Core
     // the swap rt associated with render targets for offscreen rendering
     // this uses index inherited from Descriptor
     ID3D12Resource* swapRenderTarget;
+    // keep track of currently used RT and last used RT 
+    unsigned activeRTIndex;
+    unsigned activeSRVIndex;
+    ID3D12Resource* activeRT;
+    // last used
+    unsigned lastRTIndex;
+    unsigned lastSRVIndex;
+    ID3D12Resource* lastRT;
 
     std::function<void(unsigned, unsigned, unsigned, unsigned)> freeRT;
+
+    // UGLY!!!
+    void SwapActive()
+    {
+      lastRT = activeRT;
+      lastRTIndex = activeRTIndex;
+      lastSRVIndex = activeSRVIndex;
+
+      if (activeRT == renderTarget2.Get())
+      {
+        activeRT = renderTarget1.Get();
+        activeRTIndex = renderTargetIndex1;
+        activeSRVIndex = shaderResourceIndex1;
+        return;
+      }
+
+      activeRT = renderTarget2.Get();
+      activeRTIndex = renderTargetIndex2;
+      activeSRVIndex = shaderResourceIndex2;
+    }
 
     ~RenderTargetDescriptor()
     {
