@@ -15,11 +15,12 @@ namespace Core
     ~DX12SwapChain();
 
     void Init(ID3D12CommandQueue* queue);
-    unsigned int GetCurrentBackBufferIndex();
-    void GetBuffer(unsigned int n, Microsoft::WRL::Details::ComPtrRef<Microsoft::WRL::ComPtr<ID3D12Resource>> renderTarget);
     void Present();
     void Resize(unsigned width, unsigned height);
+    
+    unsigned int GetCurrentBackBufferIndex();
     std::shared_ptr<RenderTargetDescriptor> GetRenderTarget(unsigned index) { return m_renderTargets[index]; }
+    std::shared_ptr<RenderTargetDescriptor> GetCurrentRenderTarget() { return GetRenderTarget(GetCurrentBackBufferIndex()); }
 
   private:
     void CreateDepthResource();

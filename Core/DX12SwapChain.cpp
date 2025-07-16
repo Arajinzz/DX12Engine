@@ -45,7 +45,7 @@ namespace Core
     for (unsigned i = 0; i < Application::FrameCount; ++i)
     {
       ComPtr<ID3D12Resource> renderTarget;
-      GetBuffer(i, &renderTarget);
+      ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&renderTarget)));
       m_renderTargets.push_back(ResourceManager::Instance().CreateRenderTargetResource(renderTarget.Get()));
     }
 
@@ -56,11 +56,6 @@ namespace Core
   unsigned int DX12SwapChain::GetCurrentBackBufferIndex()
   {
     return m_swapChain->GetCurrentBackBufferIndex();
-  }
-
-  void DX12SwapChain::GetBuffer(unsigned int n, Microsoft::WRL::Details::ComPtrRef<Microsoft::WRL::ComPtr<ID3D12Resource>> renderTarget)
-  {
-    ThrowIfFailed(m_swapChain->GetBuffer(n, IID_PPV_ARGS(renderTarget)));
   }
 
   void DX12SwapChain::Present()
@@ -82,7 +77,7 @@ namespace Core
     for (unsigned i = 0; i < Application::FrameCount; ++i)
     {
       ComPtr<ID3D12Resource> renderTarget;
-      GetBuffer(i, &renderTarget);
+      ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&renderTarget)));
       m_renderTargets.push_back(ResourceManager::Instance().CreateRenderTargetResource(renderTarget.Get()));
     }
 
@@ -92,7 +87,7 @@ namespace Core
   void DX12SwapChain::CreateDepthResource()
   {
     ComPtr<ID3D12Resource> renderTarget;
-    GetBuffer(0, &renderTarget); // any render target
+    ThrowIfFailed(m_swapChain->GetBuffer(0, IID_PPV_ARGS(&renderTarget))); // any render target
     // Create resouce
     D3D12_RESOURCE_DESC depthStencilDesc = {};
     depthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;

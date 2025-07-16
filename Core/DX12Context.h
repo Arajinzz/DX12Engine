@@ -37,7 +37,6 @@ namespace Core
   private:
     // the swapchain
     std::unique_ptr<DX12SwapChain> m_swapChain;
-    
     // command queue
     ComPtr<ID3D12CommandQueue> m_commandQueue;
     // command list

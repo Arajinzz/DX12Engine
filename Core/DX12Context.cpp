@@ -129,12 +129,10 @@ namespace Core
     ThrowIfFailed(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr));
 
     // get render target resource
-    ComPtr<ID3D12Resource> renderTargetResource;
-    m_swapChain->GetBuffer(m_frameIndex, &renderTargetResource);
-
+    std::shared_ptr<RenderTargetDescriptor> renderTarget = m_swapChain->GetCurrentRenderTarget();
     // Indicate that the back buffer will be used as a render target.
     auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
-      renderTargetResource.Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+      renderTarget->swapRenderTarget, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
     m_commandList->ResourceBarrier(1, &barrier1);
 
     // these must be done in the same commandlist as drawing
@@ -167,11 +165,10 @@ namespace Core
   void DX12Context::EndFrame()
   {
     // get render target resource
-    ComPtr<ID3D12Resource> renderTargetResource;
-    m_swapChain->GetBuffer(m_frameIndex, &renderTargetResource);
+    std::shared_ptr<RenderTargetDescriptor> renderTarget = m_swapChain->GetCurrentRenderTarget();
     // Indicate that the back buffer will now be used to present.
     auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
-      renderTargetResource.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+      renderTarget->swapRenderTarget, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
     m_commandList->ResourceBarrier(1, &barrier1);
   }
 

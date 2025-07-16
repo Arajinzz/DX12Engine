@@ -328,6 +328,8 @@ namespace Core
       m_nextFreeTex.push_back(SRIndex1);
       m_nextFreeTex.push_back(SRIndex2);
     };
+    // set the swap render target
+    output->swapRenderTarget = swapRenderTarget;
 
     return output;
   }
