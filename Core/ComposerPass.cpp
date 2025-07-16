@@ -58,6 +58,20 @@ namespace Core
     // should already be created
     auto texture = TextureManager::Instance().CreateOrGetTexture(paths);
 
+    return;
+
+    // set render target and depth buffer
+    // this pass has to set the render target to swap back buffer
+    auto renderTarget = ctx->GetCurrentRenderTarget();
+    auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
+      renderTarget->swapRenderTarget, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+    commandList->ResourceBarrier(1, &barrier1);
+    auto rtvHandle = ResourceManager::Instance().GetRTVCpuHandle(renderTarget->index);
+    auto dsvHandle = ResourceManager::Instance().GetDSVCpuHandle(0);
+    commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
+    const float clearColor[] = { 0.25f, 0.55f, 0.45f, 1.0f };
+    commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+
     commandList->SetPipelineState(m_pso);
     commandList->SetGraphicsRootSignature(m_rootSignature);
 

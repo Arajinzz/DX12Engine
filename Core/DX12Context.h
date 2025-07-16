@@ -28,6 +28,7 @@ namespace Core
 
     ID3D12CommandQueue* GetCommandQueue() { return m_commandQueue.Get(); }
     ID3D12GraphicsCommandList* GetCommandList() { return m_commandList.Get(); }
+    RenderTargetDescriptor* GetCurrentRenderTarget() { return m_swapChain->GetCurrentRenderTarget().get(); }
 
   private:
     void InitFence();

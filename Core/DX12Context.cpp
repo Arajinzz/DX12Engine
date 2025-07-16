@@ -141,12 +141,13 @@ namespace Core
     // since we are using bundles for drawing this should be fine
     m_commandList->RSSetViewports(1, &m_viewport);
     m_commandList->RSSetScissorRects(1, &m_scissorRect);
-    auto rtvHandle = ResourceManager::Instance().GetRTVCpuHandle(m_swapChain->GetRenderTarget(m_frameIndex)->index);
+    // set render target and depth buffer
+    auto rtvHandle = ResourceManager::Instance().GetRTVCpuHandle(renderTarget->index);
     auto dsvHandle = ResourceManager::Instance().GetDSVCpuHandle(0);
     m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
-
-    // Record commands.
     const float clearColor[] = { 0.25f, 0.55f, 0.45f, 1.0f };
+    m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+
     m_commandList->ClearDepthStencilView(
       dsvHandle,
       D3D12_CLEAR_FLAG_DEPTH,
@@ -154,7 +155,6 @@ namespace Core
       0,       // Clear stencil to 0
       0, nullptr
     );
-    m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
   }
 
   void DX12Context::Draw(DX12Model* model, ID3D12PipelineState* pso, ID3D12RootSignature* rootSig)
