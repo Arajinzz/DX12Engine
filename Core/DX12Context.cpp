@@ -141,6 +141,20 @@ namespace Core
     // since we are using bundles for drawing this should be fine
     m_commandList->RSSetViewports(1, &m_viewport);
     m_commandList->RSSetScissorRects(1, &m_scissorRect);
+
+    // set the active render target
+    renderTarget->SwapActive();
+    auto barrier2 = CD3DX12_RESOURCE_BARRIER::Transition(
+      renderTarget->activeRT, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
+    m_commandList->ResourceBarrier(1, &barrier2);
+    // set the last render target to pixel shader resource, to accumulate the previous color
+    if (renderTarget->lastRT)
+    {
+      auto barrier3 = CD3DX12_RESOURCE_BARRIER::Transition(
+        renderTarget->lastRT, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+      m_commandList->ResourceBarrier(1, &barrier3);
+    }
+
     // set render target and depth buffer
     auto rtvHandle = ResourceManager::Instance().GetRTVCpuHandle(renderTarget->index);
     auto dsvHandle = ResourceManager::Instance().GetDSVCpuHandle(0);
@@ -170,6 +184,17 @@ namespace Core
     auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
       renderTarget->swapRenderTarget, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
     m_commandList->ResourceBarrier(1, &barrier1);
+    // set the active render target
+    auto barrier2 = CD3DX12_RESOURCE_BARRIER::Transition(
+      renderTarget->activeRT, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
+    m_commandList->ResourceBarrier(1, &barrier2);
+    // set the last render target to pixel shader resource, to accumulate the previous color
+    if (renderTarget->lastRT)
+    {
+      auto barrier3 = CD3DX12_RESOURCE_BARRIER::Transition(
+        renderTarget->lastRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COMMON);
+      m_commandList->ResourceBarrier(1, &barrier3);
+    }
   }
 
   void DX12Context::InitFence()
