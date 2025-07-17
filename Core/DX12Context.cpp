@@ -156,7 +156,7 @@ namespace Core
     }
 
     // set render target and depth buffer
-    auto rtvHandle = ResourceManager::Instance().GetRTVCpuHandle(renderTarget->index);
+    auto rtvHandle = ResourceManager::Instance().GetRTVCpuHandle(renderTarget->activeRTIndex);
     auto dsvHandle = ResourceManager::Instance().GetDSVCpuHandle(0);
     m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
     const float clearColor[] = { 0.25f, 0.55f, 0.45f, 1.0f };

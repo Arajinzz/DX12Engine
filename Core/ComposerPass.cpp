@@ -20,10 +20,10 @@ namespace Core
     , m_quadReady(false)
   {
     // vertex data
-    m_vertices[0] = Vertex({ -1.0f, -1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f });
-    m_vertices[1] = Vertex({  1.0f, -1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f });
-    m_vertices[2] = Vertex({ -1.0f,  1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f });
-    m_vertices[3] = Vertex({  1.0f,  1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f });
+    m_vertices[0] = Vertex({ -1.0f, -1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f });
+    m_vertices[1] = Vertex({  1.0f, -1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f });
+    m_vertices[2] = Vertex({ -1.0f,  1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f });
+    m_vertices[3] = Vertex({  1.0f,  1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f });
     // index data
     m_indices[0] = 0;
     m_indices[1] = 1;
@@ -52,12 +52,6 @@ namespace Core
       m_quadReady = true;
     }
 
-    std::vector<std::string> paths(1); 
-    // test
-    paths[0] = "textures\\brick.png";
-    // should already be created
-    auto texture = TextureManager::Instance().CreateOrGetTexture(paths);
-
     // set render target and depth buffer
     // this pass has to set the render target to swap back buffer
     auto renderTarget = ctx->GetCurrentRenderTarget();
@@ -76,7 +70,7 @@ namespace Core
     commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
     // texture SRV
-    commandList->SetGraphicsRootDescriptorTable(0, ResourceManager::Instance().GetResourceGpuHandle(texture->GetResource()->index));
+    commandList->SetGraphicsRootDescriptorTable(0, ResourceManager::Instance().GetResourceGpuHandle(renderTarget->activeSRVIndex));
 
     commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
