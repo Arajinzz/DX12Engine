@@ -58,14 +58,11 @@ namespace Core
     // should already be created
     auto texture = TextureManager::Instance().CreateOrGetTexture(paths);
 
-    return;
-
     // set render target and depth buffer
     // this pass has to set the render target to swap back buffer
     auto renderTarget = ctx->GetCurrentRenderTarget();
-    auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
-      renderTarget->swapRenderTarget, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-    commandList->ResourceBarrier(1, &barrier1);
+    // no need to to transition this is handled by the context
+    // it is exepected at this point the render target should be in render target state
     auto rtvHandle = ResourceManager::Instance().GetRTVCpuHandle(renderTarget->index);
     auto dsvHandle = ResourceManager::Instance().GetDSVCpuHandle(0);
     commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
