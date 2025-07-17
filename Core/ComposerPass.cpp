@@ -5,6 +5,7 @@
 #include "Core/DX12Interface.h"
 #include "Core/DXApplicationHelper.h"
 
+// ARTIFACTS happens because resizing is not working correctly
 namespace Core
 {
   ComposerPass::ComposerPass()
