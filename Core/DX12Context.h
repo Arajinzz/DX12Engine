@@ -2,7 +2,6 @@
 
 #include "Core/DX12Model.h"
 #include "Core/DX12Skybox.h"
-#include "Core/DX12SwapChain.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -28,7 +27,7 @@ namespace Core
 
     ID3D12CommandQueue* GetCommandQueue() { return m_commandQueue.Get(); }
     ID3D12GraphicsCommandList* GetCommandList() { return m_commandList.Get(); }
-    RenderTargetDescriptor* GetCurrentRenderTarget() { return m_swapChain->GetCurrentRenderTarget().get(); }
+    RenderTargetDescriptor* GetCurrentRenderTarget() { return m_renderTargets[m_frameIndex].get(); }
 
   private:
     void InitFence();
@@ -37,7 +36,10 @@ namespace Core
 
   private:
     // the swapchain
-    std::unique_ptr<DX12SwapChain> m_swapChain;
+    ComPtr<IDXGISwapChain3> m_swapChain;
+    std::vector<std::shared_ptr<RenderTargetDescriptor>> m_renderTargets;
+    std::unique_ptr<ResourceDescriptor> m_depth;
+
     // command queue
     ComPtr<ID3D12CommandQueue> m_commandQueue;
     // command list

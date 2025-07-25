@@ -5,6 +5,35 @@
 #include "Core/Application.h"
 #include "Core/DX12Interface.h"
 #include "Core/DX12Texture.h"
+#include "Core/ResourceManager.h"
+
+// helpers
+namespace
+{
+  std::unique_ptr<Core::ResourceDescriptor> CreateDepthResource(unsigned width, unsigned height)
+  {
+    // Create resouce
+    D3D12_RESOURCE_DESC depthStencilDesc = {};
+    depthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+    depthStencilDesc.Alignment = 0;
+    depthStencilDesc.Width = width;  // Swap chain width
+    depthStencilDesc.Height = height; // Swap chain height
+    depthStencilDesc.DepthOrArraySize = 1;
+    depthStencilDesc.MipLevels = 1;
+    depthStencilDesc.Format = DXGI_FORMAT_D32_FLOAT;
+    depthStencilDesc.SampleDesc.Count = 1; // No multi-sampling
+    depthStencilDesc.SampleDesc.Quality = 0;
+    depthStencilDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+    depthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+    D3D12_CLEAR_VALUE clearValue = {};
+    clearValue.Format = DXGI_FORMAT_D32_FLOAT;
+    clearValue.DepthStencil.Depth = 1.0f;
+    clearValue.DepthStencil.Stencil = 0;
+
+    return Core::ResourceManager::Instance().CreateDepthResource(depthStencilDesc, clearValue);
+  }
+}
 
 namespace Core
 {
@@ -17,6 +46,8 @@ namespace Core
     , m_fenceEvent()
     , m_fenceValues()
     , m_swapChain(nullptr)
+    , m_renderTargets()
+    , m_depth()
   {
     RECT rect;
     GetClientRect(WindowsApplication::GetHwnd(), &rect);
@@ -33,9 +64,33 @@ namespace Core
       m_commandAllocators.push_back(DX12Interface::Get().CreateCommandAllocator());
     m_commandList = DX12Interface::Get().CreateCommandList(m_commandAllocators);
 
-    // create the swap chain
-    m_swapChain = std::make_unique<DX12SwapChain>();
-    m_swapChain->Init(m_commandQueue.Get());
+    // Describe and create the swap chain.
+    DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
+    swapChainDesc.BufferCount = Application::FrameCount;
+    swapChainDesc.Width = rect.right - rect.left;
+    swapChainDesc.Height = rect.bottom - rect.top;
+    swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+    swapChainDesc.SampleDesc.Count = 1;
+
+    ComPtr<IDXGISwapChain1> swapChain = DX12Interface::Get().CreateSwapChainForHwnd(
+      swapChainDesc,
+      WindowsApplication::GetHwnd(),
+      m_commandQueue.Get() // Swap chain needs the queue so that it can force a flush on it.
+    );
+    ThrowIfFailed(swapChain.As(&m_swapChain));
+
+    // Add render targets
+    for (unsigned i = 0; i < Application::FrameCount; ++i)
+    {
+      ComPtr<ID3D12Resource> renderTarget;
+      ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&renderTarget)));
+      m_renderTargets.push_back(ResourceManager::Instance().CreateRenderTargetResource(renderTarget.Get()));
+    }
+
+    // create depth resource
+    m_depth = CreateDepthResource(swapChainDesc.Width, swapChainDesc.Height);
 
     // Create synchronization objects.
     InitFence();
@@ -48,11 +103,15 @@ namespace Core
     m_fenceValues.clear();
     m_commandQueue.Reset();
     m_commandAllocators.clear(); // could be a bug
+    m_swapChain.Reset();
+    m_renderTargets.clear();
+    m_depth.reset();
   }
 
   void DX12Context::Present()
   {
-    m_swapChain->Present();
+    // no vsync
+    ThrowIfFailed(m_swapChain->Present(0, 0));
   }
 
   void DX12Context::Execute()
@@ -104,16 +163,37 @@ namespace Core
 
   void DX12Context::Resize(unsigned width, unsigned height)
   {
-    m_swapChain->Resize(width, height);
+    // delete old resources
+    m_renderTargets.clear();
+    m_depth.reset();
 
+    // resize swapchain buffers
+    auto hr = m_swapChain->ResizeBuffers(
+      Application::FrameCount, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
+
+    // Add render targets
+    for (unsigned i = 0; i < Application::FrameCount; ++i)
+    {
+      ComPtr<ID3D12Resource> renderTarget;
+      ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&renderTarget)));
+      m_renderTargets.push_back(ResourceManager::Instance().CreateRenderTargetResource(renderTarget.Get()));
+    }
+    
+    // recreate depth
+    m_depth = CreateDepthResource(width, height);
+
+    // initialize rects
     m_viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height));
     m_scissorRect = CD3DX12_RECT(0, 0, static_cast<LONG>(width), static_cast<LONG>(height));
 
+    // initialize current frame
     m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
     
     // reset fence
     m_fence.Reset();
     m_fenceValues.clear();
+
+    // initialize fence again
     InitFence();
   }
 
@@ -129,7 +209,7 @@ namespace Core
     ThrowIfFailed(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr));
 
     // get render target resource
-    std::shared_ptr<RenderTargetDescriptor> renderTarget = m_swapChain->GetCurrentRenderTarget();
+    std::shared_ptr<RenderTargetDescriptor> renderTarget = m_renderTargets[m_frameIndex];
     // Indicate that the back buffer will be used as a render target.
     auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
       renderTarget->swapRenderTarget, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -179,7 +259,7 @@ namespace Core
   void DX12Context::EndFrame()
   {
     // get render target resource
-    std::shared_ptr<RenderTargetDescriptor> renderTarget = m_swapChain->GetCurrentRenderTarget();
+    std::shared_ptr<RenderTargetDescriptor> renderTarget = m_renderTargets[m_frameIndex];
     // Indicate that the back buffer will now be used to present.
     auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
       renderTarget->swapRenderTarget, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
