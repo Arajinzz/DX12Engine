@@ -1,0 +1,24 @@
+{
+    "Shaders" : [
+        {
+            "Name": "BaseShader",
+            "Type": "Graphics",
+            "Path": "Shaders/shaders.hlsl"
+        },
+        {
+            "Name": "BaseSkyboxShader",
+            "Type": "Graphics",
+            "Path": "Shaders/skybox_shaders.hlsl"
+        },
+        {
+            "Name": "MipsGeneratorShader",
+            "Type": "Compute",
+            "Path": "Shaders/GenerateMips_CS.hlsl"
+        },
+        {
+            "Name": "ComposerShader",
+            "Type": "Graphics",
+            "Path": "Shaders/composer.hlsl"
+        }
+    ]
+}

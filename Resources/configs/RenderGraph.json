@@ -1,0 +1,18 @@
+{
+    "RenderGraph": {
+        "Passes": [
+            {
+              "Name": "SkyboxPass",
+              "PSO": "BaseSkybox"
+            },
+            {
+              "Name": "BasePass",
+              "PSO": "Base"
+            },
+            {
+              "Name": "ComposerPass",
+              "PSO": "Composer"
+            }
+        ]
+    }
+}

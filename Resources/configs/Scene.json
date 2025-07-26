@@ -1,0 +1,11 @@
+{
+  "Name": "Sponza",
+  "Objects": [
+    {
+      "Path": "models/sponza.obj"
+    },
+    {
+      "Path": "models/suzanne.obj"
+    }
+  ]
+}
