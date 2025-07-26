@@ -245,9 +245,12 @@ namespace Scene
       // else default texture
       paths[0] = material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS ? texturePath.C_Str() : "textures\\brick.png";
 
+      // workaround!!!
+      paths[0] = "Resources\\" + paths[0];
       // does file exists?
       if (!std::filesystem::exists(paths[0]))
-        paths[0] = "textures\\brick.png";
+        paths[0] = "Resources\\textures\\brick.png";
+      
 
       auto mesh = std::make_unique<DX12Mesh>(pMesh, nodeTransform, Textures::TextureManager::Instance().CreateOrGetTexture(paths));
       m_meshes.emplace_back(mesh.release());

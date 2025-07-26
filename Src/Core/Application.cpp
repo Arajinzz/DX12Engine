@@ -59,7 +59,7 @@ namespace Core
     Scene::SceneGraph::Instance();
 
     // this should be done on the scene graph
-    Scene::SceneGraph::Instance().GetSkybox()->LoadModel("models//cube.obj");
+    Scene::SceneGraph::Instance().GetSkybox()->LoadModel("Resources/models/cube.obj");
 
     // Execute command lists
     m_context->Execute();

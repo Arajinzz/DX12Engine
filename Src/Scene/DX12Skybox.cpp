@@ -29,12 +29,12 @@ namespace Scene
     const auto pMesh = pModel->mMeshes[0];
 
     std::vector<std::string> paths;
-    paths.push_back("skybox\\bluecloud_ft.jpg");
-    paths.push_back("skybox\\bluecloud_bk.jpg");
-    paths.push_back("skybox\\bluecloud_up.jpg");
-    paths.push_back("skybox\\bluecloud_dn.jpg");
-    paths.push_back("skybox\\bluecloud_rt.jpg");
-    paths.push_back("skybox\\bluecloud_lf.jpg");
+    paths.push_back("Resources\\skybox\\bluecloud_ft.jpg");
+    paths.push_back("Resources\\skybox\\bluecloud_bk.jpg");
+    paths.push_back("Resources\\skybox\\bluecloud_up.jpg");
+    paths.push_back("Resources\\skybox\\bluecloud_dn.jpg");
+    paths.push_back("Resources\\skybox\\bluecloud_rt.jpg");
+    paths.push_back("Resources\\skybox\\bluecloud_lf.jpg");
 
     auto mesh = std::make_unique<DX12Mesh>(pMesh, identity, Textures::TextureManager::Instance().CreateOrGetTexture(paths));
     m_meshes.emplace_back(mesh.release());
