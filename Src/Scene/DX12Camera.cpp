@@ -97,7 +97,7 @@ namespace Scene
     m_translation = { 0.0f, 0.0f, 0.0f };
 
     RECT rect;
-    GetClientRect(WindowsApplication::GetHwnd(), &rect);
+    GetClientRect(Core::WindowsApplication::GetHwnd(), &rect);
     auto width = rect.right - rect.left;
     auto height = rect.bottom - rect.top;
     auto aspectRatio = static_cast<double>(width) / height;

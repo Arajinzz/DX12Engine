@@ -14,7 +14,7 @@ namespace Rendering
     ComposerPass();
     ~ComposerPass();
 
-    virtual void Render(DX12Context* ctx) override;
+    virtual void Render(Graphics::DX12Context* ctx) override;
 
   private:
     // setup functions

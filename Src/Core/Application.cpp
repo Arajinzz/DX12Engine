@@ -34,32 +34,32 @@ namespace Core
   void Application::OnInit()
   {
     // Create DX12Interface, It will create Device and factory
-    DX12Interface::Get();
+    Graphics::DX12Interface::Get();
 
     // Create Context
     // Create SwapChain, swap chain creates depth buffer and render targets
-    m_context = std::make_unique<DX12Context>();
+    m_context = std::make_unique<Graphics::DX12Context>();
 
     // full screen transitions not supported.
-    DX12Interface::Get().MakeWindowAssociation(WindowsApplication::GetHwnd(), DXGI_MWA_NO_ALT_ENTER);
+    Graphics::DX12Interface::Get().MakeWindowAssociation(WindowsApplication::GetHwnd(), DXGI_MWA_NO_ALT_ENTER);
 
     // create resource manager
-    ResourceManager::Instance();
+    Graphics::ResourceManager::Instance();
 
     // create shader manager
-    ShaderManager::Instance();
+    Shaders::ShaderManager::Instance();
 
     // create PSO manager, it has to be after shader manager
-    PSOManager::Instance();
+    Graphics::PSOManager::Instance();
 
     // create render graph
-    RenderGraph::Instance();
+    Rendering::RenderGraph::Instance();
 
     // create scene graph
-    SceneGraph::Instance();
+    Scene::SceneGraph::Instance();
 
     // this should be done on the scene graph
-    SceneGraph::Instance().GetSkybox()->LoadModel("models//cube.obj");
+    Scene::SceneGraph::Instance().GetSkybox()->LoadModel("models//cube.obj");
 
     // Execute command lists
     m_context->Execute();
@@ -70,9 +70,9 @@ namespace Core
 
   void Application::OnUpdate()
   {
-    SceneGraph::Instance().UpdateScene();
+    Scene::SceneGraph::Instance().UpdateScene();
 
-    for (auto model : SceneGraph::Instance().GetModels())
+    for (auto model : Scene::SceneGraph::Instance().GetModels())
       model->UpdateModel();
   }
 
@@ -83,7 +83,7 @@ namespace Core
     m_context->BeginFrame(); // set heaps, rects ...etc
 
     // execute passes in order
-    for (auto pass : RenderGraph::Instance().GetPasses())
+    for (auto pass : Rendering::RenderGraph::Instance().GetPasses())
       pass->Render(m_context.get());
 
     // transition to present state
@@ -146,7 +146,7 @@ namespace Core
       x = 1.0;
     }
     
-    SceneGraph::Instance().GetCamera()->Translate(x, z);
+    Scene::SceneGraph::Instance().GetCamera()->Translate(x, z);
   }
 
   void Application::OnKeyUp(UINT8 key)
@@ -155,6 +155,6 @@ namespace Core
 
   void Application::OnMouseMove(float dx, float dy)
   {
-    SceneGraph::Instance().GetCamera()->Rotate(dx, dy);
+    Scene::SceneGraph::Instance().GetCamera()->Rotate(dx, dy);
   }
 }

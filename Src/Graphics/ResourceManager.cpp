@@ -168,7 +168,7 @@ namespace Graphics
 
     auto defaultProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
     // texture resource
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+    Utilities::ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &defaultProps,
       D3D12_HEAP_FLAG_NONE,
       &desc,
@@ -180,7 +180,7 @@ namespace Graphics
     auto uploadDesc = CD3DX12_RESOURCE_DESC::Buffer(
       GetRequiredIntermediateSize(texture.Get(), 0, desc.DepthOrArraySize * desc.MipLevels));
     auto uploadProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+    Utilities::ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &uploadProps,
       D3D12_HEAP_FLAG_NONE,
       &uploadDesc,
@@ -237,7 +237,7 @@ namespace Graphics
     }
 
     auto heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+    Utilities::ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &heapProp,
       D3D12_HEAP_FLAG_NONE,
       &desc,
@@ -292,7 +292,7 @@ namespace Graphics
     // texture resource
     auto defaultProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
     auto swapDesc = swapRenderTarget->GetDesc();
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+    Utilities::ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &defaultProps,
       D3D12_HEAP_FLAG_NONE,
       &swapDesc,
@@ -301,7 +301,7 @@ namespace Graphics
       IID_PPV_ARGS(&output->renderTarget1)));
 
     // texture resource
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+    Utilities::ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &defaultProps,
       D3D12_HEAP_FLAG_NONE,
       &swapDesc,

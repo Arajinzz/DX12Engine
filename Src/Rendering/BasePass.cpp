@@ -14,10 +14,10 @@ namespace Rendering
   {
   }
 
-  void BasePass::Render(DX12Context* ctx)
+  void BasePass::Render(Graphics::DX12Context* ctx)
   {
     // draw meshes
-    for (auto model : SceneGraph::Instance().GetModels())
+    for (auto model : Scene::SceneGraph::Instance().GetModels())
       ctx->Draw(model, m_pso, m_rootSignature);
   }
 }

@@ -13,8 +13,10 @@ namespace Textures
     DX12Texture(std::vector<std::string> paths, unsigned mips = 4);
     ~DX12Texture();
 
+    Graphics::TextureDescriptor* GetResource() { return m_texture.get(); }
+    
     unsigned GetMipsLevels() { return m_mipsLevels; }
-    TextureDescriptor* GetResource() { return m_texture.get(); }
+    
     void CopyToGPU(ID3D12GraphicsCommandList* commandList);
     void GenerateMips(ID3D12GraphicsCommandList* commandList);
 
@@ -27,7 +29,7 @@ namespace Textures
     };
 
     // descriptor to the heap
-    std::shared_ptr<TextureDescriptor> m_texture;
+    std::shared_ptr<Graphics::TextureDescriptor> m_texture;
     
     std::vector<unsigned char*> m_imgPtrs;
     std::vector<MetaData> m_metaData;

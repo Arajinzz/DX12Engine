@@ -163,10 +163,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Core\ComposerPass.cpp" />
-    <ClCompile Include="Core\BasePass.cpp" />
-    <ClCompile Include="Core\Application.cpp" />
-    <ClCompile Include="Core\DirectXApplication.cpp" />
     <ClCompile Include="dep\imgui\backends\imgui_impl_dx11.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -227,21 +223,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Core\DX12Texture.cpp" />
-    <ClCompile Include="Core\DX12Context.cpp" />
-    <ClCompile Include="Core\DX12Model.cpp" />
-    <ClCompile Include="Core\DX12Camera.cpp" />
-    <ClCompile Include="Core\DX12Skybox.cpp" />
-    <ClCompile Include="Core\DX12Interface.cpp" />
-    <ClCompile Include="Core\ResourceManager.cpp" />
-    <ClCompile Include="Core\ShaderManager.cpp" />
-    <ClCompile Include="Core\PSOManager.cpp" />
-    <ClCompile Include="Core\SkyboxPass.cpp" />
-    <ClCompile Include="Core\RenderGraph.cpp" />
-    <ClCompile Include="Core\SceneGraph.cpp" />
-    <ClCompile Include="Core\RenderPass.cpp" />
-    <ClCompile Include="Core\WindowsApplication.cpp" />
-    <ClCompile Include="Core\TextureManager.cpp" />
     <ClCompile Include="Src\Core\Application.cpp" />
     <ClCompile Include="Src\Core\DirectXApplication.cpp" />
     <ClCompile Include="Src\Core\WindowsApplication.cpp" />
@@ -260,16 +241,16 @@
     <ClCompile Include="Src\Scene\DX12Skybox.cpp" />
     <ClCompile Include="Src\Scene\SceneGraph.cpp" />
     <ClCompile Include="Src\Shaders\ShaderManager.cpp" />
-    <ClCompile Include="Src\stdafx.cpp" />
+    <ClCompile Include="Src\stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Src\Textures\DX12Texture.cpp" />
     <ClCompile Include="Src\Textures\TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Core\ComposerPass.h" />
-    <ClInclude Include="Core\BasePass.h" />
-    <ClInclude Include="Core\Application.h" />
-    <ClInclude Include="Core\DirectXApplication.h" />
-    <ClInclude Include="Core\DXApplicationHelper.h" />
     <ClInclude Include="dep\assimp\include\assimp\aabb.h" />
     <ClInclude Include="dep\assimp\include\assimp\ai_assert.h" />
     <ClInclude Include="dep\assimp\include\assimp\anim.h" />
@@ -407,9 +388,6 @@
     <ClInclude Include="dep\imgui\misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="dep\imgui\misc\freetype\imgui_freetype.h" />
     <ClInclude Include="dep\imgui\misc\single_file\imgui_single_file.h" />
-    <ClInclude Include="Core\DX12Texture.h" />
-    <ClInclude Include="Core\DX12Context.h" />
-    <ClInclude Include="Core\DX12Model.h" />
     <ClInclude Include="dep\nlohmann-json\include\json.hpp" />
     <ClInclude Include="dep\stb\stb_connected_components.h" />
     <ClInclude Include="dep\stb\stb_c_lexer.h" />
@@ -431,18 +409,6 @@
     <ClInclude Include="dep\stb\stb_tilemap_editor.h" />
     <ClInclude Include="dep\stb\stb_truetype.h" />
     <ClInclude Include="dep\stb\stb_voxel_render.h" />
-    <ClInclude Include="Core\DX12Camera.h" />
-    <ClInclude Include="Core\DX12Skybox.h" />
-    <ClInclude Include="Core\DX12Interface.h" />
-    <ClInclude Include="Core\ResourceManager.h" />
-    <ClInclude Include="Core\ShaderManager.h" />
-    <ClInclude Include="Core\PSOManager.h" />
-    <ClInclude Include="Core\SkyboxPass.h" />
-    <ClInclude Include="Core\RenderGraph.h" />
-    <ClInclude Include="Core\SceneGraph.h" />
-    <ClInclude Include="Core\RenderPass.h" />
-    <ClInclude Include="Core\WindowsApplication.h" />
-    <ClInclude Include="Core\TextureManager.h" />
     <ClInclude Include="Src\Core\Application.h" />
     <ClInclude Include="Src\Core\DirectXApplication.h" />
     <ClInclude Include="Src\Core\WindowsApplication.h" />

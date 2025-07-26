@@ -12,7 +12,7 @@
 // helpers
 namespace
 {
-  std::unique_ptr<Core::ResourceDescriptor> CreateDepthResource(unsigned width, unsigned height)
+  std::unique_ptr<Graphics::ResourceDescriptor> CreateDepthResource(unsigned width, unsigned height)
   {
     // Create resouce
     D3D12_RESOURCE_DESC depthStencilDesc = {};
@@ -33,7 +33,7 @@ namespace
     clearValue.DepthStencil.Depth = 1.0f;
     clearValue.DepthStencil.Stencil = 0;
 
-    return Core::ResourceManager::Instance().CreateDepthResource(depthStencilDesc, clearValue);
+    return Graphics::ResourceManager::Instance().CreateDepthResource(depthStencilDesc, clearValue);
   }
 }
 
@@ -52,7 +52,7 @@ namespace Graphics
     , m_depth()
   {
     RECT rect;
-    GetClientRect(WindowsApplication::GetHwnd(), &rect);
+    GetClientRect(Core::WindowsApplication::GetHwnd(), &rect);
     auto width = rect.right - rect.left;
     auto height = rect.bottom - rect.top;
     m_viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height));
@@ -62,13 +62,13 @@ namespace Graphics
     m_commandQueue = DX12Interface::Get().CreateCommandQueue();
 
     // create command list and allocators for it
-    for (unsigned n = 0; n < Application::FrameCount; ++n)
+    for (unsigned n = 0; n < Core::Application::FrameCount; ++n)
       m_commandAllocators.push_back(DX12Interface::Get().CreateCommandAllocator());
     m_commandList = DX12Interface::Get().CreateCommandList(m_commandAllocators);
 
     // Describe and create the swap chain.
     DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-    swapChainDesc.BufferCount = Application::FrameCount;
+    swapChainDesc.BufferCount = Core::Application::FrameCount;
     swapChainDesc.Width = rect.right - rect.left;
     swapChainDesc.Height = rect.bottom - rect.top;
     swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -78,16 +78,16 @@ namespace Graphics
 
     ComPtr<IDXGISwapChain1> swapChain = DX12Interface::Get().CreateSwapChainForHwnd(
       swapChainDesc,
-      WindowsApplication::GetHwnd(),
+      Core::WindowsApplication::GetHwnd(),
       m_commandQueue.Get() // Swap chain needs the queue so that it can force a flush on it.
     );
-    ThrowIfFailed(swapChain.As(&m_swapChain));
+    Utilities::ThrowIfFailed(swapChain.As(&m_swapChain));
 
     // Add render targets
-    for (unsigned i = 0; i < Application::FrameCount; ++i)
+    for (unsigned i = 0; i < Core::Application::FrameCount; ++i)
     {
       ComPtr<ID3D12Resource> renderTarget;
-      ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&renderTarget)));
+      Utilities::ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&renderTarget)));
       m_renderTargets.push_back(ResourceManager::Instance().CreateRenderTargetResource(renderTarget.Get()));
     }
 
@@ -113,7 +113,7 @@ namespace Graphics
   void DX12Context::Present()
   {
     // no vsync
-    ThrowIfFailed(m_swapChain->Present(0, 0));
+    Utilities::ThrowIfFailed(m_swapChain->Present(0, 0));
   }
 
   void DX12Context::Execute()
@@ -139,7 +139,7 @@ namespace Graphics
   void DX12Context::MoveToNextFrame()
   {
     // Signal and increment the fence value.
-    ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), m_fenceValues[m_frameIndex]));
+    Utilities::ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), m_fenceValues[m_frameIndex]));
 
     // current frame Fence
     const UINT64 currentFenceValue = m_fenceValues[m_frameIndex];
@@ -171,13 +171,13 @@ namespace Graphics
 
     // resize swapchain buffers
     auto hr = m_swapChain->ResizeBuffers(
-      Application::FrameCount, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
+      Core::Application::FrameCount, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
 
     // Add render targets
-    for (unsigned i = 0; i < Application::FrameCount; ++i)
+    for (unsigned i = 0; i < Core::Application::FrameCount; ++i)
     {
       ComPtr<ID3D12Resource> renderTarget;
-      ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&renderTarget)));
+      Utilities::ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&renderTarget)));
       m_renderTargets.push_back(ResourceManager::Instance().CreateRenderTargetResource(renderTarget.Get()));
     }
     
@@ -207,8 +207,8 @@ namespace Graphics
     // However, when ExecuteCommandList() is called on a particular command 
     // list, that command list can then be reset at any time and must be before 
     // re-recording.
-    ThrowIfFailed(m_commandAllocators[m_frameIndex]->Reset());
-    ThrowIfFailed(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr));
+    Utilities::ThrowIfFailed(m_commandAllocators[m_frameIndex]->Reset());
+    Utilities::ThrowIfFailed(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr));
 
     // get render target resource
     std::shared_ptr<RenderTargetDescriptor> renderTarget = m_renderTargets[m_frameIndex];
@@ -253,7 +253,7 @@ namespace Graphics
     );
   }
 
-  void DX12Context::Draw(DX12Model* model, ID3D12PipelineState* pso, ID3D12RootSignature* rootSig)
+  void DX12Context::Draw(Scene::DX12Model* model, ID3D12PipelineState* pso, ID3D12RootSignature* rootSig)
   {
     model->DrawModel(pso, rootSig, m_commandList.Get());
   }
@@ -282,20 +282,20 @@ namespace Graphics
   void DX12Context::InitFence()
   {
     m_fence = DX12Interface::Get().CreateFence();
-    for (unsigned n = 0; n < Application::FrameCount; ++n)
+    for (unsigned n = 0; n < Core::Application::FrameCount; ++n)
       m_fenceValues.push_back(0);
     m_fenceValues[0]++; // start from buffer number 0
 
     m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
     if (m_fenceEvent == nullptr)
-      ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
+      Utilities::ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
 
     m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
   }
 
   void DX12Context::SignalFence()
   {
-    ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), m_fenceValues[m_frameIndex]));
+    Utilities::ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), m_fenceValues[m_frameIndex]));
   }
 
   void DX12Context::WaitFence()
@@ -306,7 +306,7 @@ namespace Graphics
     if (completedValue < m_fenceValues[m_frameIndex])
     {
       // Wait until the fence has been processed.
-      ThrowIfFailed(m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent));
+      Utilities::ThrowIfFailed(m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent));
       WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
     }
 

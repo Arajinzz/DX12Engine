@@ -19,7 +19,7 @@
 
 namespace Scene
 {
-  DX12Mesh::DX12Mesh(const aiMesh* pMesh, const aiMatrix4x4& transform, std::shared_ptr<DX12Texture> texture)
+  DX12Mesh::DX12Mesh(const aiMesh* pMesh, const aiMatrix4x4& transform, std::shared_ptr<Textures::DX12Texture> texture)
     : m_vertices()
     , m_indices()
     , m_vertexBufferView()
@@ -53,7 +53,7 @@ namespace Scene
     m_ready = true;
   }
 
-  void DX12Mesh::Draw(ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, ResourceDescriptor* cb, ID3D12GraphicsCommandList* commandList)
+  void DX12Mesh::Draw(ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, Graphics::ResourceDescriptor* cb, ID3D12GraphicsCommandList* commandList)
   {
     if (!m_ready)
       Setup(commandList);
@@ -61,18 +61,18 @@ namespace Scene
     commandList->SetPipelineState(pso);
     commandList->SetGraphicsRootSignature(rootSig);
     
-    ID3D12DescriptorHeap* ppHeaps[] = { ResourceManager::Instance().GetResourcesHeap() };
+    ID3D12DescriptorHeap* ppHeaps[] = { Graphics::ResourceManager::Instance().GetResourcesHeap() };
     commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
     // scene CBV
     commandList->SetGraphicsRootDescriptorTable(
-      0, ResourceManager::Instance().GetResourceGpuHandle(SceneGraph::Instance().GetSceneBuffer()->index));
+      0, Graphics::ResourceManager::Instance().GetResourceGpuHandle(SceneGraph::Instance().GetSceneBuffer()->index));
 
     // object CBV
-    commandList->SetGraphicsRootDescriptorTable(1, ResourceManager::Instance().GetResourceGpuHandle(cb->index));
+    commandList->SetGraphicsRootDescriptorTable(1, Graphics::ResourceManager::Instance().GetResourceGpuHandle(cb->index));
 
     // texture CBV
-    commandList->SetGraphicsRootDescriptorTable(2, ResourceManager::Instance().GetResourceGpuHandle(m_texture->GetResource()->index));
+    commandList->SetGraphicsRootDescriptorTable(2, Graphics::ResourceManager::Instance().GetResourceGpuHandle(m_texture->GetResource()->index));
 
     commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
@@ -124,7 +124,7 @@ namespace Scene
     auto uploadHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
     auto defaultHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
     auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+    Utilities::ThrowIfFailed(Graphics::DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &defaultHeapProps,
       D3D12_HEAP_FLAG_NONE,
       &resDesc,
@@ -132,7 +132,7 @@ namespace Scene
       nullptr,
       IID_PPV_ARGS(&m_vertexBuffer)));
 
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+    Utilities::ThrowIfFailed(Graphics::DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &uploadHeapProps,
       D3D12_HEAP_FLAG_NONE,
       &resDesc,
@@ -164,7 +164,7 @@ namespace Scene
     auto uploadHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
     auto defaultHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
     auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize);
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+    Utilities::ThrowIfFailed(Graphics::DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &defaultHeapProps,
       D3D12_HEAP_FLAG_NONE,
       &resDesc,
@@ -172,7 +172,7 @@ namespace Scene
       nullptr,
       IID_PPV_ARGS(&m_indexBuffer)));
 
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+    Utilities::ThrowIfFailed(Graphics::DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &uploadHeapProps,
       D3D12_HEAP_FLAG_NONE,
       &resDesc,
@@ -200,7 +200,7 @@ namespace Scene
   }
 }
 
-namespace Core
+namespace Scene
 {
   DX12Model::DX12Model()
     : m_meshes()
@@ -212,12 +212,12 @@ namespace Core
     , m_angle(0.0f)
   {
     // create constant buffer
-    m_constantBuffer = ResourceManager::Instance().CreateConstantBufferResource(
+    m_constantBuffer = Graphics::ResourceManager::Instance().CreateConstantBufferResource(
       sizeof(ConstantBufferData), D3D12_HEAP_TYPE_UPLOAD);
     // Map and initialize the constant buffer. We don't unmap this until the
     // app closes. Keeping things mapped for the lifetime of the resource is okay.
     CD3DX12_RANGE readRange(0, 0); // We do not intend to read from this resource on the CPU.
-    ThrowIfFailed(m_constantBuffer->resource->Map(0, &readRange, reinterpret_cast<void**>(&m_pCbvDataBegin)));
+    Utilities::ThrowIfFailed(m_constantBuffer->resource->Map(0, &readRange, reinterpret_cast<void**>(&m_pCbvDataBegin)));
     memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
   }
 
@@ -249,7 +249,7 @@ namespace Core
       if (!std::filesystem::exists(paths[0]))
         paths[0] = "textures\\brick.png";
 
-      auto mesh = std::make_unique<DX12Mesh>(pMesh, nodeTransform, TextureManager::Instance().CreateOrGetTexture(paths));
+      auto mesh = std::make_unique<DX12Mesh>(pMesh, nodeTransform, Textures::TextureManager::Instance().CreateOrGetTexture(paths));
       m_meshes.emplace_back(mesh.release());
     }
 

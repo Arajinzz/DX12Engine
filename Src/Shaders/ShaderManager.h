@@ -33,11 +33,11 @@ namespace Shaders
 
       if (isCompute)
       {
-        ThrowIfFailed(D3DCompileFromFile(wFullPath.c_str(), nullptr, nullptr, "main", "cs_5_1", compileFlags, 0, &computeShader, &errorBlob));
+        Utilities::ThrowIfFailed(D3DCompileFromFile(wFullPath.c_str(), nullptr, nullptr, "main", "cs_5_1", compileFlags, 0, &computeShader, &errorBlob));
       } else
       {
-        ThrowIfFailed(D3DCompileFromFile(wFullPath.c_str(), nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &vertexShader, &errorBlob));
-        ThrowIfFailed(D3DCompileFromFile(wFullPath.c_str(), nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pixelShader, &errorBlob));
+        Utilities::ThrowIfFailed(D3DCompileFromFile(wFullPath.c_str(), nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &vertexShader, &errorBlob));
+        Utilities::ThrowIfFailed(D3DCompileFromFile(wFullPath.c_str(), nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pixelShader, &errorBlob));
       }
 
       auto shaderBlob = isCompute ? computeShader : vertexShader;
@@ -51,7 +51,7 @@ namespace Shaders
         0,
         &rootSigBlob
       );
-      ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateRootSignature(
+      Utilities::ThrowIfFailed(Graphics::DX12Interface::Get().GetDevice()->CreateRootSignature(
         0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
     }
 

@@ -14,7 +14,7 @@ namespace Rendering
     RenderPass();
     ~RenderPass();
 
-    virtual void Render(DX12Context* ctx) = 0;
+    virtual void Render(Graphics::DX12Context* ctx) = 0;
 
     void SetPSO(ID3D12PipelineState* pso);
     void SetRootSignature(ID3D12RootSignature* rootSig);

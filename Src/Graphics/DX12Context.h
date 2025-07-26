@@ -22,7 +22,7 @@ namespace Graphics
     void Resize(unsigned width, unsigned height);
 
     void BeginFrame();
-    void Draw(DX12Model* model, ID3D12PipelineState* pso, ID3D12RootSignature* rootSig);
+    void Draw(Scene::DX12Model* model, ID3D12PipelineState* pso, ID3D12RootSignature* rootSig);
     void EndFrame();
 
     ID3D12CommandQueue* GetCommandQueue() { return m_commandQueue.Get(); }

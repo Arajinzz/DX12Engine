@@ -15,9 +15,9 @@ namespace Rendering
   {
   }
 
-  void SkyboxPass::Render(DX12Context* ctx)
+  void SkyboxPass::Render(Graphics::DX12Context* ctx)
   {
     // draw skybox first
-    ctx->Draw(SceneGraph::Instance().GetSkybox(), m_pso, m_rootSignature);
+    ctx->Draw(Scene::SceneGraph::Instance().GetSkybox(), m_pso, m_rootSignature);
   }
 }

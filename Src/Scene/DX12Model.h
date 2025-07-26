@@ -9,18 +9,21 @@
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
-namespace Scene
+namespace Textures
 {
   class DX12Texture;
+}
 
+namespace Scene
+{
   class DX12Mesh
   {
   public:
     // context needed for setup and draw
-    DX12Mesh(const aiMesh* pMesh, const aiMatrix4x4& transform, std::shared_ptr<DX12Texture> texture);
+    DX12Mesh(const aiMesh* pMesh, const aiMatrix4x4& transform, std::shared_ptr<Textures::DX12Texture> texture);
     ~DX12Mesh();
 
-    void Draw(ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, ResourceDescriptor* cb, ID3D12GraphicsCommandList* commandList);
+    void Draw(ID3D12PipelineState* pso, ID3D12RootSignature* rootSig, Graphics::ResourceDescriptor* cb, ID3D12GraphicsCommandList* commandList);
 
   private:
     void LoadMesh(const aiMesh* pMesh, const aiMatrix4x4& transform);
@@ -50,7 +53,7 @@ namespace Scene
     ComPtr<ID3D12Resource> m_indexBufferUploadHeap;
     D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
     // mesh texture, one for now
-    std::shared_ptr<DX12Texture> m_texture;
+    std::shared_ptr<Textures::DX12Texture> m_texture;
     // is it ready to draw
     bool m_ready;
 
@@ -61,7 +64,7 @@ namespace Scene
   };
 }
 
-namespace Core
+namespace Scene
 {
   // Mesh can have multiple models
   class DX12Model
@@ -96,7 +99,7 @@ namespace Core
     ConstantBufferData m_constantBufferData;
     UINT8* m_pCbvDataBegin;
     // constant buffer
-    std::unique_ptr<ResourceDescriptor> m_constantBuffer;
+    std::unique_ptr<Graphics::ResourceDescriptor> m_constantBuffer;
     // for testing
     XMFLOAT3 m_translation;
     XMFLOAT3 m_scale;

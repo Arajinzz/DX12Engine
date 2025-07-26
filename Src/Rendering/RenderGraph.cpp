@@ -66,8 +66,8 @@ namespace Rendering
       // just plain pass for now
       m_passesMap[name] = m_creators[name](); // create
       // set pso and root signature
-      m_passesMap[name]->SetPSO(PSOManager::Instance().GetPSO(pso));
-      m_passesMap[name]->SetRootSignature(PSOManager::Instance().GetRootSignature(pso));
+      m_passesMap[name]->SetPSO(Graphics::PSOManager::Instance().GetPSO(pso));
+      m_passesMap[name]->SetRootSignature(Graphics::PSOManager::Instance().GetRootSignature(pso));
       // store in vec to maintain order of config file
       m_passesVec.emplace_back(m_passesMap[name]);
     }

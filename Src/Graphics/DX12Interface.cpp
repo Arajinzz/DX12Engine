@@ -40,13 +40,13 @@ namespace Graphics
 #endif
 
     // Create Factory
-    ThrowIfFailed(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&m_factory)));
+    Utilities::ThrowIfFailed(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&m_factory)));
 
     // Create device
     ComPtr<IDXGIAdapter1> hardwareAdapter;
     GetHardwareAdapter(m_factory.Get(), &hardwareAdapter, true);
 
-    ThrowIfFailed(D3D12CreateDevice(
+    Utilities::ThrowIfFailed(D3D12CreateDevice(
       hardwareAdapter.Get(),
       D3D_FEATURE_LEVEL_11_0,
       IID_PPV_ARGS(&m_device)
@@ -84,7 +84,7 @@ namespace Graphics
       NewFilter.DenyList.NumIDs = _countof(DenyIds);
       NewFilter.DenyList.pIDList = DenyIds;
 
-      ThrowIfFailed(pInfoQueue->PushStorageFilter(&NewFilter));
+      Utilities::ThrowIfFailed(pInfoQueue->PushStorageFilter(&NewFilter));
     }
 #endif
   }
@@ -161,7 +161,7 @@ namespace Graphics
 
     ComPtr<ID3D12Resource> buffer;
 
-    ThrowIfFailed(m_device->CreateCommittedResource(
+    Utilities::ThrowIfFailed(m_device->CreateCommittedResource(
       &heapProperties,
       D3D12_HEAP_FLAG_NONE,
       &resourceDescription,
@@ -179,7 +179,7 @@ namespace Graphics
     D3D12_COMMAND_QUEUE_DESC queueDesc = {};
     queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
     queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue)));
+    Utilities::ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue)));
     return commandQueue;
   }
 
@@ -187,14 +187,14 @@ namespace Graphics
   {
     ComPtr<ID3D12Fence> fence;
     // initial value of 0
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
+    Utilities::ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
     return fence;
   }
 
   ComPtr<ID3D12CommandAllocator> DX12Interface::CreateCommandAllocator()
   { // supports only direct for now
     ComPtr<ID3D12CommandAllocator> commandAllocator;
-    ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator)));
+    Utilities::ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator)));
     return commandAllocator;
   }
 
@@ -202,7 +202,7 @@ namespace Graphics
   { // supports only direct for now
     ComPtr<ID3D12GraphicsCommandList> commandList;
     for (auto allocator : allocators)
-      ThrowIfFailed(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, allocator.Get(), nullptr, IID_PPV_ARGS(&commandList)));
+      Utilities::ThrowIfFailed(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, allocator.Get(), nullptr, IID_PPV_ARGS(&commandList)));
     return commandList;
   }
 
@@ -215,7 +215,7 @@ namespace Graphics
     heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
     if (type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV || type == D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER)
       heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&heap)));
+    Utilities::ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&heap)));
 
     return heap;
   }
@@ -285,7 +285,7 @@ namespace Graphics
 
   void DX12Interface::MakeWindowAssociation(HWND windowHandle, unsigned flags)
   {
-    ThrowIfFailed(m_factory->MakeWindowAssociation(windowHandle, flags));
+    Utilities::ThrowIfFailed(m_factory->MakeWindowAssociation(windowHandle, flags));
   }
 
   unsigned DX12Interface::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE type)
@@ -296,7 +296,7 @@ namespace Graphics
   ComPtr<IDXGISwapChain1> DX12Interface::CreateSwapChainForHwnd(DXGI_SWAP_CHAIN_DESC1& desc, HWND windowHandle, ID3D12CommandQueue* commandQueue)
   {
     ComPtr<IDXGISwapChain1> swapChain;
-    ThrowIfFailed(m_factory->CreateSwapChainForHwnd(
+    Utilities::ThrowIfFailed(m_factory->CreateSwapChainForHwnd(
       commandQueue, // Swap chain needs the queue so that it can force a flush on it.
       windowHandle,
       &desc,

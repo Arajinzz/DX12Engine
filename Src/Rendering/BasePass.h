@@ -13,7 +13,7 @@ namespace Rendering
     BasePass();
     ~BasePass();
 
-    virtual void Render(DX12Context* ctx) override;
+    virtual void Render(Graphics::DX12Context* ctx) override;
 
   private:
     BasePass(const BasePass&) = delete;

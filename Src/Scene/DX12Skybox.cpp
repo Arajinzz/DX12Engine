@@ -36,7 +36,7 @@ namespace Scene
     paths.push_back("skybox\\bluecloud_rt.jpg");
     paths.push_back("skybox\\bluecloud_lf.jpg");
 
-    auto mesh = std::make_unique<DX12Mesh>(pMesh, identity, TextureManager::Instance().CreateOrGetTexture(paths));
+    auto mesh = std::make_unique<DX12Mesh>(pMesh, identity, Textures::TextureManager::Instance().CreateOrGetTexture(paths));
     m_meshes.emplace_back(mesh.release());
   }
 }

@@ -30,7 +30,7 @@ namespace Graphics
   ID3D12RootSignature* PSOManager::GetRootSignature(const std::string& name)
   {
     auto shaderName = m_psoMap[name]->shaderName;
-    auto shaderBlob = ShaderManager::Instance().GetShader(shaderName);
+    auto shaderBlob = Shaders::ShaderManager::Instance().GetShader(shaderName);
     return shaderBlob->rootSignature.Get();
   }
 
@@ -70,7 +70,7 @@ namespace Graphics
       }
 
       // get the shader blob
-      auto shaderBlob = ShaderManager::Instance().GetShader(shader);
+      auto shaderBlob = Shaders::ShaderManager::Instance().GetShader(shader);
       // the pso
       auto pso = std::make_shared<PSO>();
       // set the shader name
@@ -101,7 +101,7 @@ namespace Graphics
         psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
         psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
         psoDesc.SampleDesc.Count = 1;
-        ThrowIfFailed(
+        Utilities::ThrowIfFailed(
           DX12Interface::Get().GetDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso->pipelineState)));
 
       } else if (type == "Compute")

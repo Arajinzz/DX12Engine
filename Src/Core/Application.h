@@ -30,7 +30,7 @@ namespace Core
 
   private:
     // main context
-    std::unique_ptr<DX12Context> m_context;
+    std::unique_ptr<Graphics::DX12Context> m_context;
 
   };
 }

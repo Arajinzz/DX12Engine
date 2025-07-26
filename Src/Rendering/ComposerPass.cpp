@@ -44,7 +44,7 @@ namespace Rendering
     m_indexBufferUploadHeap.Reset();
   }
 
-  void ComposerPass::Render(DX12Context* ctx)
+  void ComposerPass::Render(Graphics::DX12Context* ctx)
   {
     auto commandList = ctx->GetCommandList();
     
@@ -60,8 +60,8 @@ namespace Rendering
     auto renderTarget = ctx->GetCurrentRenderTarget();
     // no need to to transition this is handled by the context
     // it is exepected at this point the render target should be in render target state
-    auto rtvHandle = ResourceManager::Instance().GetRTVCpuHandle(renderTarget->index);
-    auto dsvHandle = ResourceManager::Instance().GetDSVCpuHandle(0);
+    auto rtvHandle = Graphics::ResourceManager::Instance().GetRTVCpuHandle(renderTarget->index);
+    auto dsvHandle = Graphics::ResourceManager::Instance().GetDSVCpuHandle(0);
     commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
     const float clearColor[] = { 0.25f, 0.55f, 0.45f, 1.0f };
     commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
@@ -69,11 +69,11 @@ namespace Rendering
     commandList->SetPipelineState(m_pso);
     commandList->SetGraphicsRootSignature(m_rootSignature);
 
-    ID3D12DescriptorHeap* ppHeaps[] = { ResourceManager::Instance().GetResourcesHeap() };
+    ID3D12DescriptorHeap* ppHeaps[] = { Graphics::ResourceManager::Instance().GetResourcesHeap() };
     commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
     // texture SRV
-    commandList->SetGraphicsRootDescriptorTable(0, ResourceManager::Instance().GetResourceGpuHandle(renderTarget->activeSRVIndex));
+    commandList->SetGraphicsRootDescriptorTable(0, Graphics::ResourceManager::Instance().GetResourceGpuHandle(renderTarget->activeSRVIndex));
 
     commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
@@ -87,7 +87,7 @@ namespace Rendering
     auto uploadHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
     auto defaultHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
     auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+    Utilities::ThrowIfFailed(Graphics::DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &defaultHeapProps,
       D3D12_HEAP_FLAG_NONE,
       &resDesc,
@@ -95,7 +95,7 @@ namespace Rendering
       nullptr,
       IID_PPV_ARGS(&m_vertexBuffer)));
 
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+    Utilities::ThrowIfFailed(Graphics::DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &uploadHeapProps,
       D3D12_HEAP_FLAG_NONE,
       &resDesc,
@@ -127,7 +127,7 @@ namespace Rendering
     auto uploadHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
     auto defaultHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
     auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize);
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+    Utilities::ThrowIfFailed(Graphics::DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &defaultHeapProps,
       D3D12_HEAP_FLAG_NONE,
       &resDesc,
@@ -135,7 +135,7 @@ namespace Rendering
       nullptr,
       IID_PPV_ARGS(&m_indexBuffer)));
 
-    ThrowIfFailed(DX12Interface::Get().GetDevice()->CreateCommittedResource(
+    Utilities::ThrowIfFailed(Graphics::DX12Interface::Get().GetDevice()->CreateCommittedResource(
       &uploadHeapProps,
       D3D12_HEAP_FLAG_NONE,
       &resDesc,

@@ -39,7 +39,7 @@ namespace Textures
     textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 
     // don't generate mips for skybox
-    m_texture = ResourceManager::Instance().CreateTextureResource(textureDesc, m_imgPtrs.size() > 1, m_imgPtrs.size() == 1);
+    m_texture = Graphics::ResourceManager::Instance().CreateTextureResource(textureDesc, m_imgPtrs.size() > 1, m_imgPtrs.size() == 1);
   }
 
   DX12Texture::~DX12Texture()
@@ -83,11 +83,11 @@ namespace Textures
     m_mipsGenerated = true;
 
     //Set root signature, pso and descriptor heap
-    commandList->SetComputeRootSignature(PSOManager::Instance().GetRootSignature("MipsCompute"));
-    commandList->SetPipelineState(PSOManager::Instance().GetPSO("MipsCompute"));
+    commandList->SetComputeRootSignature(Graphics::PSOManager::Instance().GetRootSignature("MipsCompute"));
+    commandList->SetPipelineState(Graphics::PSOManager::Instance().GetPSO("MipsCompute"));
 
     // heap created
-    ID3D12DescriptorHeap* ppHeaps[] = { ResourceManager::Instance().GetResourcesHeap() };
+    ID3D12DescriptorHeap* ppHeaps[] = { Graphics::ResourceManager::Instance().GetResourcesHeap() };
     commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
     //Transition from pixel shader resource to unordered access
@@ -95,15 +95,15 @@ namespace Textures
       m_texture->resource.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
     commandList->ResourceBarrier(1, &barrier1);
 
-    SGenerateMipsCB generateMipsCB;
+    Graphics::SGenerateMipsCB generateMipsCB;
     generateMipsCB.SrcDimension = (m_texture->resource->GetDesc().Height & 1) << 1 | (m_texture->resource->GetDesc().Width & 1);
     generateMipsCB.SrcMipLevel = 0;
     generateMipsCB.NumMipLevels = m_mipsLevels;
     generateMipsCB.TexelSize.x = 1.0f / (float)m_texture->resource->GetDesc().Width;
     generateMipsCB.TexelSize.y = 1.0f / (float)m_texture->resource->GetDesc().Height;
-    commandList->SetComputeRoot32BitConstants(0, sizeof(SGenerateMipsCB) / 4, &generateMipsCB, 0);
-    commandList->SetComputeRootDescriptorTable(1, ResourceManager::Instance().GetResourceGpuHandle(m_texture->index));
-    commandList->SetComputeRootDescriptorTable(2, ResourceManager::Instance().GetResourceGpuHandle(m_texture->mipIndex));
+    commandList->SetComputeRoot32BitConstants(0, sizeof(Graphics::SGenerateMipsCB) / 4, &generateMipsCB, 0);
+    commandList->SetComputeRootDescriptorTable(1, Graphics::ResourceManager::Instance().GetResourceGpuHandle(m_texture->index));
+    commandList->SetComputeRootDescriptorTable(2, Graphics::ResourceManager::Instance().GetResourceGpuHandle(m_texture->mipIndex));
 
     //Dispatch the compute shader with one thread per 8x8 pixels
     commandList->Dispatch(

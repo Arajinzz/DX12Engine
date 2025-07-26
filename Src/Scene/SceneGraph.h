@@ -20,7 +20,7 @@ namespace Scene
     }
     ~SceneGraph();
 
-    const ResourceDescriptor* GetSceneBuffer() { return m_constantBuffer.get(); }
+    const Graphics::ResourceDescriptor* GetSceneBuffer() { return m_constantBuffer.get(); }
     DX12Camera* GetCamera() { return m_camera.get(); }
     DX12Skybox* GetSkybox() { return m_skybox.get(); }
 
@@ -47,7 +47,7 @@ namespace Scene
     ConstantBufferData m_constantBufferData;
     UINT8* m_pCbvDataBegin;
     // CB resource
-    std::unique_ptr<ResourceDescriptor> m_constantBuffer;
+    std::unique_ptr<Graphics::ResourceDescriptor> m_constantBuffer;
     // camera and skybox
     std::unique_ptr<DX12Camera> m_camera;
     std::unique_ptr<DX12Skybox> m_skybox;
