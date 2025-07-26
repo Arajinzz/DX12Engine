@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "SkyboxPass.h"
 
-#include "Core/DX12Skybox.h"
-#include "Core/SceneGraph.h"
+#include "Scene/DX12Skybox.h"
+#include "Scene/SceneGraph.h"
 
 namespace Rendering
 {

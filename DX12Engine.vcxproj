@@ -257,10 +257,10 @@
     <ClCompile Include="Src\Rendering\SkyboxPass.cpp" />
     <ClCompile Include="Src\Scene\DX12Camera.cpp" />
     <ClCompile Include="Src\Scene\DX12Model.cpp" />
+    <ClCompile Include="Src\Scene\DX12Skybox.cpp" />
     <ClCompile Include="Src\Scene\SceneGraph.cpp" />
     <ClCompile Include="Src\Shaders\ShaderManager.cpp" />
     <ClCompile Include="Src\stdafx.cpp" />
-    <ClCompile Include="Src\Textures\DX12Skybox.cpp" />
     <ClCompile Include="Src\Textures\DX12Texture.cpp" />
     <ClCompile Include="Src\Textures\TextureManager.cpp" />
   </ItemGroup>
@@ -457,10 +457,10 @@
     <ClInclude Include="Src\Rendering\SkyboxPass.h" />
     <ClInclude Include="Src\Scene\DX12Camera.h" />
     <ClInclude Include="Src\Scene\DX12Model.h" />
+    <ClInclude Include="Src\Scene\DX12Skybox.h" />
     <ClInclude Include="Src\Scene\SceneGraph.h" />
     <ClInclude Include="Src\Shaders\ShaderManager.h" />
     <ClInclude Include="Src\stdafx.h" />
-    <ClInclude Include="Src\Textures\DX12Skybox.h" />
     <ClInclude Include="Src\Textures\DX12Texture.h" />
     <ClInclude Include="Src\Textures\TextureManager.h" />
     <ClInclude Include="Src\Utilities\DXApplicationHelper.h" />

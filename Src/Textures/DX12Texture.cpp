@@ -1,9 +1,10 @@
 #include "stdafx.h"
 #include "DX12Texture.h"
 
-#include "Core/DX12Interface.h"
-#include "Core/DXApplicationHelper.h"
-#include "Core/PSOManager.h"
+#include "Graphics/DX12Interface.h"
+#include "Graphics/PSOManager.h"
+
+#include "Utilities/DXApplicationHelper.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"

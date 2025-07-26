@@ -2,11 +2,14 @@
 #include "DX12Model.h"
 
 #include "Core/WindowsApplication.h"
-#include "Core/DX12Texture.h"
-#include "Core/DX12Interface.h"
-#include "Core/PSOManager.h"
-#include "Core/TextureManager.h"
-#include "Core/SceneGraph.h"
+
+#include "Textures/DX12Texture.h"
+#include "Textures/TextureManager.h"
+
+#include "Graphics/DX12Interface.h"
+#include "Graphics/PSOManager.h"
+
+#include "Scene/SceneGraph.h"
 
 #include <assimp\Importer.hpp>
 #include <assimp\scene.h>

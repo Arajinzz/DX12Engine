@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "SceneGraph.h"
 
-#include "Core/DXApplicationHelper.h"
+#include "Utilities/DXApplicationHelper.h"
 
 #include <filesystem>
 #include <fstream>

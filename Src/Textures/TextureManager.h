@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Core/ResourceManager.h"
-#include "Core/DX12Texture.h"
+#include "Graphics/ResourceManager.h"
+
+#include "Textures/DX12Texture.h"
 
 #include <unordered_map>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/RenderPass.h"
+#include "Rendering/RenderPass.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;

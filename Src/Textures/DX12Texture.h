@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/ResourceManager.h"
+#include "Graphics/ResourceManager.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;

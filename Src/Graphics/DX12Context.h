@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Scene/DX12Model.h"
-#include "Textures/DX12Skybox.h"
+#include "Scene/DX12Skybox.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;

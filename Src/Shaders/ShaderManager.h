@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Core/DXApplicationHelper.h"
-#include "Core/DX12Interface.h"
+#include "Utilities/DXApplicationHelper.h"
+
+#include "Graphics/DX12Interface.h"
 
 #include <unordered_map>
 #include <filesystem>

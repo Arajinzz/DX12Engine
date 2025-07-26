@@ -1,8 +1,10 @@
 #pragma once
 
 #include "Core/DirectXApplication.h"
-#include "Core/DX12Model.h"
-#include "Core/DX12Context.h"
+
+#include "Scene/DX12Model.h"
+
+#include "Graphics/DX12Context.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;

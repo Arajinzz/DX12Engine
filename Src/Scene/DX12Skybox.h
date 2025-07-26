@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Core/DX12Texture.h"
-#include "Core/DX12Model.h"
+#include "Textures/DX12Texture.h"
 
-namespace Textures
+#include "Scene/DX12Model.h"
+
+namespace Scene
 {
   class DX12Skybox : public DX12Model
   {

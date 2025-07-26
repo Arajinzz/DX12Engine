@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/RenderPass.h"
+#include "Rendering/RenderPass.h"
 
 #include <functional>
 #include <unordered_map>

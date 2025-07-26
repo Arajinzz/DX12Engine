@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "ShaderManager.h"
 
-#include "Core/DX12Interface.h"
+#include "Graphics/DX12Interface.h"
 
 #include <filesystem>
 #include <fstream>

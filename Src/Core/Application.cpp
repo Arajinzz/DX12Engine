@@ -1,13 +1,16 @@
 #include "stdafx.h"
 #include "Application.h"
 
-#include "Core/DX12Interface.h"
-#include "Core/DX12Skybox.h"
-#include "Core/ResourceManager.h"
-#include "Core/ShaderManager.h"
-#include "Core/PSOManager.h"
-#include "Core/SceneGraph.h"
-#include "Core/RenderGraph.h"
+#include "Graphics/DX12Interface.h"
+#include "Graphics/ResourceManager.h"
+#include "Graphics/PSOManager.h"
+
+#include "Rendering/RenderGraph.h"
+
+#include "Scene/SceneGraph.h"
+#include "Scene/DX12Skybox.h"
+
+#include "Shaders/ShaderManager.h"
 
 #include <random>
 

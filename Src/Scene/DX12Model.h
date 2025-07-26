@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core\ResourceManager.h"
+#include "Graphics\ResourceManager.h"
 
 #include <assimp\Importer.hpp>
 #include <assimp\scene.h>

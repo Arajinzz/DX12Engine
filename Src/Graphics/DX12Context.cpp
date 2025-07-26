@@ -3,9 +3,11 @@
 
 #include "Core/WindowsApplication.h"
 #include "Core/Application.h"
-#include "Core/DX12Interface.h"
-#include "Core/DX12Texture.h"
-#include "Core/ResourceManager.h"
+
+#include "Graphics/ResourceManager.h"
+#include "Graphics/DX12Interface.h"
+
+#include "Textures/DX12Texture.h"
 
 // helpers
 namespace

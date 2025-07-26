@@ -1,10 +1,11 @@
 #include "stdafx.h"
 #include "RenderGraph.h"
 
-#include "Core/BasePass.h"
-#include "Core/SkyboxPass.h"
-#include "Core/PSOManager.h"
-#include "Core/ComposerPass.h"
+#include "Rendering/BasePass.h"
+#include "Rendering/SkyboxPass.h"
+#include "Rendering/ComposerPass.h"
+
+#include "Graphics/PSOManager.h"
 
 #include <filesystem>
 #include <fstream>

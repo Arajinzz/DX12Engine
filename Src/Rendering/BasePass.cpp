@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "BasePass.h"
 
-#include "Core/SceneGraph.h"
+#include "Scene/SceneGraph.h"
 
 namespace Rendering
 {

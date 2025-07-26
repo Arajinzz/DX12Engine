@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Core/PSOManager.h"
-#include "Core/DX12Context.h"
+#include "Graphics/PSOManager.h"
+#include "Graphics/DX12Context.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;

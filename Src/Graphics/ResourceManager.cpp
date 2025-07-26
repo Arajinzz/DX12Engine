@@ -1,8 +1,9 @@
 #include "stdafx.h"
 #include "ResourceManager.h"
 
-#include "Core/DX12Interface.h"
-#include "Core/DXApplicationHelper.h"
+#include "Graphics/DX12Interface.h"
+
+#include "Utilities/DXApplicationHelper.h"
 
 namespace Graphics
 {

@@ -1,9 +1,11 @@
 #include "stdafx.h"
 #include "ComposerPass.h"
 
-#include "Core/TextureManager.h"
-#include "Core/DX12Interface.h"
-#include "Core/DXApplicationHelper.h"
+#include "Textures/TextureManager.h"
+
+#include "Graphics/DX12Interface.h"
+
+#include "Utilities/DXApplicationHelper.h"
 
 // ARTIFACTS happens because resizing is not working correctly
 namespace Rendering

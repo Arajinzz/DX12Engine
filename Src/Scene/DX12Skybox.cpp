@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "DX12Skybox.h"
 
-#include "Core/TextureManager.h"
+#include "Textures/TextureManager.h"
 
-namespace Textures
+namespace Scene
 {
   DX12Skybox::DX12Skybox()
     : DX12Model()

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Core/WindowsApplication.h"
-#include "Core/DXApplicationHelper.h"
+
+#include "Utilities/DXApplicationHelper.h"
 
 namespace Core
 {
