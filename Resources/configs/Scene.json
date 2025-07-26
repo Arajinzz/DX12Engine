@@ -2,10 +2,10 @@
   "Name": "Sponza",
   "Objects": [
     {
-      "Path": "models/sponza.obj"
+      "Path": "Resources/models/sponza.obj"
     },
     {
-      "Path": "models/suzanne.obj"
+      "Path": "Resources/models/suzanne.obj"
     }
   ]
 }

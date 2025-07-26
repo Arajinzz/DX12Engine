@@ -1,239 +1,239 @@
 {
-    "Textures" : [
+    "Resources/textures" : [
         {
             "Name": "lion.tga",
             "Type": "Texture",
-            "Path": "textures/lion.tga"
+            "Path": "Resources/Resources/textures/lion.tga"
         },
         {
             "Name": "lion_ddn.tga",
             "Type": "Texture",
-            "Path": "textures/lion_ddn.tga"
+            "Path": "Resources/textures/lion_ddn.tga"
         },
         {
             "Name": "background.tga",
             "Type": "Texture",
-            "Path": "textures/background.tga"
+            "Path": "Resources/textures/background.tga"
         },
         {
             "Name": "background_ddn.tga",
             "Type": "Texture",
-            "Path": "textures/background_ddn.tga"
+            "Path": "Resources/textures/background_ddn.tga"
         },
         {
             "Name": "vase_plant.tga",
             "Type": "Texture",
-            "Path": "textures/vase_plant.tga"
+            "Path": "Resources/textures/vase_plant.tga"
         },
         {
             "Name": "vase_plant_mask.tga",
             "Type": "Texture",
-            "Path": "textures/vase_plant_mask.tga"
+            "Path": "Resources/textures/vase_plant_mask.tga"
         },
         {
             "Name": "sponza_arch_diff.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_arch_diff.tga"
+            "Path": "Resources/textures/sponza_arch_diff.tga"
         },
         {
             "Name": "sponza_arch_ddn.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_arch_ddn.tga"
+            "Path": "Resources/textures/sponza_arch_ddn.tga"
         },
         {
             "Name": "spnza_bricks_a_diff.tga",
             "Type": "Texture",
-            "Path": "textures/spnza_bricks_a_diff.tga"
+            "Path": "Resources/textures/spnza_bricks_a_diff.tga"
         },
         {
             "Name": "spnza_bricks_a_ddn.tga",
             "Type": "Texture",
-            "Path": "textures/spnza_bricks_a_ddn.tga"
+            "Path": "Resources/textures/spnza_bricks_a_ddn.tga"
         },
         {
             "Name": "sponza_ceiling_a_diff.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_ceiling_a_diff.tga"
+            "Path": "Resources/textures/sponza_ceiling_a_diff.tga"
         },
         {
             "Name": "sponza_ceiling_a_ddn.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_ceiling_a_ddn.tga"
+            "Path": "Resources/textures/sponza_ceiling_a_ddn.tga"
         },
         {
             "Name": "chain_texture.tga",
             "Type": "Texture",
-            "Path": "textures/chain_texture.tga"
+            "Path": "Resources/textures/chain_texture.tga"
         },
         {
             "Name": "chain_texture_mask.tga",
             "Type": "Texture",
-            "Path": "textures/chain_texture_mask.tga"
+            "Path": "Resources/textures/chain_texture_mask.tga"
         },
         {
             "Name": "chain_texture_ddn.tga",
             "Type": "Texture",
-            "Path": "textures/chain_texture_ddn.tga"
+            "Path": "Resources/textures/chain_texture_ddn.tga"
         },
         {
             "Name": "sponza_column_a_diff.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_column_a_diff.tga"
+            "Path": "Resources/textures/sponza_column_a_diff.tga"
         },
         {
             "Name": "sponza_column_a_ddn.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_column_a_ddn.tga"
+            "Path": "Resources/textures/sponza_column_a_ddn.tga"
         },
         {
             "Name": "sponza_column_b_diff.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_column_b_diff.tga"
+            "Path": "Resources/textures/sponza_column_b_diff.tga"
         },
         {
             "Name": "sponza_column_b_ddn.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_column_b_ddn.tga"
+            "Path": "Resources/textures/sponza_column_b_ddn.tga"
         },
         {
             "Name": "sponza_column_c_diff.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_column_c_diff.tga"
+            "Path": "Resources/textures/sponza_column_c_diff.tga"
         },
         {
             "Name": "sponza_column_c_ddn.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_column_c_ddn.tga"
+            "Path": "Resources/textures/sponza_column_c_ddn.tga"
         },
         {
             "Name": "sponza_details_diff.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_details_diff.tga"
+            "Path": "Resources/textures/sponza_details_diff.tga"
         },
         {
             "Name": "sponza_details_ddn.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_details_ddn.tga"
+            "Path": "Resources/textures/sponza_details_ddn.tga"
         },
         {
             "Name": "sponza_fabric_diff.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_fabric_diff.tga"
+            "Path": "Resources/textures/sponza_fabric_diff.tga"
         },
         {
             "Name": "sponza_fabric_blue_diff.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_fabric_blue_diff.tga"
+            "Path": "Resources/textures/sponza_fabric_blue_diff.tga"
         },
         {
             "Name": "sponza_fabric_green_diff.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_fabric_green_diff.tga"
+            "Path": "Resources/textures/sponza_fabric_green_diff.tga"
         },
         {
             "Name": "sponza_fabric_ddn.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_fabric_ddn.tga"
+            "Path": "Resources/textures/sponza_fabric_ddn.tga"
         },
         {
             "Name": "sponza_curtain_diff.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_curtain_diff.tga"
+            "Path": "Resources/textures/sponza_curtain_diff.tga"
         },
         {
             "Name": "sponza_curtain_green_diff.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_curtain_green_diff.tga"
+            "Path": "Resources/textures/sponza_curtain_green_diff.tga"
         },
         {
             "Name": "sponza_curtain_blue_diff.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_curtain_blue_diff.tga"
+            "Path": "Resources/textures/sponza_curtain_blue_diff.tga"
         },
         {
             "Name": "sponza_curtain_ddn.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_curtain_ddn.tga"
+            "Path": "Resources/textures/sponza_curtain_ddn.tga"
         },
         {
             "Name": "sponza_flagpole_diff.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_flagpole_diff.tga"
+            "Path": "Resources/textures/sponza_flagpole_diff.tga"
         },
         {
             "Name": "sponza_flagpole_ddn.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_flagpole_ddn.tga"
+            "Path": "Resources/textures/sponza_flagpole_ddn.tga"
         },
         {
             "Name": "sponza_floor_a_diff.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_floor_a_diff.tga"
+            "Path": "Resources/textures/sponza_floor_a_diff.tga"
         },
         {
             "Name": "sponza_floor_a_ddn.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_floor_a_ddn.tga"
+            "Path": "Resources/textures/sponza_floor_a_ddn.tga"
         },
         {
             "Name": "sponza_thorn_diff.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_thorn_diff.tga"
+            "Path": "Resources/textures/sponza_thorn_diff.tga"
         },
         {
             "Name": "sponza_thorn_mask.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_thorn_mask.tga"
+            "Path": "Resources/textures/sponza_thorn_mask.tga"
         },
         {
             "Name": "sponza_thorn_ddn.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_thorn_ddn.tga"
+            "Path": "Resources/textures/sponza_thorn_ddn.tga"
         },
         {
             "Name": "sponza_roof_diff.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_roof_diff.tga"
+            "Path": "Resources/textures/sponza_roof_diff.tga"
         },
         {
             "Name": "sponza_roof_ddn.tga",
             "Type": "Texture",
-            "Path": "textures/sponza_roof_ddn.tga"
+            "Path": "Resources/textures/sponza_roof_ddn.tga"
         },
         {
             "Name": "vase_dif.tga",
             "Type": "Texture",
-            "Path": "textures/vase_dif.tga"
+            "Path": "Resources/textures/vase_dif.tga"
         },
         {
             "Name": "vase_ddn.tga",
             "Type": "Texture",
-            "Path": "textures/vase_ddn.tga"
+            "Path": "Resources/textures/vase_ddn.tga"
         },
         {
             "Name": "vase_hanging.tga",
             "Type": "Texture",
-            "Path": "textures/vase_hanging.tga"
+            "Path": "Resources/textures/vase_hanging.tga"
         },
         {
             "Name": "vase_hanging_ddn.tga",
             "Type": "Texture",
-            "Path": "textures/vase_hanging_ddn.tga"
+            "Path": "Resources/textures/vase_hanging_ddn.tga"
         },
         {
             "Name": "vase_round.tga",
             "Type": "Texture",
-            "Path": "textures/vase_round.tga"
+            "Path": "Resources/textures/vase_round.tga"
         },
         {
             "Name": "vase_round_ddn.tga",
             "Type": "Texture",
-            "Path": "textures/vase_round_ddn.tga"
+            "Path": "Resources/textures/vase_round_ddn.tga"
         },
         {
             "Name": "default",
             "Type": "Texture",
-            "Path": "textures/brick.png"
+            "Path": "Resources/textures/brick.png"
         },
         {
             "Name": "skybox001",
