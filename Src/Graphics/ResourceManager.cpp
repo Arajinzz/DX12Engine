@@ -4,7 +4,7 @@
 #include "Core/DX12Interface.h"
 #include "Core/DXApplicationHelper.h"
 
-namespace Core
+namespace Graphics
 {
   ResourceManager::ResourceManager()
     : m_resourcesHeap(nullptr)

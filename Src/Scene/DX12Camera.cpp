@@ -23,7 +23,7 @@ namespace
   }
 }
 
-namespace Core
+namespace Scene
 {
   DX12Camera::DX12Camera(float fov, float nearPlane, float farPlane)
     : m_fov(fov)

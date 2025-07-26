@@ -14,7 +14,7 @@
 
 #include <filesystem>
 
-namespace Core
+namespace Scene
 {
   DX12Mesh::DX12Mesh(const aiMesh* pMesh, const aiMatrix4x4& transform, std::shared_ptr<DX12Texture> texture)
     : m_vertices()

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "RenderPass.h"
 
-namespace Core
+namespace Rendering
 {
   RenderPass::RenderPass()
     : m_pso()

@@ -9,7 +9,7 @@
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
-namespace Core
+namespace Shaders
 {
   struct ShaderBlob
   {

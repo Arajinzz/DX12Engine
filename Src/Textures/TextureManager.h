@@ -9,7 +9,7 @@ using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
 // A very basic texture manager
-namespace Core
+namespace Textures
 {
   class TextureManager
   {

@@ -8,7 +8,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-namespace Core
+namespace Textures
 {
   DX12Texture::DX12Texture(std::vector<std::string> paths, unsigned mips)
     : m_imgPtrs()

@@ -131,7 +131,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)dep/DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;$(SolutionDir)dep/stb;$(SolutionDir)dep/nlohmann-json/include;$(SolutionDir)dep/tinyobjloader/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dep/DX12Headers/include/directx;$(SolutionDir)Src;$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;$(SolutionDir)dep/stb;$(SolutionDir)dep/nlohmann-json/include;$(SolutionDir)dep/tinyobjloader/include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
@@ -150,7 +150,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)dep/DX12Headers/include/directx;$(SolutionDir);$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;$(SolutionDir)dep/stb;$(SolutionDir)dep/nlohmann-json/include;$(SolutionDir)dep/tinyobjloader/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dep/DX12Headers/include/directx;$(SolutionDir)Src;$(SolutionDir)dep/imgui;$(SolutionDir)dep/assimp/include;$(SolutionDir)dep/imgui/backends;$(SolutionDir)dep/stb;$(SolutionDir)dep/nlohmann-json/include;$(SolutionDir)dep/tinyobjloader/include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
@@ -233,7 +233,6 @@
     <ClCompile Include="Core\DX12Camera.cpp" />
     <ClCompile Include="Core\DX12Skybox.cpp" />
     <ClCompile Include="Core\DX12Interface.cpp" />
-    <ClCompile Include="Main.cpp" />
     <ClCompile Include="Core\ResourceManager.cpp" />
     <ClCompile Include="Core\ShaderManager.cpp" />
     <ClCompile Include="Core\PSOManager.cpp" />
@@ -241,14 +240,29 @@
     <ClCompile Include="Core\RenderGraph.cpp" />
     <ClCompile Include="Core\SceneGraph.cpp" />
     <ClCompile Include="Core\RenderPass.cpp" />
-    <ClCompile Include="stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="Core\WindowsApplication.cpp" />
     <ClCompile Include="Core\TextureManager.cpp" />
+    <ClCompile Include="Src\Core\Application.cpp" />
+    <ClCompile Include="Src\Core\DirectXApplication.cpp" />
+    <ClCompile Include="Src\Core\WindowsApplication.cpp" />
+    <ClCompile Include="Src\Graphics\DX12Context.cpp" />
+    <ClCompile Include="Src\Graphics\DX12Interface.cpp" />
+    <ClCompile Include="Src\Graphics\PSOManager.cpp" />
+    <ClCompile Include="Src\Graphics\ResourceManager.cpp" />
+    <ClCompile Include="Src\Main.cpp" />
+    <ClCompile Include="Src\Rendering\BasePass.cpp" />
+    <ClCompile Include="Src\Rendering\ComposerPass.cpp" />
+    <ClCompile Include="Src\Rendering\RenderGraph.cpp" />
+    <ClCompile Include="Src\Rendering\RenderPass.cpp" />
+    <ClCompile Include="Src\Rendering\SkyboxPass.cpp" />
+    <ClCompile Include="Src\Scene\DX12Camera.cpp" />
+    <ClCompile Include="Src\Scene\DX12Model.cpp" />
+    <ClCompile Include="Src\Scene\SceneGraph.cpp" />
+    <ClCompile Include="Src\Shaders\ShaderManager.cpp" />
+    <ClCompile Include="Src\stdafx.cpp" />
+    <ClCompile Include="Src\Textures\DX12Skybox.cpp" />
+    <ClCompile Include="Src\Textures\DX12Texture.cpp" />
+    <ClCompile Include="Src\Textures\TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\ComposerPass.h" />
@@ -427,9 +441,29 @@
     <ClInclude Include="Core\RenderGraph.h" />
     <ClInclude Include="Core\SceneGraph.h" />
     <ClInclude Include="Core\RenderPass.h" />
-    <ClInclude Include="stdafx.h" />
     <ClInclude Include="Core\WindowsApplication.h" />
     <ClInclude Include="Core\TextureManager.h" />
+    <ClInclude Include="Src\Core\Application.h" />
+    <ClInclude Include="Src\Core\DirectXApplication.h" />
+    <ClInclude Include="Src\Core\WindowsApplication.h" />
+    <ClInclude Include="Src\Graphics\DX12Context.h" />
+    <ClInclude Include="Src\Graphics\DX12Interface.h" />
+    <ClInclude Include="Src\Graphics\PSOManager.h" />
+    <ClInclude Include="Src\Graphics\ResourceManager.h" />
+    <ClInclude Include="Src\Rendering\BasePass.h" />
+    <ClInclude Include="Src\Rendering\ComposerPass.h" />
+    <ClInclude Include="Src\Rendering\RenderGraph.h" />
+    <ClInclude Include="Src\Rendering\RenderPass.h" />
+    <ClInclude Include="Src\Rendering\SkyboxPass.h" />
+    <ClInclude Include="Src\Scene\DX12Camera.h" />
+    <ClInclude Include="Src\Scene\DX12Model.h" />
+    <ClInclude Include="Src\Scene\SceneGraph.h" />
+    <ClInclude Include="Src\Shaders\ShaderManager.h" />
+    <ClInclude Include="Src\stdafx.h" />
+    <ClInclude Include="Src\Textures\DX12Skybox.h" />
+    <ClInclude Include="Src\Textures\DX12Texture.h" />
+    <ClInclude Include="Src\Textures\TextureManager.h" />
+    <ClInclude Include="Src\Utilities\DXApplicationHelper.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dep\assimp\include\assimp\color4.inl" />

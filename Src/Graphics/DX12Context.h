@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Core/DX12Model.h"
-#include "Core/DX12Skybox.h"
+#include "Scene/DX12Model.h"
+#include "Textures/DX12Skybox.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
-namespace Core
+namespace Graphics
 {
   class DX12Context
   {

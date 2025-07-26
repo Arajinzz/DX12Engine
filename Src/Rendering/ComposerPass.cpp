@@ -6,7 +6,7 @@
 #include "Core/DXApplicationHelper.h"
 
 // ARTIFACTS happens because resizing is not working correctly
-namespace Core
+namespace Rendering
 {
   ComposerPass::ComposerPass()
     : RenderPass()

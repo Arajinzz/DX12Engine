@@ -4,7 +4,7 @@
 #include "Core/DX12Skybox.h"
 #include "Core/SceneGraph.h"
 
-namespace Core
+namespace Rendering
 {
   SkyboxPass::SkyboxPass()
     : RenderPass()

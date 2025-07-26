@@ -3,7 +3,7 @@
 #include "Core/DX12Texture.h"
 #include "Core/DX12Model.h"
 
-namespace Core
+namespace Textures
 {
   class DX12Skybox : public DX12Model
   {

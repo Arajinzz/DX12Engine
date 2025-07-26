@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "TextureManager.h"
 
-namespace Core
+namespace Textures
 {
   TextureManager::TextureManager()
     : m_textures()

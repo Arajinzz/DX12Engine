@@ -5,7 +5,7 @@
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
-namespace Core
+namespace Textures
 {
   class DX12Texture
   {

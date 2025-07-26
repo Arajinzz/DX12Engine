@@ -2,7 +2,7 @@
 #include "DX12Interface.h"
 #include "Core/DXApplicationHelper.h"
 
-namespace Core
+namespace Graphics
 {
   DX12Interface::DX12Interface()
     : m_device(nullptr)

@@ -6,7 +6,7 @@ using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
 // this will create a quad and map a texture to the screen
-namespace Core
+namespace Rendering
 {
   class ComposerPass : public RenderPass
   {

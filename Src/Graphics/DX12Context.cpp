@@ -35,7 +35,7 @@ namespace
   }
 }
 
-namespace Core
+namespace Graphics
 {
   DX12Context::DX12Context()
     : m_frameIndex(0)

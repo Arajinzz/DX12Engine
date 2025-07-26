@@ -12,7 +12,7 @@ using json = nlohmann::json;
 
 // TODO: move root signatures inside shaders
 
-namespace Core
+namespace Graphics
 {
   PSOManager::PSOManager()
     : m_psoMap()

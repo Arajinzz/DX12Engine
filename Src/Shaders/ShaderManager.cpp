@@ -10,7 +10,7 @@
 #include <json.hpp>
 using json = nlohmann::json;
 
-namespace Core
+namespace Shaders
 {
   ShaderManager::ShaderManager()
     : m_shaderMap()

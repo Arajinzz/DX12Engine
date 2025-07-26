@@ -5,7 +5,7 @@
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
-namespace Core
+namespace Rendering
 {
   class BasePass : public RenderPass
   {

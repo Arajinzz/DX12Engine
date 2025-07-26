@@ -13,7 +13,7 @@
 #include <json.hpp>
 using json = nlohmann::json;
 
-namespace Core
+namespace Rendering
 {
   RenderGraph::RenderGraph()
     : m_passesMap()

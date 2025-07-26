@@ -3,7 +3,7 @@
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
-namespace Core
+namespace Graphics
 {
   // This will provide functions to manage DX12,
 // like creating buffers, heaps, root signatures ...etc.

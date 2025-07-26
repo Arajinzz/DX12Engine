@@ -11,7 +11,7 @@ using Microsoft::WRL::ComPtr;
 // 1000 - 4999 : mips [expecting 4 mips per texture]
 // 5000 - 7999 : constant buffers
 
-namespace Core
+namespace Graphics
 {
   struct Range
   {

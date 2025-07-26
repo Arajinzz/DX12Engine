@@ -3,7 +3,7 @@
 
 #include "Core/SceneGraph.h"
 
-namespace Core
+namespace Rendering
 {
   BasePass::BasePass()
     : RenderPass()

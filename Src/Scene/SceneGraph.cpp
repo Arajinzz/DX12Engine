@@ -10,7 +10,7 @@
 #include <json.hpp>
 using json = nlohmann::json;
 
-namespace Core
+namespace Scene
 {
   SceneGraph::SceneGraph()
     : m_models()

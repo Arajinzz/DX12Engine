@@ -3,7 +3,7 @@
 
 #include "Core/TextureManager.h"
 
-namespace Core
+namespace Textures
 {
   DX12Skybox::DX12Skybox()
     : DX12Model()
