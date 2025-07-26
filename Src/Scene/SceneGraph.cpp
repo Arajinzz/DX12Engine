@@ -21,7 +21,7 @@ namespace Scene
     , m_skybox(nullptr)
   {
     // TODO: handle errors
-    auto configPath = std::filesystem::current_path().string() + "/Configs/Scene.json";
+    auto configPath = std::filesystem::current_path().string() + "/Resources/configs/Scene.json";
 
     // read config file and parse it
     json configData = json::parse(std::ifstream(configPath));

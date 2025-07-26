@@ -46,7 +46,7 @@ namespace Graphics
     };
 
     // TODO: handle errors
-    auto configPath = std::filesystem::current_path().string() + "/Configs/PipelineState.json";
+    auto configPath = std::filesystem::current_path().string() + "/Resources/configs/PipelineState.json";
 
     // read config file and parse it
     json configData = json::parse(std::ifstream(configPath))["PipelineStateObjects"];

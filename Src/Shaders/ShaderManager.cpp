@@ -26,7 +26,7 @@ namespace Shaders
   void ShaderManager::RegisterShaders()
   {
     // TODO: handle errors
-    auto configPath = std::filesystem::current_path().string() + "/Configs/Shaders.json";
+    auto configPath = std::filesystem::current_path().string() + "/Resources/configs/Shaders.json";
 
     // read config file and parse it
     json configData = json::parse(std::ifstream(configPath))["Shaders"];

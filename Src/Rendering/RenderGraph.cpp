@@ -49,7 +49,7 @@ namespace Rendering
   void RenderGraph::ReadRenderGraph()
   {
     // TODO: handle errors
-    auto configPath = std::filesystem::current_path().string() + "/Configs/RenderGraph.json";
+    auto configPath = std::filesystem::current_path().string() + "/Resources/configs/RenderGraph.json";
 
     // read config file and parse it
     json configData = json::parse(std::ifstream(configPath))["RenderGraph"];
