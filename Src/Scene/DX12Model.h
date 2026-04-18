@@ -43,7 +43,7 @@ namespace Scene
 
     // data
     std::vector<Vertex> m_vertices;
-    std::vector<uint16_t> m_indices;
+    std::vector<uint32_t> m_indices;
     // vertex buffer
     ComPtr<ID3D12Resource> m_vertexBuffer;
     ComPtr<ID3D12Resource> m_vertexBufferUploadHeap;

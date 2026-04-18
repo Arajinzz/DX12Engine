@@ -160,7 +160,7 @@ namespace Scene
 
   void DX12Mesh::SetupIndexBuffer(ID3D12GraphicsCommandList* commandList)
   {
-    const unsigned indexBufferSize = static_cast<unsigned>(m_indices.size() * sizeof(uint16_t));
+    const unsigned indexBufferSize = static_cast<unsigned>(m_indices.size() * sizeof(uint32_t));
     auto uploadHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
     auto defaultHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
     auto resDesc = CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize);
@@ -196,7 +196,7 @@ namespace Scene
     // Initialize the index buffer view.
     m_indexBufferView.BufferLocation = m_indexBuffer->GetGPUVirtualAddress();
     m_indexBufferView.SizeInBytes = indexBufferSize;
-    m_indexBufferView.Format = DXGI_FORMAT_R16_UINT;
+    m_indexBufferView.Format = DXGI_FORMAT_R32_UINT;
   }
 }
 
